@@ -1,0 +1,28 @@
+/* Màn hình chưa làm */
+.placeholder {
+  align-items: center;
+  padding: 56px 24px;
+  text-align: center;
+  gap: 12px;
+}
+.placeholder__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-soft);
+  color: var(--primary-text);
+}
+.placeholder__title {
+  font-size: 18px;
+  font-weight: 800;
+}
+.placeholder__desc {
+  max-width: 420px;
+  margin-bottom: 8px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-3);
+}

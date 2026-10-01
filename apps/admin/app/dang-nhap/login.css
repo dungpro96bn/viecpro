@@ -1,0 +1,227 @@
+/* ==========================================================================
+   Đăng nhập quản trị
+   ========================================================================== */
+
+.login {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+/* Cột thương hiệu tối – cùng tông sidebar */
+.login__side {
+  position: relative;
+  width: 460px;
+  flex-shrink: 0;
+  padding: 36px 40px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(160deg, #0b1424 0%, #11204a 60%, #1b3fa8 130%);
+  color: #fff;
+}
+.login__glow {
+  position: absolute;
+  right: -120px;
+  top: -120px;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56, 121, 255, 0.35), rgba(56, 121, 255, 0) 70%);
+  pointer-events: none;
+}
+.login__brand {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.login__mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login__name {
+  font-size: 20px;
+  letter-spacing: -0.03em;
+}
+.login__accent {
+  color: var(--side-accent);
+}
+.login__badge {
+  height: 22px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #f97316, #e11d48);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.login__intro {
+  position: relative;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.login__headline {
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.login__lead {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #cbd5e1;
+}
+.login__points {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.login__point {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #dce4f0;
+}
+.login__point .icon {
+  margin-top: 1px;
+  color: var(--side-accent);
+}
+.login__foot {
+  position: relative;
+  margin-top: 40px;
+  font-size: 12px;
+  color: var(--side-muted);
+}
+
+/* ---------- Cột form ---------- */
+.login__main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+.login-card {
+  width: 420px;
+  max-width: 100%;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: 0 24px 48px -24px rgba(15, 37, 56, 0.18);
+}
+.login-card__head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.login-card__title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.login-card__lead {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-3);
+}
+.login-card__code {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-align: center;
+}
+.login-card__links {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.login-card__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--primary-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.login-card__link:hover {
+  text-decoration: underline;
+}
+.login-card__link--muted {
+  color: var(--text-3);
+}
+.login-card__note {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+
+/* Bật 2FA: mã QR + khoá thủ công */
+.mfa-setup {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-radius: var(--radius);
+  background: var(--surface-muted);
+}
+.mfa-setup__qr {
+  width: 132px;
+  height: 132px;
+  border-radius: 8px;
+  background: #fff;
+}
+.mfa-setup__manual {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.mfa-setup__secret {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.6;
+  word-break: break-all;
+  color: var(--text);
+}
+
+/* Mã khôi phục */
+.recovery-codes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 14px;
+  border-radius: var(--radius);
+  background: var(--surface-muted);
+}
+.recovery-codes__item {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  padding: 6px 0;
+}
+
+@media (max-width: 1100px) {
+  .login__side {
+    display: none;
+  }
+}

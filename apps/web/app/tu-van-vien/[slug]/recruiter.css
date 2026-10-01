@@ -1,0 +1,370 @@
+/* ==========================================================================
+   Trang hồ sơ nhà tuyển dụng cá nhân
+   ========================================================================== */
+
+/* Ảnh bìa dạng gradient */
+.recruiter-cover {
+  height: 200px;
+  background: linear-gradient(120deg, #1b3fa8 0%, #2456d6 45%, #3879ff 100%);
+}
+.recruiter-cover__circle {
+  position: absolute;
+  border-radius: 50%;
+}
+.recruiter-cover__circle--1 {
+  width: 420px;
+  height: 420px;
+  right: 120px;
+  top: -220px;
+  background: rgba(255, 255, 255, 0.07);
+}
+.recruiter-cover__circle--2 {
+  width: 300px;
+  height: 300px;
+  left: 80px;
+  bottom: -200px;
+  background: rgba(255, 255, 255, 0.05);
+}
+.recruiter-card-wrap {
+  margin-top: -96px;
+}
+
+/* Ảnh đại diện lớn */
+.recruiter-avatar {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  flex-shrink: 0;
+  margin-top: -70px;
+}
+.recruiter-avatar__img {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid #fff;
+  box-shadow: var(--shadow-lg);
+}
+.recruiter-avatar__online {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--success);
+  border: 4px solid #fff;
+}
+
+.recruiter-pill {
+  font-weight: 700;
+}
+.recruiter-headline {
+  font-size: 14px;
+  color: var(--text-body);
+}
+.recruiter-star {
+  color: #f59e0b;
+}
+.recruiter-score {
+  color: var(--text);
+}
+.recruiter-zalo {
+  width: 46px;
+  height: 46px;
+}
+
+/* Kinh nghiệm – dòng thời gian */
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.timeline__item {
+  display: flex;
+  gap: 16px;
+}
+.timeline__rail {
+  width: 14px;
+  flex-shrink: 0;
+  padding-top: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.timeline__dot {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--btn-primary);
+}
+.timeline__item--current .timeline__dot {
+  border: 0;
+  background: var(--btn-primary);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.timeline__line {
+  flex-grow: 1;
+  width: 2px;
+  margin-top: 6px;
+  background: var(--primary-lighter);
+}
+.timeline__item:last-child .timeline__line {
+  display: none;
+}
+.timeline__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 22px;
+}
+.timeline__when {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--active-text);
+}
+.timeline__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.timeline__desc {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-3);
+}
+
+.cert-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.cert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.cert__icon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--status-parttime-bg);
+  color: var(--status-parttime-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cert__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cert__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.cert__desc {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* Doanh nghiệp hợp tác */
+.partner-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.partner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.partner:hover {
+  color: var(--text);
+  border-color: var(--primary-lighter);
+  box-shadow: var(--shadow-lg);
+}
+.partner__logo {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 14px;
+}
+.partner__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex-grow: 1;
+}
+.partner__name {
+  font-size: 14px;
+  font-weight: 700;
+}
+.partner__note {
+  font-size: 12px;
+  color: var(--text-3);
+}
+.partner__arrow {
+  color: var(--text-disabled);
+}
+
+/* Trạng thái trực tuyến */
+.online-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--success-dark);
+}
+.online-status__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 3px var(--success-soft-2);
+}
+
+/* Xác minh & minh bạch */
+.verify-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.verify-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-body);
+}
+.verify-item__icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  color: var(--text-disabled);
+}
+.verify-item__icon--ok {
+  background: var(--success-soft-2);
+  color: var(--success-dark);
+}
+.verify-item__title {
+  flex-grow: 1;
+}
+.verify-item__note {
+  font-size: 12px;
+  color: var(--text-3);
+}
+.verify-report {
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   Responsive – tablet (≤ 1024px) & mobile (≤ 767px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .recruiter-cover {
+    height: 170px;
+  }
+  .recruiter-card-wrap {
+    margin-top: -80px;
+  }
+  .recruiter-avatar,
+  .recruiter-avatar__img {
+    width: 112px;
+    height: 112px;
+  }
+  .recruiter-avatar {
+    margin-top: -60px;
+  }
+  .recruiter-avatar__online {
+    right: 8px;
+    bottom: 8px;
+  }
+  .recruiter-zalo {
+    flex-shrink: 0;
+  }
+  .verify-item__note {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 767px) {
+  .recruiter-cover {
+    height: 130px;
+  }
+  .recruiter-card-wrap {
+    margin-top: -48px;
+  }
+  .recruiter-avatar,
+  .recruiter-avatar__img {
+    width: 92px;
+    height: 92px;
+  }
+  .recruiter-avatar__img {
+    border-width: 4px;
+  }
+  .recruiter-avatar {
+    margin-top: -54px;
+  }
+  .recruiter-avatar__online {
+    width: 18px;
+    height: 18px;
+    right: 4px;
+    bottom: 4px;
+    border-width: 3px;
+  }
+  .recruiter-headline {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .recruiter-zalo {
+    width: 44px;
+    height: 44px;
+  }
+
+  .cert-grid,
+  .partner-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .timeline__body {
+    padding-bottom: 18px;
+  }
+  .partner {
+    padding: 14px;
+  }
+  .partner__logo {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+  }
+  .verify-item {
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+  .verify-item__note {
+    width: 100%;
+    padding-left: 32px;
+  }
+}

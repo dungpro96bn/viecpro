@@ -1,0 +1,807 @@
+/*
+ * Việc đã ứng tuyển (/tai-khoan-ung-vien/viec-da-ung-tuyen) – design-page/19
+ * Đầu trang · 4 ô số liệu · thẻ phỏng vấn sắp tới + chuẩn bị · tab lọc · thẻ hồ sơ (tiến trình 5 bước, lịch sử, cán bộ phụ trách)
+ * Khung trang ở components/seeker/seeker.css
+ */
+
+.ap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ---------- Đầu trang ---------- */
+.ap-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.ap-head__title {
+  font-size: 25px;
+  letter-spacing: -0.03em;
+}
+.ap-head__desc {
+  margin-top: 6px;
+  color: var(--text-3);
+  font-size: 13px;
+}
+.ap-sort {
+  display: flex;
+  flex: 0 0 200px;
+}
+
+/* ---------- Số liệu ---------- */
+.ap-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.ap-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.ap-stat__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ap-stat__label {
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 600;
+}
+.ap-stat__icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+.ap-stat__icon--blue { background: var(--accent-soft); color: var(--primary); }
+.ap-stat__icon--orange { background: var(--orange-soft-2); color: var(--orange-dark); }
+.ap-stat__icon--green { background: var(--success-soft); color: var(--success); }
+.ap-stat__icon--violet { background: var(--violet-soft); color: var(--violet); }
+.ap-stat__value {
+  font-size: 24px;
+  line-height: 1.1;
+}
+.ap-stat__note {
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ap-stat__note--blue { color: var(--text-3); }
+.ap-stat__note--orange { color: var(--orange-dark); }
+.ap-stat__note--green { color: var(--success-dark); }
+.ap-stat__note--violet { color: var(--violet); }
+
+/* ---------- Thẻ phỏng vấn sắp tới ---------- */
+.ap-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(120deg, var(--bg-dark), var(--primary-deep));
+  color: #fff;
+}
+.ap-hero::before {
+  position: absolute;
+  top: -120px;
+  right: 180px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  content: '';
+}
+.ap-hero__main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 22px 24px;
+}
+.ap-hero__badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.ap-hero__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--orange);
+  font-weight: 800;
+}
+.ap-hero__pill i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+}
+.ap-hero__count {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+}
+.ap-hero__when {
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+.ap-hero__place,
+.ap-hero__who {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+}
+.ap-hero__who {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ap-hero__who img {
+  width: 26px;
+  height: 26px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  object-fit: cover;
+}
+.ap-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+.ap-hero__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ap-hero__btn--ghost {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: default;
+}
+.ap-hero__btn--primary {
+  background: var(--btn-primary);
+  color: #fff;
+}
+.ap-hero__btn--white {
+  background: #fff;
+  color: var(--text);
+}
+.ap-hero__btn:disabled {
+  opacity: 0.6;
+}
+.ap-hero__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.ap-hero__confirmed {
+  color: var(--success-light);
+  font-size: 12px;
+  font-weight: 700;
+}
+.ap-hero__ask {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 520px;
+}
+.ap-hero__ask textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+.ap-hero__ask textarea::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}
+.ap-hero__ask-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
+}
+.ap-hero__error {
+  margin: 0;
+  color: var(--orange-soft-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Chuẩn bị */
+.ap-prep {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+.ap-prep__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+.ap-prep__head small {
+  color: var(--blue-200);
+  font-size: 11px;
+  font-weight: 700;
+}
+.ap-prep__bar {
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+}
+.ap-prep__bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--success);
+}
+.ap-prep__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ap-prep__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ap-prep__box {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+}
+.ap-prep__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+}
+.ap-prep__text small {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 10px;
+}
+.ap-prep__item--done .ap-prep__box {
+  border-color: var(--success);
+  background: var(--success);
+}
+.ap-prep__item--done b {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: line-through;
+}
+
+/* ---------- Tab lọc ---------- */
+.ap-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ap-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ap-tab {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 8px 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.ap-tab__count {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--bg-subtle);
+  color: var(--text-3);
+  font-size: 11px;
+}
+.ap-tab--on {
+  border-color: var(--bg-dark);
+  background: var(--bg-dark);
+  color: #fff;
+}
+.ap-tab--on .ap-tab__count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+.ap-search {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  width: 220px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-disabled);
+}
+.ap-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+.ap-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 13px;
+}
+.ap-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 20px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: 14px;
+}
+.ap-more {
+  align-self: center;
+}
+
+/* ---------- Thẻ hồ sơ ---------- */
+.ap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ap-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.ap-card--open {
+  border-color: var(--primary-lighter);
+  box-shadow: var(--shadow-sm);
+}
+.ap-card__top {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.ap-card__img {
+  flex-shrink: 0;
+  width: 88px;
+  height: 66px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+.ap-card__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ap-card__info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.ap-card__title {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 750;
+}
+.ap-card__title:hover {
+  color: var(--primary);
+}
+.ap-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  color: var(--text-3);
+  font-size: 12px;
+}
+.ap-card__meta b {
+  color: var(--primary);
+}
+.ap-card__sub {
+  color: var(--text-disabled);
+  font-size: 11px;
+}
+.ap-card__status {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.ap-card__when {
+  color: var(--orange-dark);
+  font-size: 12px;
+}
+.ap-card__when--green {
+  color: var(--success-dark);
+}
+.ap-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.ap-badge--submitted { background: var(--bg-subtle); color: var(--text-3); }
+.ap-badge--viewed { background: var(--accent-soft); color: var(--primary); }
+.ap-badge--interview { background: var(--orange-soft-2); color: var(--orange-dark); }
+.ap-badge--passed,
+.ap-badge--departed { background: var(--success-soft-2); color: var(--success-dark); }
+.ap-badge--rejected { background: var(--danger-soft); color: var(--danger); }
+.ap-badge--withdrawn { background: var(--status-closed-bg); color: var(--status-closed-text); }
+
+/* Tiến trình 5 bước */
+.ap-steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ap-step {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.ap-step__bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+}
+.ap-step__label {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  color: var(--text-disabled);
+  font-size: 11px;
+  font-weight: 700;
+}
+.ap-step__label small {
+  font-weight: 500;
+}
+.ap-step--done .ap-step__bar { background: var(--success); }
+.ap-step--done .ap-step__label { color: var(--text); }
+.ap-step--current .ap-step__bar { background: var(--orange); }
+.ap-step--current .ap-step__label { color: var(--text); }
+.ap-step--failed .ap-step__bar { background: var(--danger-light); }
+.ap-step--failed .ap-step__label { color: var(--text-3); }
+
+/* Chi tiết */
+.ap-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-soft);
+}
+.ap-history__title {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.ap-history ol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ap-history li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 20px;
+  font-size: 13px;
+}
+.ap-history li::before {
+  position: absolute;
+  top: 5px;
+  left: 2px;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  content: '';
+}
+.ap-history li:not(:last-child)::after {
+  position: absolute;
+  top: 16px;
+  bottom: -12px;
+  left: 6px;
+  width: 1px;
+  background: var(--border);
+  content: '';
+}
+.ap-history li small {
+  color: var(--text-disabled);
+  font-size: 11px;
+}
+.ap-history .ap-history__now::before {
+  border-color: var(--orange);
+  background: var(--orange);
+}
+.ap-consultant {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.ap-consultant__who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.ap-consultant__who > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ap-consultant__who small {
+  color: var(--text-3);
+  font-size: 11px;
+}
+.ap-consultant__photo {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--primary);
+  font-weight: 800;
+}
+.ap-consultant__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ap-consultant__msg {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 4px 12px 12px 12px;
+  background: var(--accent-soft);
+  color: var(--primary-deep);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.ap-consultant__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.ap-consultant .btn {
+  gap: 6px;
+}
+
+/* Chân thẻ */
+.ap-card__foot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 -20px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-soft);
+}
+.ap-foot__note {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 600;
+}
+.ap-foot__note--orange { color: var(--orange-dark); }
+.ap-foot__note--green { color: var(--success-dark); }
+.ap-foot__note--link { color: var(--primary); }
+.ap-foot__withdraw,
+.ap-foot__toggle {
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.ap-foot__withdraw {
+  color: var(--text-3);
+}
+.ap-foot__withdraw:hover {
+  color: var(--danger);
+}
+.ap-foot__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* ---------- Tablet ---------- */
+@media (max-width: 1200px) {
+  .ap-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ap-prep {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 0;
+  }
+  .ap-detail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .ap-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ap-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ap-search {
+    width: 100%;
+  }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 767px) {
+  .ap-head {
+    flex-direction: column;
+  }
+  .ap-head__title {
+    font-size: 21px;
+  }
+  .ap-sort {
+    flex-basis: auto;
+    align-self: stretch;
+  }
+  .ap-stats {
+    gap: 8px;
+  }
+  .ap-stat {
+    padding: 12px;
+  }
+  .ap-hero__main {
+    padding: 18px 16px;
+  }
+  .ap-hero__when {
+    font-size: 19px;
+  }
+  .ap-card {
+    padding: 14px 14px 0;
+  }
+  .ap-card__top {
+    flex-wrap: wrap;
+  }
+  .ap-card__img {
+    width: 72px;
+    height: 56px;
+  }
+  .ap-card__info {
+    flex-basis: calc(100% - 86px);
+  }
+  .ap-card__status {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+  }
+  .ap-step__label {
+    flex-direction: column;
+    font-size: 10px;
+  }
+  .ap-card__foot {
+    flex-wrap: wrap;
+    margin: 0 -14px;
+    padding: 10px 14px;
+  }
+  .ap-foot__note {
+    flex-basis: 100%;
+  }
+}

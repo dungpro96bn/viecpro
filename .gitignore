@@ -1,0 +1,22 @@
+node_modules
+.next
+out
+dist
+coverage
+next-env.d.ts
+*.tsbuildinfo
+.DS_Store
+
+# Biến môi trường (chỉ commit file .env.example)
+.env
+.env.*
+!.env.example
+
+# Prisma client sinh tự động
+apps/api/src/generated
+
+# Công cụ
+.playwright-mcp
+
+# Email xem trước ở dev (EMAIL_PROVIDER=console)
+apps/api/tmp

@@ -1,0 +1,882 @@
+/*
+ * Lịch phỏng vấn (/quan-ly-tuyen-dung/lich-phong-van) – design-page/14
+ * Thanh chọn tuần · thẻ chỉ số · lịch tháng nhỏ + bộ lọc · lưới tuần 8:00–19:00 · popup chi tiết
+ */
+
+.cal-head-btn {
+  height: 42px;
+  border-radius: 12px;
+}
+
+/* ---------- Chọn tuần / kiểu xem ---------- */
+.cal-range {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 42px;
+  padding: 0 4px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.cal-range__btn,
+.cal-month__nav button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-soft);
+  cursor: pointer;
+}
+.cal-range__btn:hover,
+.cal-month__nav button:hover {
+  background: var(--bg-alt);
+  color: var(--primary);
+}
+.cal-range__label {
+  padding: 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.cal-views {
+  display: flex;
+  gap: 2px;
+  height: 42px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--segment-bg);
+}
+.cal-views__btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-3);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cal-views__btn--active {
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(15, 37, 56, 0.12);
+  color: var(--text);
+}
+
+/* ---------- Chỉ số ---------- */
+.cal-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.cal-stat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+.cal-stat__icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+.cal-stat__icon--blue { background: var(--accent-soft); color: var(--primary); }
+.cal-stat__icon--green { background: var(--success-soft); color: var(--success); }
+.cal-stat__icon--orange { background: var(--orange-soft); color: var(--orange); }
+.cal-stat__icon--red { background: var(--danger-soft); color: var(--danger); }
+.cal-stat__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.cal-stat__label {
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 600;
+}
+.cal-stat__row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.cal-stat__value {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.cal-stat__note {
+  color: var(--text-disabled);
+  font-size: 12px;
+  font-weight: 700;
+}
+.cal-stat__note--good { color: var(--success-dark); }
+.cal-stat__note--warn { color: var(--orange); }
+
+/* ---------- Bố cục ---------- */
+.cal-layout {
+  display: grid;
+  grid-template-columns: 256px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.cal-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cal-main {
+  position: relative;
+  min-width: 0;
+}
+.cal-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+}
+.cal-box__title {
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+.cal-box__empty {
+  padding: 4px 0;
+}
+
+/* Lịch tháng nhỏ */
+.cal-month {
+  gap: 10px;
+}
+.cal-month__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+}
+.cal-month__nav {
+  display: flex;
+  gap: 2px;
+}
+.cal-month__nav button {
+  width: 26px;
+  height: 26px;
+}
+.cal-month__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 2px;
+}
+.cal-month__dow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  color: var(--text-disabled);
+  font-size: 11px;
+  font-weight: 700;
+}
+.cal-month__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.cal-month__day--week {
+  background: var(--accent-soft);
+}
+.cal-month__day--first {
+  border-radius: 9px 0 0 9px;
+}
+.cal-month__day--last {
+  border-radius: 0 9px 9px 0;
+}
+.cal-month__num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: var(--text-body);
+  font-size: 12px;
+  font-weight: 500;
+}
+.cal-month__day:hover .cal-month__num {
+  background: var(--bg-alt);
+}
+.cal-month__day--week .cal-month__num {
+  font-weight: 700;
+  color: var(--primary-light);
+}
+.cal-month__day--muted .cal-month__num {
+  color: var(--border-strong);
+}
+.cal-month__day .cal-month__num--today,
+.cal-month__day:hover .cal-month__num--today {
+  background: var(--btn-primary);
+  color: #fff;
+  font-weight: 700;
+}
+.cal-month__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+}
+.cal-month__dot--on {
+  background: var(--btn-primary);
+}
+
+/* Bộ lọc loại lịch / ô tích */
+.cal-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  margin: 0 -6px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-body);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cal-filter:hover {
+  background: var(--bg-subtle);
+}
+.cal-filter__box {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 5px;
+  background: var(--surface);
+  color: transparent;
+}
+.cal-filter__box--on { color: #fff; }
+.cal-filter__box--online.cal-filter__box--on { border-color: var(--primary); background: var(--primary); }
+.cal-filter__box--onsite.cal-filter__box--on { border-color: var(--teal); background: var(--teal); }
+.cal-filter__box--skill_test.cal-filter__box--on { border-color: var(--violet); background: var(--violet); }
+.cal-filter__label {
+  flex: 1;
+  text-align: left;
+}
+.cal-filter__count {
+  color: var(--text-disabled);
+  font-size: 12px;
+}
+
+/* Người phỏng vấn */
+.cal-person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 -6px;
+  padding: 6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.cal-person:hover {
+  background: var(--bg-subtle);
+}
+.cal-person--active,
+.cal-person--active:hover {
+  background: var(--accent-soft);
+}
+.cal-person__avatar {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.cal-person__avatar--text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-dark);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+.cal-person__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.cal-person__name {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-person__title {
+  color: var(--text-disabled);
+  font-size: 11px;
+}
+.cal-person__count {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Nhắc lịch Zalo */
+.cal-remind {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--primary-lighter);
+  border-radius: 18px;
+  background: var(--bg-alt);
+}
+.cal-remind__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--primary-deep);
+  font-size: 14px;
+}
+.cal-remind__text {
+  color: var(--text-soft);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* ---------- Lưới tuần ---------- */
+.cal-week {
+  overflow: hidden;
+}
+.cal-week__scroll {
+  overflow-x: auto;
+}
+.cal-week__head,
+.cal-week__body {
+  display: grid;
+  grid-template-columns: 56px repeat(7, minmax(0, 1fr));
+  min-width: 760px;
+}
+.cal-week__head {
+  border-bottom: 1px solid var(--border);
+}
+.cal-week__tz {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 10px;
+  color: var(--text-disabled);
+  font-size: 10px;
+  font-weight: 700;
+}
+.cal-week__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 0 10px;
+  border-left: 1px solid var(--border-soft);
+}
+.cal-week__dow {
+  color: var(--text-disabled);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.cal-week__date {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 800;
+}
+.cal-week__count {
+  color: var(--text-disabled);
+  font-size: 11px;
+  font-weight: 600;
+}
+.cal-week__day--past .cal-week__date {
+  color: var(--text-disabled);
+}
+.cal-week__day--today {
+  background: var(--today-bg);
+}
+.cal-week__day--today .cal-week__date {
+  background: var(--btn-primary);
+  color: #fff;
+}
+.cal-week__day--today .cal-week__count {
+  color: var(--primary);
+}
+.cal-week__body {
+  position: relative;
+  /* 11 giờ × 64px */
+  height: 704px;
+}
+.cal-week__hours {
+  position: relative;
+}
+.cal-week__hour {
+  position: absolute;
+  right: 8px;
+  color: var(--text-disabled);
+  font-size: 11px;
+  font-weight: 600;
+}
+.cal-week__col {
+  position: relative;
+  border-left: 1px solid var(--border-soft);
+  background-color: var(--surface);
+  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px);
+  background-size: 100% 64px;
+}
+.cal-week__col--today {
+  background-color: var(--row-hover);
+}
+.cal-week__now {
+  position: absolute;
+  right: 0;
+  left: 0;
+  z-index: 4;
+  height: 2px;
+  background: var(--now-line);
+}
+.cal-week__now::before {
+  position: absolute;
+  top: -4px;
+  left: -5px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--now-line);
+  content: '';
+}
+
+/* Ô lịch hẹn */
+.cal-event {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 8px 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--primary);
+  font: inherit;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.cal-event--onsite {
+  background: var(--cyan-soft);
+  box-shadow: inset 3px 0 0 var(--teal);
+}
+.cal-event--skill_test {
+  background: var(--violet-soft);
+  box-shadow: inset 3px 0 0 var(--violet);
+}
+.cal-event--past {
+  opacity: 0.55;
+}
+.cal-event--pending {
+  border: 1px dashed var(--primary);
+  background: repeating-linear-gradient(135deg, var(--accent-soft) 0, var(--accent-soft) 6px, #fff 6px, #fff 12px);
+}
+.cal-event--onsite.cal-event--pending {
+  border-color: var(--teal);
+  background: repeating-linear-gradient(135deg, var(--cyan-soft) 0, var(--cyan-soft) 6px, #fff 6px, #fff 12px);
+}
+.cal-event--skill_test.cal-event--pending {
+  border-color: var(--violet);
+  background: repeating-linear-gradient(135deg, var(--violet-soft) 0, var(--violet-soft) 6px, #fff 6px, #fff 12px);
+}
+.cal-event--selected {
+  z-index: 3;
+  opacity: 1;
+  box-shadow: inset 3px 0 0 var(--primary), 0 0 0 2px #fff, 0 0 0 4px var(--primary), 0 10px 24px -8px rgba(15, 37, 56, 0.35);
+}
+.cal-event__time {
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-event--onsite .cal-event__time { color: var(--teal); }
+.cal-event--skill_test .cal-event__time { color: var(--violet); }
+.cal-event__title {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-event__sub {
+  color: var(--text-3);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-event__sub--live {
+  color: var(--text);
+  font-weight: 600;
+}
+.cal-event__sub--late {
+  color: var(--danger);
+}
+
+/* ---------- Danh sách ---------- */
+.cal-list {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+}
+.cal-list__day {
+  padding: 8px 20px 12px;
+}
+.cal-list__date {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 8px 0;
+  font-size: 15px;
+}
+.cal-list__date span {
+  color: var(--text-disabled);
+  font-size: 12px;
+  font-weight: 600;
+}
+.cal-list__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.cal-list__row:hover,
+.cal-list__row--active {
+  border-color: var(--primary-lighter);
+  background: var(--row-hover);
+}
+.cal-list__time {
+  display: flex;
+  flex-direction: column;
+  width: 52px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.cal-list__time small {
+  color: var(--text-disabled);
+  font-size: 11px;
+  font-weight: 600;
+}
+.cal-list__bar {
+  flex-shrink: 0;
+  width: 3px;
+  height: 36px;
+  border-radius: 3px;
+  background: var(--primary);
+}
+.cal-list__bar--onsite { background: var(--teal); }
+.cal-list__bar--skill_test { background: var(--violet); }
+.cal-list__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 13px;
+}
+.cal-list__text span {
+  color: var(--text-3);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-list__tag {
+  flex-shrink: 0;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--radius-full);
+  background: var(--success-soft);
+  color: var(--success-dark);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 22px;
+}
+.cal-list__tag--pending { background: var(--orange-soft); color: var(--orange-dark); }
+.cal-list__tag--past { background: var(--border-soft); color: var(--text-3); }
+
+/* ---------- Popup chi tiết ---------- */
+.cal-pop {
+  position: absolute;
+  top: 120px;
+  right: 16px;
+  z-index: 5;
+  width: 312px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 24px 48px -12px rgba(15, 37, 56, 0.28), 0 8px 16px -8px rgba(15, 37, 56, 0.16);
+  overflow: hidden;
+}
+.cal-pop__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 10px 0 16px;
+  background: var(--accent-soft);
+  box-shadow: inset 0 3px 0 var(--primary);
+}
+.cal-pop--onsite .cal-pop__head { background: var(--cyan-soft); box-shadow: inset 0 3px 0 var(--teal); }
+.cal-pop--skill_test .cal-pop__head { background: var(--violet-soft); box-shadow: inset 0 3px 0 var(--violet); }
+.cal-pop__badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cal-pop__badge {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+}
+.cal-pop__badge--live { background: var(--danger-soft-2); color: var(--danger); }
+.cal-pop__badge--pending { background: var(--orange-soft-2); color: var(--orange-dark); }
+.cal-pop__badge--upcoming { background: var(--success-soft-2); color: var(--success-dark); }
+.cal-pop__badge--past { background: var(--border-soft); color: var(--text-3); }
+.cal-pop__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text-soft);
+  cursor: pointer;
+}
+.cal-pop__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 16px;
+}
+.cal-pop__titles {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.cal-pop__title {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.cal-pop__sub {
+  color: var(--text-3);
+  font-size: 12px;
+}
+.cal-pop__line {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--text-body);
+  font-size: 13px;
+}
+.cal-pop__line > span {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.cal-pop__line b {
+  font-weight: 600;
+}
+.cal-pop__line small {
+  color: var(--text-disabled);
+  font-size: 12px;
+}
+.cal-pop__line small.cal-pop__link {
+  color: var(--primary);
+  font-weight: 600;
+}
+.cal-pop__notice,
+.cal-pop__result {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--danger-soft);
+  color: var(--danger-text);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.cal-pop__notice--warn {
+  background: var(--orange-soft);
+  color: var(--orange-text);
+}
+.cal-pop__result {
+  background: var(--success-soft);
+  color: var(--success-text);
+}
+.cal-pop__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.cal-pop__actions--full {
+  grid-column: 1 / -1;
+}
+.cal-pop__main {
+  grid-column: 1 / -1;
+  height: 38px;
+  font-size: 13px;
+}
+.cal-pop__cancel {
+  grid-column: 1 / -1;
+  justify-self: center;
+  color: var(--danger);
+  font-size: 12px;
+}
+.cal-pop__form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.cal-pop__form--col {
+  display: flex;
+  flex-direction: column;
+}
+.cal-pop__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 600;
+}
+.cal-pop__input {
+  height: 38px;
+  padding: 0 8px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.cal-pop__note {
+  height: 72px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  resize: none;
+  outline: 0;
+}
+.cal-pop__note:focus {
+  border-color: var(--btn-primary);
+  box-shadow: 0 0 0 4px rgba(56, 121, 255, 0.14);
+}
+
+/* ---------- Tablet ---------- */
+@media (max-width: 1200px) {
+  .cal-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cal-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cal-side {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 767px) {
+  .cal-stats,
+  .cal-side {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cal-range {
+    flex: 1;
+    justify-content: space-between;
+  }
+  /* Popup thành ngăn dưới màn hình */
+  .cal-pop {
+    position: fixed;
+    top: auto;
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    z-index: 75;
+    width: auto;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .cal-list__day {
+    padding: 8px 12px 12px;
+  }
+}

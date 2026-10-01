@@ -1,0 +1,634 @@
+/*
+ * Quản lý ứng viên (/quan-ly-tuyen-dung/ung-vien) – design-page/13
+ * Thẻ bước tuyển dụng · bảng hồ sơ + lọc nhanh · bảng chi tiết hồ sơ
+ */
+
+.appl-head-btn {
+  height: 42px;
+  border-radius: 12px;
+}
+
+/* ---------- Thẻ bước ---------- */
+.appl-stages {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.appl-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.appl-stage:hover {
+  border-color: var(--blue-200);
+}
+.appl-stage--active,
+.appl-stage--active:hover {
+  border-color: var(--btn-primary);
+  box-shadow: 0 6px 16px -8px rgba(36, 62, 99, 0.35);
+}
+.appl-stage__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.appl-stage__dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bg-dark);
+}
+.appl-stage__dot--new { background: var(--btn-primary); }
+.appl-stage__dot--contacted { background: var(--purple); }
+.appl-stage__dot--interview { background: var(--orange); }
+.appl-stage__dot--passed { background: var(--success); }
+.appl-stage__dot--rejected { background: var(--text-disabled); }
+.appl-stage__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+}
+.appl-stage__count {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.appl-stage__note {
+  color: var(--text-disabled);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.appl-stage__note--warn {
+  color: var(--orange);
+}
+
+/* ---------- Bố cục ---------- */
+.appl-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 372px;
+  gap: 20px;
+  align-items: start;
+}
+.appl-table {
+  overflow: hidden;
+}
+.appl-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px 12px;
+}
+.appl-filter--job {
+  flex-basis: 210px;
+}
+
+/* Lọc nhanh */
+.appl-quick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px 14px;
+}
+.appl-quick__label {
+  margin-right: 2px;
+  color: var(--text-disabled);
+  font-size: 12px;
+  font-weight: 600;
+}
+.appl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--text-body);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.appl-chip__count {
+  color: var(--text-disabled);
+  font-size: 11px;
+  font-weight: 800;
+}
+.appl-chip--warn {
+  border-color: var(--orange-border);
+  background: var(--orange-soft);
+  color: var(--orange-dark);
+}
+.appl-chip--warn .appl-chip__count {
+  color: var(--orange);
+}
+.appl-chip--active {
+  border-color: var(--btn-primary);
+  background: var(--accent-soft);
+  color: var(--primary);
+}
+.appl-chip--active .appl-chip__count {
+  color: var(--primary);
+}
+
+/* Bảng */
+.appl-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1.25fr) 58px 112px 82px;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.appl-grid--head {
+  padding-top: 11px;
+  padding-bottom: 11px;
+  border-top: 1px solid var(--border-soft);
+  background: var(--bg-subtle);
+  color: var(--text-disabled);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.appl-grid__right {
+  text-align: right;
+}
+.appl-row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.appl-row:hover {
+  background: var(--row-hover);
+}
+.appl-row--selected,
+.appl-row--selected:hover {
+  background: var(--bg-alt);
+  box-shadow: inset 3px 0 0 var(--btn-primary);
+}
+.appl-row__person {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+.appl-row__person .emp-avatar {
+  width: 38px;
+  height: 38px;
+}
+.appl-row__text,
+.appl-row__job {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.appl-row__name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.appl-row__name-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.appl-row__unseen {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--btn-primary);
+}
+.appl-row__meta {
+  color: var(--text-3);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.appl-row__job-title {
+  color: var(--text-body);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.appl-row__tags {
+  display: flex;
+  gap: 4px;
+  overflow: hidden;
+}
+.appl-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 5px;
+  background: var(--border-soft);
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.appl-row__time {
+  color: var(--text-disabled);
+  font-size: 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+.appl-row__time--late {
+  color: var(--orange);
+  font-weight: 600;
+}
+.appl-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--bg-subtle);
+  color: var(--text-body);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.appl-pill .appl-stage__dot {
+  width: 6px;
+  height: 6px;
+}
+
+/* ---------- Bảng chi tiết ---------- */
+.appl-panel {
+  position: sticky;
+  top: calc(var(--app-header-h) + 20px);
+  max-height: calc(100vh - var(--app-header-h) - 40px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.appl-panel--empty {
+  padding: 24px;
+  color: var(--text-3);
+  font-size: 13px;
+}
+.appl-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 20px 14px;
+}
+.appl-panel__who {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.appl-panel__name {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.appl-panel__meta {
+  color: var(--text-3);
+  font-size: 12px;
+}
+.appl-panel__match {
+  align-self: flex-start;
+  margin-top: 2px;
+}
+.appl-panel__contact {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 0 20px 16px;
+}
+.appl-panel__btn {
+  height: 36px;
+  padding: 0 6px;
+  font-size: 12px;
+  gap: 6px;
+}
+.appl-panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 4px 20px 20px;
+}
+.appl-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+.appl-section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.appl-section__head span {
+  color: var(--text-3);
+  font-size: 12px;
+  text-align: right;
+}
+.appl-section__warn {
+  color: var(--danger);
+  font-size: 12px;
+}
+
+/* Bước tuyển dụng */
+.appl-steps {
+  display: flex;
+  gap: 4px;
+}
+.appl-steps__btn {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: 34px;
+  padding: 0 2px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-3);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.appl-steps__btn:hover {
+  border-color: var(--primary-lighter);
+  color: var(--primary);
+}
+.appl-steps__btn:disabled {
+  cursor: default;
+}
+.appl-steps__btn--active,
+.appl-steps__btn--active:hover {
+  border-color: var(--btn-primary);
+  background: var(--btn-primary);
+  color: #fff;
+}
+.appl-steps__btn--rejected,
+.appl-steps__btn--rejected:hover {
+  border-color: var(--text-disabled);
+  background: var(--text-disabled);
+}
+
+/* Vì sao phù hợp */
+.appl-why {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--bg-subtle);
+  font-size: 13px;
+}
+.appl-why__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--success-dark);
+  font-weight: 600;
+}
+.appl-why__item--warn {
+  color: var(--orange-dark);
+}
+
+/* Thông tin */
+.appl-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 0;
+}
+.appl-facts__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.appl-facts dt {
+  color: var(--text-disabled);
+  font-size: 11px;
+  font-weight: 600;
+}
+.appl-facts dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.appl-interview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--orange-soft);
+  color: var(--orange-dark);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Hoạt động */
+.appl-timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.appl-timeline__item {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  padding-bottom: 12px;
+}
+.appl-timeline__item:not(:last-child)::before {
+  position: absolute;
+  top: 17px;
+  bottom: 3px;
+  left: 5px;
+  width: 2px;
+  background: var(--border);
+  content: '';
+}
+.appl-timeline__dot {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  margin-top: 3px;
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface);
+}
+.appl-timeline__item--current .appl-timeline__dot {
+  border-color: var(--btn-primary);
+  background: var(--btn-primary);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.appl-timeline__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--text-body);
+  font-size: 13px;
+  font-weight: 600;
+}
+.appl-timeline__text small {
+  color: var(--text-disabled);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Ghi chú */
+.appl-note {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--orange-soft);
+}
+.appl-note__body {
+  color: var(--text-body);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.appl-note small {
+  color: var(--text-disabled);
+  font-size: 11px;
+}
+.appl-note__input {
+  height: 64px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  resize: none;
+  outline: 0;
+}
+.appl-note__input:focus {
+  border-color: var(--btn-primary);
+  box-shadow: 0 0 0 4px rgba(56, 121, 255, 0.14);
+}
+.appl-note__input--invalid {
+  border-color: var(--danger);
+}
+.appl-note__save {
+  align-self: flex-end;
+}
+
+/* Nút cuối */
+.appl-panel__actions {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 8px;
+}
+.appl-panel__reject,
+.appl-panel__primary {
+  height: 42px;
+  font-size: 13px;
+}
+
+/* ---------- Tablet ---------- */
+@media (max-width: 1200px) {
+  .appl-stages {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .appl-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .appl-panel {
+    position: static;
+    max-height: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .appl-grid {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 58px 104px;
+  }
+  .appl-grid > :nth-child(5) {
+    display: none;
+  }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 767px) {
+  .appl-stages {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .appl-filters {
+    flex-wrap: wrap;
+    padding: 14px 16px 10px;
+  }
+  .appl-filters .emp-find {
+    flex-basis: 100%;
+  }
+  .appl-quick {
+    padding: 0 16px 12px;
+  }
+  .appl-grid {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 10px;
+    padding: 12px 16px;
+  }
+  .appl-grid--head {
+    display: none;
+  }
+  .appl-grid > :nth-child(3) {
+    display: none;
+  }
+  .appl-grid > :nth-child(4) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .appl-row__job {
+    grid-column: 1 / -1;
+    padding-left: 49px;
+  }
+  .appl-panel__head,
+  .appl-panel__contact,
+  .appl-panel__body {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+}

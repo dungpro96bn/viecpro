@@ -1,0 +1,177 @@
+/* Trang tổng quan tài khoản ứng viên (/tai-khoan-ung-vien). Khung chung ở components/seeker/seeker.css */
+
+/* ---------- Khung và đầu trang ---------- */
+
+/* ---------- Cột hồ sơ và nội dung ---------- */
+.account-panel, .account-stat { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+
+/* ---------- Chào mừng và thẻ thống kê ---------- */
+.account-overview { display: flex; flex-direction: column; gap: 18px; }
+.account-welcome { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 93px; }
+.account-welcome__date { display: block; margin-bottom: 7px; color: var(--text-3); font-size: 12px; font-weight: 600; }
+.account-welcome h1 { max-width: 680px; font-size: 25px; line-height: 1.25; letter-spacing: -.035em; }
+.account-welcome p { margin-top: 8px; color: var(--text-3); font-size: 12px; }
+.account-welcome > .btn { flex: 0 0 auto; gap: 8px; height: 42px; padding: 0 15px; border-radius: 10px; font-size: 13px; }
+.account-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.account-stat { position: relative; display: flex; min-height: 126px; flex-direction: column; align-items: flex-start; padding: 15px; }
+.account-stat__icon { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 9px; border-radius: 10px; }
+.account-stat__icon--blue { background: #ebf2ff; color: var(--primary); }
+.account-stat__icon--purple { background: var(--status-purple-bg); color: var(--status-purple-text); }
+.account-stat__icon--pink { background: var(--status-pink-bg); color: var(--status-pink-text); }
+.account-stat__icon--green { background: var(--success-soft); color: var(--success); }
+.account-stat__value { position: absolute; top: 17px; right: 16px; font-size: 23px; font-weight: 800; }
+.account-stat__label { font-size: 12px; font-weight: 700; }
+.account-stat__note { margin-top: 5px; color: var(--text-3); font-size: 10px; }
+.account-stat__note--positive { color: var(--success-dark); }
+
+/* ---------- Tiến độ ứng tuyển và lịch ---------- */
+.account-overview-grid { display: grid; grid-template-columns: 1.12fr .88fr; gap: 14px; }
+.account-panel { padding: 17px; }
+.account-panel__heading, .account-panel__title { display: flex; align-items: center; }
+.account-panel__heading { justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+.account-panel__heading > a, .account-recommendations__heading > a { display: inline-flex; align-items: center; gap: 5px; color: var(--primary); white-space: nowrap; font-size: 11px; font-weight: 700; }
+.account-panel__title { gap: 8px; font-size: 14px; font-weight: 750; }
+.account-panel__heading-icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; }
+.account-panel__heading-icon--blue { background: var(--accent-soft); color: var(--primary); }
+.account-panel__heading-icon--purple { background: var(--status-purple-bg); color: var(--status-purple-text); }
+.account-application__job { display: flex; align-items: center; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid var(--border-soft); }
+.account-application__job img { width: 49px; height: 43px; flex: 0 0 auto; border-radius: 8px; object-fit: cover; }
+.account-application__job > span { display: flex; min-width: 0; flex-direction: column; gap: 5px; }
+.account-application__job b { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.account-application__job small { color: var(--text-3); font-size: 10px; }
+.account-application__count { color: var(--text-3); font-size: 11px; font-weight: 600; }
+.account-application__list { display: grid; gap: 8px; margin: 16px 0 0; padding: 14px 0 0; border-top: 1px solid var(--border-soft); list-style: none; }
+.account-application__list li { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 12px; }
+.account-application__list a { overflow: hidden; flex: 1 1 auto; min-width: 0; color: var(--text); text-overflow: ellipsis; white-space: nowrap; }
+.account-application__status { flex: 0 0 auto; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--primary); font-size: 10px; font-weight: 700; }
+.account-application__status--passed { background: var(--success-soft-2); color: var(--success-dark); }
+.account-application__status--rejected, .account-application__status--withdrawn { background: var(--status-closed-bg); color: var(--status-closed-text); }
+.account-application__withdraw { flex: 0 0 auto; padding: 0; border: 0; background: none; color: var(--danger); font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.account-application__withdraw:disabled { opacity: 0.6; cursor: default; }
+.account-application__error { margin: 8px 0 0; color: var(--danger); font-size: 11px; }
+.account-notifications__tools { display: inline-flex; align-items: center; gap: 10px; }
+.account-notifications__tools button { padding: 0; border: 0; background: none; color: var(--primary); font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.account-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 15px 0 0; padding: 0; list-style: none; }
+.account-steps li { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 7px; min-width: 0; }
+.account-steps li:not(:last-child)::after { position: absolute; top: 10px; left: 25px; width: calc(100% - 16px); height: 2px; background: var(--border); content: ''; }
+.account-steps li.account-steps__step--done:not(:last-child)::after { background: #91b6ff; }
+.account-steps__marker { z-index: 1; display: grid; place-items: center; width: 21px; height: 21px; border: 1px solid var(--border); border-radius: 50%; background: var(--surface); color: var(--text-disabled); font-size: 10px; font-weight: 700; }
+.account-steps__step--done .account-steps__marker { border-color: var(--btn-primary); background: var(--btn-primary); color: #fff; }
+.account-steps__step--current .account-steps__marker { border: 2px solid var(--btn-primary); background: var(--surface); color: var(--primary); }
+.account-steps__label { overflow: hidden; max-width: 100%; color: var(--text-3); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.account-steps__step--current .account-steps__label { color: var(--primary); font-weight: 750; }
+.account-steps small { color: var(--text-3); font-size: 9px; }
+.account-interview__month { color: var(--text-3); font-size: 11px; }
+.account-interview__details { display: flex; align-items: center; gap: 11px; padding: 3px 0 15px; }
+.account-interview__day { display: flex; width: 48px; height: 50px; flex: 0 0 auto; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--status-purple-bg); border-radius: 10px; background: var(--status-purple-bg); color: var(--status-purple-text); }
+.account-interview__day b { font-size: 18px; line-height: 1.05; }
+.account-interview__day small { margin-top: 3px; font-size: 9px; }
+.account-interview__info { display: flex; flex-direction: column; gap: 6px; }
+.account-interview__info b { font-size: 11px; }
+.account-interview__info small { color: var(--text-3); font-size: 9px; }
+.account-interview__footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border-soft); }
+.account-interview__footer p { max-width: 255px; color: var(--text-3); font-size: 9px; line-height: 1.55; }
+.account-interview__footer p b { color: var(--warning); }
+.account-interview__footer p a { color: var(--primary); font-weight: 650; }
+.account-interview__footer .btn { height: 33px; gap: 4px; padding: 0 8px; border-radius: 8px; font-size: 9px; }
+
+/* ---------- Hoàn thiện hồ sơ ---------- */
+.account-completion { display: grid; grid-template-columns: .85fr 1.15fr; align-items: center; gap: 20px; padding: 15px 18px; }
+.account-completion__summary { display: flex; align-items: center; gap: 12px; }
+.account-completion__ring { display: grid; width: 52px; height: 52px; flex: 0 0 auto; place-items: center; border: 4px solid var(--accent-soft); border-right-color: var(--btn-primary); border-top-color: var(--btn-primary); border-radius: 50%; color: var(--primary); font-size: 11px; }
+.account-completion__summary > span:last-child { display: flex; flex-direction: column; gap: 5px; }
+.account-completion__summary b { font-size: 12px; }
+.account-completion__summary small { color: var(--text-3); font-size: 9px; line-height: 1.45; }
+.account-completion__tasks { display: flex; flex-direction: column; }
+.account-task { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 32px; padding: 4px 0; border: 0; background: transparent; text-align: left; }
+.account-task + .account-task { border-top: 1px solid var(--border-soft); }
+.account-task__icon { display: grid; width: 20px; height: 20px; flex: 0 0 auto; place-items: center; border-radius: 6px; background: var(--accent-soft); color: var(--primary); }
+.account-task__title { flex: 1; color: var(--text-body); font-size: 10px; }
+.account-task__score { color: var(--success-dark); font-size: 10px; }
+.account-task--done .account-task__icon { background: var(--success-soft-2); color: var(--success-dark); }
+.account-task--done .account-task__title { color: var(--text-3); text-decoration: line-through; }
+.account-empty { padding: 24px; color: var(--text-3); font-size: 14px; }
+.account-profile-edit__message { margin: 0; color: var(--success-dark); font-size: 13px; }
+.account-profile-edit__message--error { color: var(--danger); }
+.account-notifications__list { display: grid; margin: 0; padding: 0; list-style: none; }
+.account-notifications__item { border-top: 1px solid var(--border-soft); }
+.account-notifications__item a { display: grid; gap: 4px; padding: 12px 2px; color: var(--text-body); text-decoration: none; }
+.account-notifications__item--unread a { color: var(--text); }
+.account-notifications__item span, .account-notifications__item small { color: var(--text-3); font-size: 12px; }
+.account-security__heading { margin: 22px 0 8px; color: var(--text); font-size: 14px; }
+.account-security__sessions { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.account-security__sessions li, .account-security__delete { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px; border: 1px solid var(--border-soft); border-radius: var(--radius-sm); }
+.account-security__sessions li > span, .account-security__delete > span { display: grid; gap: 3px; }
+.account-security__sessions small, .account-security__delete small { color: var(--text-3); font-size: 12px; }
+.account-security__delete { margin-top: 16px; border-color: var(--border); }
+
+/* ---------- Việc làm gợi ý ---------- */
+.account-recommendations { display: flex; flex-direction: column; gap: 13px; }
+.account-recommendations__heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.account-recommendations__heading h2 { font-size: 17px; letter-spacing: -.02em; }
+.account-recommendations__heading p { margin-top: 5px; color: var(--text-3); font-size: 11px; }
+.account-job-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
+.account-job-card { overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); transition: border-color .25s var(--ease), box-shadow .25s var(--ease); }
+.account-job-card:hover { border-color: var(--primary-lighter); box-shadow: var(--shadow-lg); }
+.account-job-card__media { position: relative; display: block; height: 118px; overflow: hidden; background: var(--primary-soft); }
+.account-job-card__media::after { position: absolute; inset: 40% 0 0; background: linear-gradient(transparent, rgba(15,37,56,.54)); content: ''; }
+.account-job-card__media img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s var(--ease); }
+.account-job-card:hover .account-job-card__media img { transform: scale(1.04); }
+.account-job-card__match, .account-job-card__location { position: absolute; z-index: 1; display: inline-flex; align-items: center; gap: 4px; }
+.account-job-card__match { top: 9px; left: 9px; padding: 5px 7px; border-radius: 6px; background: #fff; color: var(--success-dark); font-size: 9px; font-weight: 750; }
+.account-job-card__location { bottom: 9px; left: 10px; color: #fff; font-size: 10px; font-weight: 650; }
+.account-job-card__body { display: flex; flex-direction: column; align-items: flex-start; padding: 12px; }
+.account-job-card__title { display: -webkit-box; min-height: 34px; overflow: hidden; color: var(--text); font-size: 11px; font-weight: 750; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.account-job-card__title:hover { color: var(--primary); }
+.account-job-card__salary { margin-top: 9px; color: var(--primary); font-size: 14px; }
+.account-job-card__salary small { margin-left: 3px; color: var(--text-3); font-size: 9px; font-weight: 500; }
+.account-job-card__tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 9px 0 11px; }
+.account-job-card__tags span { padding: 4px 6px; border-radius: 5px; background: var(--primary-soft); color: var(--text-3); font-size: 9px; }
+.account-job-card__apply { width: 100%; height: 36px; border-radius: 8px; font-size: 11px; }
+
+/* ---------- Điều chỉnh theo kích thước màn hình ---------- */
+@media (max-width: 1200px) {
+  .account-overview-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 1024px) {
+  .account-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .account-completion { grid-template-columns: 1fr; gap: 12px; }
+  .account-job-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .account-job-card:last-child { display: none; }
+}
+
+@media (max-width: 767px) {
+  .account-overview { gap: 13px; }
+  .account-welcome { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .account-welcome h1 { font-size: 21px; }
+  .account-welcome p { font-size: 11px; line-height: 1.5; }
+  .account-welcome > .btn { height: 40px; }
+  .account-stats { gap: 8px; }
+  .account-stat { min-height: 115px; padding: 12px; }
+  .account-stat__value { top: 13px; right: 12px; font-size: 20px; }
+  .account-stat__label { font-size: 11px; }
+  .account-stat__note { font-size: 9px; }
+  .account-overview-grid { gap: 10px; }
+  .account-panel { padding: 13px; }
+  .account-interview__footer { align-items: flex-start; flex-direction: column; }
+  .account-interview__footer p { max-width: none; font-size: 10px; }
+  .account-completion { padding: 13px; }
+  .account-recommendations__heading { align-items: flex-start; }
+  .account-recommendations__heading h2 { font-size: 15px; }
+  .account-recommendations__heading p { max-width: 270px; line-height: 1.45; }
+  .account-job-grid { grid-template-columns: 1fr; }
+  .account-job-card:last-child { display: block; }
+  .account-job-card { display: grid; grid-template-columns: 112px minmax(0, 1fr); }
+  .account-job-card__media { height: 100%; min-height: 160px; }
+  .account-job-card__location { align-items: flex-start; font-size: 8px; }
+  .account-job-card__body { padding: 10px; }
+  .account-job-card__title { min-height: 0; }
+  .site-footer__newsletter { align-items: flex-start; flex-direction: column; }
+  .newsletter-form { width: 100%; }
+  .newsletter-form__input { min-width: 0; width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-job-card, .account-job-card__media img { transition: none; }
+}

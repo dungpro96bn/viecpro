@@ -1,0 +1,68 @@
+/* ==========================================================================
+   Trang đăng nhập – nội dung cột thương hiệu
+   ========================================================================== */
+
+.login-perks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.login-perks__item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.login-perks__icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-perks__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.login-perks__title {
+  font-size: 15px;
+  font-weight: 700;
+}
+.login-perks__desc {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* Thống kê 3 cột */
+.login-stats {
+  margin-bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.login-stats__item {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 2px;
+}
+.login-stats__item + .login-stats__item {
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+}
+.login-stats__value {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.login-stats__label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+}

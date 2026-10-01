@@ -1,0 +1,157 @@
+/* ==========================================================================
+   Biểu đồ SVG tự vẽ
+   ========================================================================== */
+
+/* ---------- Sparkline ---------- */
+.sparkline {
+  display: block;
+  width: 100%;
+  height: 34px;
+}
+.sparkline--empty {
+  display: block;
+  height: 34px;
+  border-bottom: 2px dashed var(--border);
+}
+.sparkline__line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sparkline--primary .sparkline__line { stroke: var(--primary); }
+.sparkline--primary .sparkline__area { fill: rgba(56, 121, 255, 0.1); }
+.sparkline--warning .sparkline__line { stroke: var(--orange); }
+.sparkline--warning .sparkline__area { fill: rgba(232, 134, 42, 0.12); }
+
+/* ---------- Biểu đồ vùng ---------- */
+.area-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.area-chart--empty {
+  height: 230px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  background: var(--surface-muted);
+  font-size: 13px;
+  color: var(--text-3);
+}
+.area-chart__plot {
+  position: relative;
+  height: 230px;
+}
+.area-chart__svg {
+  display: block;
+  width: 100%;
+  height: 230px;
+  overflow: visible;
+  cursor: crosshair;
+}
+.area-chart__grid {
+  stroke: #eef2f7;
+  stroke-width: 1;
+}
+.area-chart__stop-top {
+  stop-color: var(--primary);
+  stop-opacity: 0.22;
+}
+.area-chart__stop-bottom {
+  stop-color: var(--primary);
+  stop-opacity: 0;
+}
+.area-chart__line {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.area-chart__cursor {
+  stroke: var(--text-disabled);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.area-chart__dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px #fff, 0 2px 6px rgba(15, 37, 56, 0.3);
+  pointer-events: none;
+}
+.area-chart__tip {
+  position: absolute;
+  width: 132px;
+  margin-left: 12px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-radius: 10px;
+  background: var(--dark);
+  color: #fff;
+  box-shadow: var(--shadow-pop);
+  pointer-events: none;
+}
+.area-chart__tip--left {
+  margin-left: -144px;
+}
+.area-chart__tip-date {
+  font-size: 11.5px;
+  color: var(--text-disabled);
+}
+.area-chart__tip-value {
+  font-size: 14px;
+}
+.area-chart__axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: var(--text-disabled);
+}
+
+/* ---------- Biểu đồ tròn ---------- */
+.donut {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  flex-shrink: 0;
+}
+.donut__svg {
+  display: block;
+  transform: rotate(-90deg);
+}
+.donut__track {
+  fill: none;
+  stroke: var(--surface-sunken);
+  stroke-width: 6;
+}
+.donut__slice {
+  fill: none;
+  stroke-width: 6;
+}
+.donut__slice--c1 { stroke: var(--primary); }
+.donut__slice--c2 { stroke: var(--orange); }
+.donut__slice--c3 { stroke: var(--teal); }
+.donut__slice--c4 { stroke: var(--violet); }
+.donut__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.donut__value {
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+.donut__unit {
+  font-size: 10.5px;
+  color: var(--text-3);
+}

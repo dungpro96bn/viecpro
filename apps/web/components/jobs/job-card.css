@@ -1,0 +1,489 @@
+/* ==========================================================================
+   Job card – danh sách đơn hàng
+   ========================================================================== */
+
+.job-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.job-card:hover {
+  border-color: var(--primary-lighter);
+  box-shadow: var(--shadow-lg);
+}
+
+.job-card__body {
+  display: flex;
+  gap: 20px;
+}
+
+/* Ảnh */
+.job-card__media {
+  position: relative;
+  width: 232px;
+  height: 172px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  display: block;
+  background: var(--primary-soft);
+}
+.job-card--compact .job-card__media {
+  width: 208px;
+  height: 164px;
+}
+.job-card__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease);
+}
+.job-card:hover .job-card__photo {
+  transform: scale(1.05);
+}
+.job-card__shade {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 64px;
+  background: linear-gradient(180deg, rgba(15, 37, 56, 0) 0%, rgba(15, 37, 56, 0.72) 100%);
+}
+.job-card__pref {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Nội dung */
+.job-card__content {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.job-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.job-card__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.job-card__title {
+  font-size: 17px;
+  line-height: 1.42;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.job-card__title:hover {
+  color: var(--primary);
+}
+.job-card__tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.job-card__views {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.job-card__chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  margin-top: 12px;
+}
+
+.job-card__stats-row {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.job-card__stats {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.job-card__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 18px;
+  border-right: 1px solid var(--border-soft);
+}
+.job-card__stat:first-child {
+  padding-left: 0;
+}
+.job-card__stat:last-child {
+  padding-right: 0;
+  border-right: 0;
+}
+.job-card--compact .job-card__stat {
+  padding: 0 16px;
+}
+.job-card--compact .job-card__stat:first-child {
+  padding-left: 0;
+}
+.job-card__stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+.job-card__stat-value--salary {
+  font-weight: 700;
+  color: var(--primary);
+}
+.job-card__per {
+  font-weight: 500;
+  color: var(--text-3);
+}
+
+/* Chân card – người đăng */
+.job-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border);
+}
+.job-card__poster {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.job-card__poster-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.job-card__poster-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.job-card__poster-line--muted {
+  font-size: 12px;
+  color: var(--text-3);
+}
+.job-card__poster-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.job-card__poster-name:hover {
+  color: var(--primary);
+}
+.job-card__poster-role {
+  font-size: 12px;
+  color: var(--text-3);
+}
+.job-card__rating {
+  font-weight: 600;
+  color: var(--text);
+}
+.job-card__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.job-card__verified-icon {
+  color: var(--success);
+}
+.job-card__divider {
+  width: 1px;
+  height: 34px;
+  margin: 0 6px;
+  flex-shrink: 0;
+  background: var(--border-soft);
+}
+.job-card__where {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.job-card__where > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.job-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Chân card – bản gọn */
+.job-card__footer--compact {
+  padding-top: 12px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.job-card__owner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.job-card__owner-name {
+  font-weight: 600;
+  color: var(--text);
+}
+.job-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ---------- Responsive (chỉ áp dụng cho trang .page--fluid) ---------- */
+@media (max-width: 900px) {
+  .page--fluid .job-card__media {
+    width: 200px;
+    height: 160px;
+  }
+  .page--fluid .job-card__divider {
+    display: none;
+  }
+  .page--fluid .job-card__poster {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .page--fluid .job-card__where {
+    flex-direction: row;
+    gap: 12px;
+  }
+  .page--fluid .job-card__poster {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+  .page--fluid .job-card__poster > a {
+    grid-row: span 2;
+  }
+  /* Bản gọn: nút Ứng tuyển xuống dòng khi thiếu chỗ */
+  .page--fluid .job-card--compact .job-card__stats-row {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Mobile: mọi hàng đều được xuống dòng, không dùng nowrap / chiều cao cố định
+     → thẻ có thể cao hơn nhưng không tràn, không chồng lên nhau */
+  .page--fluid .job-card {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  /* Ảnh full chiều ngang (tỉ lệ 2 / 1.3), nội dung xếp dọc bên dưới */
+  .page--fluid .job-card__body {
+    flex-direction: column;
+    gap: 14px;
+  }
+  .page--fluid .job-card__media,
+  .page--fluid .job-card--compact .job-card__media {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2 / 1.3;
+  }
+  .page--fluid .job-card__content {
+    gap: 12px;
+  }
+  .page--fluid .job-card__top {
+    min-width: 0;
+    gap: 12px;
+  }
+  .page--fluid .job-card__heading {
+    flex: 1;
+    gap: 8px;
+  }
+  .page--fluid .job-badges {
+    flex-wrap: wrap;
+  }
+  /* Tiêu đề hiển thị đầy đủ, không cắt dòng */
+  .page--fluid .job-card__title {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+    font-size: 16px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+  .page--fluid .job-card__views {
+    display: none;
+  }
+  /* Nút lưu (wishlist) nổi ở góc trên bên phải ảnh */
+  .page--fluid .job-card__body {
+    position: relative;
+  }
+  .page--fluid .job-card__tools {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+    gap: 0;
+  }
+  .page--fluid .job-card .save-btn {
+    width: 38px;
+    height: 38px;
+    border-color: transparent;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px rgba(15, 37, 56, 0.18);
+    color: var(--text);
+  }
+  .page--fluid .job-card .save-btn--active {
+    background: #fff;
+    color: #e11d48;
+  }
+  .page--fluid .job-card__chips {
+    height: auto;
+    margin-top: 0;
+    flex-wrap: wrap;
+  }
+
+  /* Chỉ số: lương 1 hàng riêng (nhãn trái – số phải), số lượng & năm sinh chia đôi bên dưới */
+  .page--fluid .job-card__stats-row {
+    margin-top: 0;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--primary-soft);
+  }
+  .page--fluid .job-card__stats {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .page--fluid .job-card__stat {
+    min-width: 0;
+    padding: 10px 0 0;
+    border-right: 0;
+  }
+  .page--fluid .job-card__stat:first-child {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2px 12px;
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--primary-lighter);
+  }
+  .page--fluid .job-card__stat:nth-child(2) {
+    padding-right: 12px;
+    border-right: 1px solid var(--primary-lighter);
+  }
+  .page--fluid .job-card__stat:nth-child(3) {
+    padding-left: 14px;
+  }
+  .page--fluid .job-card__stat-value {
+    font-size: 14px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .page--fluid .job-card__stat-value--salary {
+    font-size: 16px;
+  }
+
+  /* Chân thẻ: người đăng (được xuống dòng) rồi hàng nút */
+  .page--fluid .job-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding-top: 14px;
+  }
+  .page--fluid .job-card__poster {
+    align-items: start;
+  }
+  .page--fluid .job-card__poster-info {
+    gap: 4px;
+  }
+  .page--fluid .job-card__poster-line {
+    flex-wrap: wrap;
+    white-space: normal;
+    row-gap: 2px;
+    min-width: 0;
+  }
+  .page--fluid .job-card__poster-name {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  .page--fluid .job-card__poster-role {
+    white-space: nowrap;
+  }
+  .page--fluid .job-card__verified {
+    white-space: nowrap;
+  }
+  .page--fluid .job-card__where {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    white-space: normal;
+  }
+  .page--fluid .job-card__actions {
+    gap: 8px;
+  }
+  .page--fluid .job-card__actions > .btn {
+    flex: 1;
+    min-width: 0;
+    padding: 0 12px;
+  }
+
+  /* Bản gọn (trang hồ sơ): nút Ứng tuyển full hàng dưới khối chỉ số */
+  .page--fluid .job-card--compact .job-card__stats-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .page--fluid .job-card--compact .job-card__stats-row > .btn {
+    height: 44px;
+  }
+  .page--fluid .job-card__footer--compact {
+    gap: 8px;
+  }
+  .page--fluid .job-card__meta {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+}

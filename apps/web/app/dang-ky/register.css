@@ -1,0 +1,474 @@
+/* ==========================================================================
+   Trang đăng ký
+   ========================================================================== */
+
+/* ---------- Cột thương hiệu ---------- */
+.register-intro {
+  gap: 24px;
+}
+.register-intro__title {
+  font-size: 38px;
+  line-height: 1.16;
+}
+.register-benefits {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.register-benefits__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+}
+.register-benefits__check {
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #4ade80;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.register-promise {
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.register-promise__icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.register-promise__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.register-promise__title {
+  font-size: 15px;
+  font-weight: 700;
+}
+.register-promise__desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* ---------- Thanh bước ---------- */
+.reg-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.reg-steps__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.reg-steps__item:last-child {
+  flex: 0 0 auto;
+}
+.reg-steps__num {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--border-soft);
+  color: var(--text-disabled);
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.reg-steps__label {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text-disabled);
+}
+.reg-steps__line {
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.2s;
+}
+.reg-steps__item--active .reg-steps__num {
+  background: var(--btn-primary);
+  color: #fff;
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.reg-steps__item--active .reg-steps__label,
+.reg-steps__item--done .reg-steps__label {
+  color: var(--text);
+}
+.reg-steps__item--done .reg-steps__num {
+  background: var(--accent-soft);
+  color: var(--primary);
+}
+.reg-steps__item--done .reg-steps__line {
+  background: var(--btn-primary);
+}
+
+/* ---------- Bước 1: thông tin ---------- */
+.reg-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.reg-form__intro,
+.reg-form__group {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.reg-form__head {
+  gap: 6px;
+}
+.reg-form__title {
+  font-size: 30px;
+}
+
+/* Thẻ chọn vai trò */
+.role-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.role-card {
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  text-align: left;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.role-card:hover {
+  border-color: var(--btn-primary);
+}
+.role-card--active {
+  border-color: var(--btn-primary);
+  background: var(--bg-alt);
+  box-shadow: 0 0 0 4px rgba(56, 121, 255, 0.1);
+}
+.role-card__icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-soft);
+  color: var(--primary-light);
+  transition: background 0.2s, color 0.2s;
+}
+.role-card--active .role-card__icon {
+  background: var(--btn-primary);
+  color: #fff;
+}
+.role-card__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.role-card__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.role-card__desc {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+.role-card__radio {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.role-card__radio::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.role-card--active .role-card__radio {
+  border-color: var(--btn-primary);
+}
+.role-card--active .role-card__radio::after {
+  background: var(--btn-primary);
+}
+
+.reg-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+/* Dropdown năm sinh dùng chung Select, giữ kiểu ô nhập */
+.reg-select {
+  padding: 0 12px;
+  font-size: 15px;
+  color: var(--text);
+}
+.reg-select:focus-visible {
+  outline: none;
+  border-color: var(--btn-primary);
+  box-shadow: 0 0 0 4px rgba(56, 121, 255, 0.14);
+}
+
+/* Chip chọn chương trình */
+.reg-programs {
+  gap: 10px;
+}
+.reg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.reg-chip {
+  height: 38px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.reg-chip:hover {
+  border-color: var(--btn-primary);
+}
+.reg-chip--active {
+  border-color: var(--btn-primary);
+  background: var(--accent-soft);
+  color: var(--primary);
+}
+
+/* Độ mạnh mật khẩu */
+.pw-meter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pw-meter__bars {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+.pw-meter__bar {
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--border);
+  transition: background 0.25s;
+}
+.pw-meter__label {
+  width: 72px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-disabled);
+}
+.pw-meter--1 .pw-meter__bar--on { background: var(--danger); }
+.pw-meter--1 .pw-meter__label { color: var(--danger); }
+.pw-meter--2 .pw-meter__bar--on { background: var(--warning); }
+.pw-meter--2 .pw-meter__label { color: #d97706; }
+.pw-meter--3 .pw-meter__bar--on { background: var(--btn-primary); }
+.pw-meter--3 .pw-meter__label { color: var(--primary); }
+.pw-meter--4 .pw-meter__bar--on { background: var(--success); }
+.pw-meter--4 .pw-meter__label { color: var(--success); }
+
+.pw-rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+.pw-rules__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-disabled);
+  transition: color 0.2s;
+}
+.pw-rules__item--ok {
+  color: var(--success);
+}
+
+/* ---------- Bước 2: OTP ---------- */
+.reg-otp {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.reg-otp__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--accent-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.reg-otp__phone {
+  color: var(--text);
+}
+.reg-otp__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--primary);
+  font-weight: 700;
+}
+.reg-otp__link:hover {
+  color: var(--primary-dark);
+}
+.reg-otp__inputs {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+.reg-otp__input {
+  width: 100%;
+  min-width: 0;
+  height: 64px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: center;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.reg-otp__input:focus {
+  outline: none;
+  border-color: var(--btn-primary);
+  box-shadow: 0 0 0 4px rgba(56, 121, 255, 0.14);
+}
+.reg-otp__resend {
+  font-size: 14px;
+  color: var(--text-3);
+}
+.reg-otp__timer {
+  color: var(--text);
+}
+.reg-otp__back {
+  align-self: center;
+  height: 40px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-3);
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+}
+.reg-otp__back:hover {
+  background: var(--primary-soft);
+  color: var(--text);
+}
+
+/* ---------- Bước 3: hoàn tất ---------- */
+.reg-done {
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.reg-done__icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  background: var(--success-soft-2);
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 10px var(--success-soft);
+}
+.reg-done__lead b {
+  color: var(--text);
+}
+.reg-done__actions {
+  width: 100%;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 767px) {
+  .reg-steps {
+    gap: 6px;
+  }
+  .reg-steps__item {
+    gap: 6px;
+  }
+  .reg-steps__label {
+    font-size: 12px;
+  }
+  .reg-form__title {
+    font-size: 26px;
+  }
+  .role-cards,
+  .reg-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .reg-otp__inputs {
+    gap: 8px;
+  }
+  .reg-otp__input {
+    height: 54px;
+    font-size: 22px;
+  }
+}

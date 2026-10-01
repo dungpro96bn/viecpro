@@ -1,0 +1,131 @@
+/* ==========================================================================
+   Select – dropdown tự vẽ thay cho <select>
+   Nút bấm nhận thêm class của ô cũ (field-input, search-bar__input…) để giữ kích thước.
+   ========================================================================== */
+.select {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.select__trigger {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+.select__value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.select__value--placeholder {
+  color: var(--text-disabled);
+}
+.select__chevron {
+  flex-shrink: 0;
+  color: var(--text-3);
+  transition: transform 0.2s var(--ease);
+}
+.select__trigger--open .select__chevron {
+  transform: rotate(180deg);
+  color: var(--primary);
+}
+
+/* Input ẩn: vẫn nằm trong luồng để trình duyệt hiện bong bóng "required" đúng chỗ */
+.select__native {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Menu */
+.select__menu {
+  position: fixed;
+  z-index: 1100;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px -12px rgba(15, 37, 56, 0.22), 0 4px 12px -4px rgba(15, 37, 56, 0.08);
+  animation: select-in 0.16s var(--ease);
+  transform-origin: top center;
+}
+.select__menu--up {
+  transform-origin: bottom center;
+}
+@keyframes select-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+.select__menu--up {
+  animation-name: select-in-up;
+}
+@keyframes select-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}
+.select__option {
+  min-height: 40px;
+  padding: 8px 10px 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--text-body);
+  cursor: pointer;
+  user-select: none;
+}
+.select__option--active {
+  background: var(--primary-soft);
+  color: var(--text);
+}
+.select__option--selected {
+  color: var(--primary);
+  font-weight: 600;
+}
+.select__option--selected.select__option--active {
+  background: var(--accent-soft);
+}
+.select__check {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+@media (max-width: 767px) {
+  .select__option {
+    min-height: 44px;
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .select__menu,
+  .select__chevron {
+    animation: none;
+    transition: none;
+  }
+}

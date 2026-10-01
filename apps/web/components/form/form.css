@@ -1,0 +1,416 @@
+/*
+ * Form dùng chung (khu NTD: đăng tin 15, thêm ứng viên 16, tạo lịch hẹn 17; hồ sơ ứng viên 18):
+ * khối mục đánh số, ô nhập, nhóm chip chọn, ô tích dạng thẻ, thanh lưu cuối form.
+ */
+
+/* ---------- Khối mục ---------- */
+.ef-section {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 24px 24px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  scroll-margin-top: calc(var(--app-header-h) + 16px);
+}
+.ef-section__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.ef-section__titles {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.ef-section__num {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--bg-dark);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+.ef-section__title {
+  display: block;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+.ef-section__desc {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+/* Lưới ô nhập */
+.ef-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 16px;
+}
+.ef-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.ef-grid--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.ef-span-2 {
+  grid-column: span 2;
+}
+.ef-span-all {
+  grid-column: 1 / -1;
+}
+
+/* ---------- Ô nhập ---------- */
+.ef-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+.ef-field__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ef-field__label {
+  color: var(--text-body);
+  font-size: 13px;
+  font-weight: 700;
+}
+.ef-field__req {
+  margin-left: 2px;
+  color: var(--danger);
+}
+.ef-field__extra {
+  color: var(--text-disabled);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ef-field__hint {
+  color: var(--text-disabled);
+  font-size: 12px;
+}
+.ef-field__error {
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 600;
+}
+.ef-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--primary-lighter);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  outline: 0;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.ef-input:focus {
+  border-color: var(--btn-primary);
+  box-shadow: 0 0 0 4px rgba(56, 121, 255, 0.14);
+}
+.ef-input--strong {
+  font-weight: 600;
+}
+.ef-input--invalid,
+.ef-input--invalid:focus {
+  border-color: var(--danger);
+}
+.ef-input:read-only {
+  background: var(--bg-subtle);
+  color: var(--text-soft);
+}
+textarea.ef-input {
+  height: auto;
+  min-height: 96px;
+  padding: 10px 12px;
+  line-height: 1.6;
+  resize: vertical;
+}
+.ef-select {
+  height: 42px;
+  border-color: var(--primary-lighter);
+  border-radius: 10px;
+}
+/* Ô nhập có đơn vị (¥, USD, cm, kg) */
+.ef-affix {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.ef-affix .ef-input {
+  padding-right: 52px;
+}
+.ef-affix__unit {
+  position: absolute;
+  right: 12px;
+  color: var(--text-disabled);
+  font-size: 12px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+/* Bộ tăng giảm số lượng */
+.ef-stepper {
+  display: flex;
+  align-items: center;
+  height: 42px;
+  border: 1px solid var(--primary-lighter);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.ef-stepper__btn {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: var(--bg-subtle);
+  color: var(--text);
+  cursor: pointer;
+}
+.ef-stepper__btn:hover {
+  background: var(--accent-soft);
+  color: var(--primary);
+}
+.ef-stepper__input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ---------- Nhóm chip chọn ---------- */
+.ef-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ef-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--primary-lighter);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-body);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.ef-option:hover {
+  border-color: var(--blue-300);
+}
+.ef-option--sm {
+  height: 34px;
+  padding: 0 12px;
+}
+.ef-option--on,
+.ef-option--on:hover {
+  border: 1.5px solid var(--btn-primary);
+  background: var(--accent-soft);
+  color: var(--primary);
+}
+.ef-option--invalid {
+  border-color: var(--danger);
+}
+
+/* ---------- Ô tích dạng thẻ ---------- */
+.ef-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--primary-lighter);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-body);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.ef-check--on {
+  border-color: var(--btn-primary);
+  background: var(--accent-soft);
+  color: var(--primary);
+}
+.ef-check__box {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 5px;
+  background: var(--surface);
+  color: transparent;
+}
+.ef-check--on .ef-check__box {
+  border-color: var(--btn-primary);
+  background: var(--btn-primary);
+  color: #fff;
+}
+
+/* Nhãn có nút xoá (yêu cầu khác, kỹ năng) */
+.ef-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 6px 10px;
+  border: 1px solid var(--primary-lighter);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.ef-tags:focus-within {
+  border-color: var(--btn-primary);
+  box-shadow: 0 0 0 4px rgba(56, 121, 255, 0.14);
+}
+.ef-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 4px 0 9px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+.ef-tag__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--primary);
+  cursor: pointer;
+}
+.ef-tag__remove:hover {
+  background: rgba(56, 121, 255, 0.15);
+}
+.ef-tags__input {
+  flex: 1;
+  min-width: 140px;
+  height: 28px;
+  border: 0;
+  outline: 0;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+.ef-suggest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-disabled);
+  font-size: 12px;
+}
+.ef-suggest__btn {
+  height: 24px;
+  padding: 0 8px;
+  border: 1px dashed var(--primary-lighter);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ---------- Thanh lưu cuối form ---------- */
+.ef-footer {
+  position: sticky;
+  bottom: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 32px -12px rgba(15, 37, 56, 0.25);
+  backdrop-filter: blur(6px);
+}
+.ef-footer__note {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--text-3);
+  font-size: 13px;
+}
+.ef-footer__error {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1024px) {
+  .ef-grid--3,
+  .ef-grid--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .ef-section {
+    padding: 18px 16px 20px;
+  }
+  .ef-grid,
+  .ef-grid--3,
+  .ef-grid--4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ef-span-2 {
+    grid-column: auto;
+  }
+  .ef-footer {
+    flex-wrap: wrap;
+  }
+  .ef-footer__note {
+    flex-basis: 100%;
+  }
+}

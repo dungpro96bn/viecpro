@@ -1,0 +1,527 @@
+/*
+ * Tạo lịch hẹn (/quan-ly-tuyen-dung/lich-phong-van/tao) – design-page/17
+ * Loại lịch · ứng viên · ngày giờ · địa điểm · người phỏng vấn · lời mời · cột phải: tóm tắt, lịch trống, xem trước tin
+ */
+
+.ci-head-btn {
+  height: 42px;
+  border-radius: 12px;
+}
+.ci-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 20px;
+  align-items: start;
+}
+.ci-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* 1. Loại lịch */
+.ci-kinds {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.ci-kind {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.ci-kind--on {
+  border: 1.5px solid var(--btn-primary);
+  background: var(--bg-alt);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.ci-kind__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+.ci-kind__icon--blue { background: var(--accent-soft); color: var(--primary); }
+.ci-kind__icon--orange { background: var(--orange-soft-2); color: var(--orange-dark); }
+.ci-kind__icon--violet { background: var(--violet-soft); color: var(--violet); }
+.ci-kind__desc {
+  color: var(--text-3);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* 2. Ứng viên */
+.ci-count {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+.ci-picked {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ci-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 6px;
+  border: 1px solid var(--primary-lighter);
+  border-radius: 12px;
+  background: var(--bg-alt);
+}
+.ci-chip__text,
+.ci-cand__text,
+.ci-person__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  font-size: 13px;
+}
+.ci-chip__text small,
+.ci-cand__text small,
+.ci-person__text small {
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 400;
+}
+.ci-waiting {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--bg-subtle);
+}
+.ci-waiting__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+.ci-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-disabled);
+}
+.ci-search input {
+  width: 180px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+.ci-waiting__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.ci-cand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: var(--surface);
+}
+.ci-cand__text {
+  flex: 1;
+}
+.ci-cand__text b,
+.ci-cand__text small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 3. Thời gian */
+.ci-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+.ci-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 4px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.ci-day b {
+  font-size: 18px;
+}
+.ci-day__wd {
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 600;
+}
+.ci-day small {
+  color: var(--success-dark);
+  font-size: 10px;
+  font-weight: 600;
+}
+.ci-day--on {
+  border-color: var(--btn-primary);
+  background: var(--btn-primary);
+  color: #fff;
+}
+.ci-day--on .ci-day__wd,
+.ci-day--on small {
+  color: rgba(255, 255, 255, 0.85);
+}
+.ci-day:disabled {
+  background: var(--bg-subtle);
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+.ci-day:disabled small {
+  color: var(--text-disabled);
+}
+.ci-slots {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 6px;
+}
+.ci-slot {
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ci-slot--on {
+  border-color: var(--btn-primary);
+  background: var(--btn-primary);
+  color: #fff;
+}
+.ci-slot:disabled {
+  border-color: var(--border-soft);
+  background: var(--bg-subtle);
+  color: var(--text-disabled);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+.ci-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 8px;
+  color: var(--text-3);
+  font-size: 11px;
+}
+.ci-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ci-legend__item::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
+}
+.ci-legend__item--on::before {
+  border-color: var(--btn-primary);
+  background: var(--btn-primary);
+}
+.ci-legend__item--off::before {
+  background: var(--border-soft);
+}
+
+/* 5. Người phỏng vấn */
+.ci-people {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.ci-person {
+  align-items: center;
+}
+.ci-person__free {
+  color: var(--success-dark);
+}
+.ci-reminds {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.ci-remind {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* ---------- Cột phải ---------- */
+.ci-side {
+  position: sticky;
+  top: calc(var(--app-header-h) + 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ci-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, var(--primary-deep), var(--bg-dark));
+  color: #fff;
+}
+.ci-summary__kind {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 11px;
+  font-weight: 700;
+}
+.ci-summary__title {
+  font-size: 16px;
+}
+.ci-summary__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.ci-summary__list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.ci-summary__list .icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--blue-200);
+}
+.ci-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ci-timeline__scale {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 64px;
+  color: var(--text-disabled);
+  font-size: 10px;
+}
+.ci-timeline__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ci-timeline__name {
+  flex-shrink: 0;
+  width: 56px;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ci-timeline__track {
+  position: relative;
+  flex: 1;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--success-soft);
+}
+.ci-timeline__lunch,
+.ci-timeline__busy,
+.ci-timeline__pick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 4px;
+}
+.ci-timeline__lunch {
+  background: var(--border-soft);
+}
+.ci-timeline__busy {
+  background: var(--orange-soft-2);
+  box-shadow: inset 0 0 0 1px var(--orange-border);
+}
+.ci-timeline__pick {
+  background: var(--btn-primary);
+  opacity: 0.85;
+}
+.ci-ok {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--success-dark);
+  font-size: 12px;
+  font-weight: 600;
+}
+.ci-suggest {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ci-suggest__item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.ci-suggest__item--on {
+  border-color: var(--btn-primary);
+  background: var(--accent-soft);
+  color: var(--primary);
+}
+.ci-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--bg-subtle);
+}
+.ci-preview__from {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.ci-preview__bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 4px 14px 14px 14px;
+  background: var(--surface);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.ci-preview__bubble p {
+  margin: 0;
+}
+.ci-preview__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-3);
+}
+.ci-preview__actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+.ci-preview__btn {
+  flex: 1;
+  padding: 7px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-weight: 700;
+  text-align: center;
+}
+.ci-preview__btn--primary {
+  border-color: var(--btn-primary);
+  background: var(--btn-primary);
+  color: #fff;
+}
+
+/* ---------- Tablet ---------- */
+@media (max-width: 1200px) {
+  .ci-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ci-side {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ci-summary {
+    grid-column: 1 / -1;
+  }
+  .ci-slots {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 767px) {
+  .ci-kinds,
+  .ci-people,
+  .ci-reminds,
+  .ci-side {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ci-days {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .ci-slots {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .ci-waiting__head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ci-search input {
+    width: 100%;
+  }
+  .ci-cand {
+    flex-wrap: wrap;
+  }
+}

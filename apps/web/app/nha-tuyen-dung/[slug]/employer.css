@@ -1,0 +1,221 @@
+/* ==========================================================================
+   Trang hồ sơ nhà tuyển dụng (doanh nghiệp)
+   ========================================================================== */
+
+/* Ảnh bìa */
+.employer-cover {
+  height: 260px;
+}
+.employer-cover__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.employer-cover__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 37, 56, 0.35) 0%, rgba(27, 63, 168, 0.78) 100%);
+}
+.employer-card-wrap {
+  margin-top: -92px;
+}
+
+/* Vị trí logo công ty */
+.employer-logo {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  margin-top: -64px;
+  border-radius: 26px;
+  border: 5px solid #fff;
+  box-shadow: var(--shadow-lg);
+  background: var(--primary-soft);
+  color: var(--primary-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.employer-logo__text {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Đội ngũ tư vấn */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.team-member {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  transition: box-shadow 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.team-member:hover {
+  border-color: var(--primary-lighter);
+  box-shadow: var(--shadow-lg);
+}
+.team-member__photo {
+  position: relative;
+  width: 68px;
+  height: 68px;
+}
+.team-member__img {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.team-member__status {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: #cbd5e1;
+}
+.team-member__status--online {
+  background: var(--success);
+}
+.team-member__who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.team-member__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.team-member__role {
+  font-size: 12px;
+  color: var(--text-3);
+}
+.team-member__stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.team-member__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 700;
+  color: var(--text);
+}
+.team-member__star {
+  color: #f59e0b;
+}
+.team-member__actions {
+  width: 100%;
+  margin-top: 4px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.team-member__btn {
+  height: 38px;
+  gap: 6px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+/* Thông tin pháp lý */
+.legal-list {
+  display: flex;
+  flex-direction: column;
+}
+.legal-list__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  font-size: 13px;
+}
+.legal-list__row + .legal-list__row {
+  border-top: 1px solid var(--border-soft);
+}
+.legal-list__key {
+  color: var(--text-3);
+}
+.legal-list__value {
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+}
+
+/* ==========================================================================
+   Responsive – tablet (≤ 1024px) & mobile (≤ 767px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .employer-cover {
+    height: 210px;
+  }
+  .employer-card-wrap {
+    margin-top: -80px;
+  }
+  .employer-logo {
+    width: 104px;
+    height: 104px;
+    margin-top: -56px;
+    border-radius: 22px;
+  }
+}
+
+@media (max-width: 767px) {
+  .employer-cover {
+    height: 150px;
+  }
+  .employer-card-wrap {
+    margin-top: -48px;
+  }
+  .employer-logo {
+    width: 84px;
+    height: 84px;
+    margin-top: -50px;
+    border-width: 4px;
+    border-radius: 20px;
+  }
+
+  /* Đội ngũ tư vấn: vuốt ngang */
+  .team-grid {
+    display: flex;
+    gap: 10px;
+    margin: 0 -16px;
+    padding: 2px 16px 6px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 16px;
+    scrollbar-width: none;
+  }
+  .team-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .team-member {
+    flex: 0 0 min(220px, 68%);
+    padding: 16px 14px;
+    scroll-snap-align: start;
+  }
+
+  .legal-list__row {
+    flex-direction: column;
+    gap: 2px;
+  }
+  .legal-list__value {
+    text-align: left;
+  }
+}

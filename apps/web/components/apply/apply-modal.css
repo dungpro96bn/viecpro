@@ -1,0 +1,909 @@
+/* ==========================================================================
+   Popup "Ứng tuyển nhanh"
+   ========================================================================== */
+
+body.is-modal-open {
+  overflow: hidden;
+}
+
+.apply-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+}
+.apply-overlay__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 37, 56, 0.55);
+  backdrop-filter: blur(6px);
+  animation: apply-fade 0.2s ease-out;
+}
+
+.apply-modal {
+  position: relative;
+  width: 920px;
+  flex-shrink: 0;
+  display: flex;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 40px 80px -20px rgba(15, 37, 56, 0.5);
+  outline: none;
+  animation: apply-pop 0.3s var(--ease);
+}
+
+@keyframes apply-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes apply-pop {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- Cột trái ---------- */
+.apply-modal__side {
+  position: relative;
+  width: 340px;
+  flex-shrink: 0;
+  overflow: hidden;
+  padding: 28px 24px 24px;
+  background: linear-gradient(165deg, #3879ff 0%, #2456d6 55%, #1b3fa8 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.apply-modal__side > * {
+  position: relative;
+}
+.apply-modal__bubble {
+  position: absolute;
+  border-radius: 50%;
+}
+.apply-modal__side > .apply-modal__bubble {
+  position: absolute;
+}
+.apply-modal__bubble--top {
+  width: 280px;
+  height: 280px;
+  right: -130px;
+  top: -110px;
+  background: rgba(255, 255, 255, 0.07);
+}
+.apply-modal__bubble--bottom {
+  width: 200px;
+  height: 200px;
+  left: -90px;
+  bottom: 60px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.apply-job {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.apply-job__img {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+}
+.apply-job__info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.apply-job__eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #cfe0ff;
+}
+.apply-job__title {
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+.apply-job__employer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.apply-facts {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.apply-facts__grid {
+  display: flex;
+}
+.apply-facts__row {
+  flex-grow: 1;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.apply-facts__row--top {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+.apply-facts__row--divider {
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+}
+.apply-facts__label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+}
+.apply-facts__value {
+  font-size: 14px;
+  font-weight: 700;
+}
+.apply-facts__value--lg {
+  font-size: 17px;
+}
+
+.apply-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.apply-tags__item {
+  height: 28px;
+  padding: 0 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 12px;
+  font-weight: 700;
+}
+.apply-tags__item--program {
+  background: var(--success);
+}
+
+.apply-perks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.apply-perks__item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.apply-perks__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.apply-perks__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.apply-perks__title {
+  font-size: 14px;
+  font-weight: 700;
+}
+.apply-perks__desc {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.apply-poster {
+  margin-top: auto;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.apply-poster__avatar .avatar__img {
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  box-shadow: none;
+}
+.apply-poster__info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex-grow: 1;
+}
+.apply-poster__name {
+  font-size: 14px;
+  font-weight: 700;
+}
+.apply-poster__role {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.78);
+}
+.apply-poster__rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.apply-poster__call {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--btn-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+.apply-poster__call:hover {
+  transform: scale(1.06);
+  color: var(--btn-primary);
+}
+
+/* ---------- Cột phải ---------- */
+.apply-modal__main {
+  position: relative;
+  flex-grow: 1;
+  min-width: 0;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+}
+.apply-modal__close {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.apply-modal__close:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.apply-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.apply-form__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 48px;
+}
+.apply-form__title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.apply-form__lead {
+  font-size: 14px;
+  color: var(--text-3);
+}
+.apply-form__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.apply-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.apply-field__req {
+  margin-left: 3px;
+  color: var(--danger);
+}
+.apply-field__label-row {
+  display: flex;
+  justify-content: space-between;
+}
+.apply-field__optional {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+}
+.apply-field__input {
+  height: 46px;
+  min-width: 0;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.apply-field__input:focus {
+  outline: none;
+  border-color: var(--btn-primary);
+  box-shadow: 0 0 0 4px rgba(56, 121, 255, 0.14);
+}
+.apply-field__input--select {
+  padding: 0 12px;
+}
+.apply-field__input--textarea {
+  height: auto;
+  min-height: 64px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+/* Nút chọn giới tính dạng segmented */
+.segmented {
+  height: 46px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: #f1f5f9;
+}
+.segmented__option {
+  height: 38px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.segmented__option--active {
+  background: #fff;
+  color: var(--primary);
+  box-shadow: 0 1px 3px rgba(15, 37, 56, 0.12);
+}
+
+.apply-agree {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-3);
+  cursor: pointer;
+}
+
+.apply-form__error {
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.apply-agree__box {
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  flex-shrink: 0;
+  accent-color: var(--btn-primary);
+}
+
+.apply-form__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.apply-form__trust {
+  display: none;
+}
+.apply-form__submit {
+  box-shadow: 0 10px 20px var(--btn-shadow);
+}
+.apply-form__submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---------- Gửi thành công ---------- */
+.apply-success {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px 12px;
+  text-align: center;
+}
+.apply-success__icon {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: var(--success-soft-2);
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 10px var(--success-soft);
+}
+.apply-success__title {
+  margin-top: 8px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.apply-success__note {
+  max-width: 380px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-3);
+}
+.apply-success__job {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 8px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--bg-alt);
+  border: 1px solid var(--primary-lighter);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+}
+.apply-success__img {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  object-fit: cover;
+}
+.apply-success__job-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.apply-success__job-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.apply-success__job-pref {
+  font-size: 12px;
+  color: var(--text-3);
+}
+.apply-success__btn {
+  margin-top: 8px;
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Responsive – tablet (≤ 1024px) & mobile (≤ 767px)
+   Một cột: thẻ tóm tắt đơn (cố định) → form (cuộn) → nút gửi (dính đáy)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .apply-overlay {
+    padding: 24px;
+    overflow: hidden;
+  }
+  .apply-modal {
+    width: min(640px, 100%);
+    max-height: calc(100dvh - 48px);
+    flex-direction: column;
+  }
+
+  /* Thẻ tóm tắt đơn hàng */
+  .apply-modal__side {
+    width: auto;
+    flex-shrink: 0;
+    padding: 20px 68px 18px 22px;
+    gap: 14px;
+  }
+  .apply-modal__bubble--bottom,
+  .apply-perks,
+  .apply-poster {
+    display: none;
+  }
+  .apply-job {
+    align-items: center;
+  }
+  .apply-job__img {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+  }
+  .apply-job__info {
+    gap: 4px;
+  }
+  .apply-job__title {
+    font-size: 15px;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  /* Lương | Số lượng | Năm sinh trên một hàng */
+  .apply-facts {
+    display: flex;
+  }
+  .apply-facts__row--top {
+    flex: 1.2;
+    border-bottom: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.14);
+  }
+  .apply-facts__grid {
+    flex: 2;
+    min-width: 0;
+  }
+  .apply-facts__row {
+    min-width: 0;
+    padding: 10px 12px;
+  }
+  .apply-facts__value {
+    overflow-wrap: anywhere;
+  }
+  .apply-facts__value--lg {
+    font-size: 15px;
+  }
+
+  /* Nút đóng nằm trên thẻ tóm tắt, không cuộn theo form */
+  .apply-modal__close {
+    right: 14px;
+    top: 14px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+  }
+  .apply-modal__close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: #fff;
+  }
+
+  /* Form cuộn trong popup */
+  .apply-modal__main {
+    position: static;
+    flex: 1;
+    min-height: 0;
+    padding: 22px 24px 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .apply-form {
+    gap: 14px;
+  }
+  .apply-form__head {
+    padding-right: 0;
+  }
+  .apply-form__title {
+    font-size: 22px;
+  }
+
+  /* Nút gửi dính đáy popup */
+  .apply-form__actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin: 2px -24px 0;
+    padding: 12px 24px calc(14px + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--border-soft);
+  }
+  .apply-form__submit {
+    box-shadow: 0 6px 16px var(--btn-shadow);
+  }
+  .apply-form__trust {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-3);
+    text-align: center;
+  }
+  .apply-form__trust .icon {
+    color: var(--success);
+  }
+
+  .apply-success {
+    padding-bottom: 32px;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Bottom sheet */
+  .apply-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .apply-overlay__backdrop {
+    backdrop-filter: blur(2px);
+  }
+  .apply-modal {
+    width: 100%;
+    max-height: calc(100dvh - 12px);
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -12px 40px -12px rgba(15, 37, 56, 0.45);
+    animation: apply-sheet 0.35s var(--ease);
+  }
+  @keyframes apply-sheet {
+    from { transform: translateY(100%); }
+    to { transform: none; }
+  }
+  .apply-modal__side {
+    padding: 24px 60px 16px 16px;
+    gap: 12px;
+  }
+  /* Thanh kéo của bottom sheet */
+  .apply-modal__side::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 36px;
+    height: 4px;
+    margin-left: -18px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.45);
+  }
+  .apply-tags {
+    display: none;
+  }
+  .apply-job {
+    gap: 12px;
+  }
+  .apply-job__img {
+    width: 46px;
+    height: 46px;
+  }
+  .apply-job__eyebrow {
+    font-size: 10px;
+  }
+  .apply-job__title {
+    font-size: 14px;
+  }
+  /* Lương 1 hàng (nhãn trái – số phải), Số lượng + Năm sinh chia đôi bên dưới */
+  .apply-facts {
+    flex-direction: column;
+  }
+  .apply-facts__row {
+    padding: 9px 12px;
+  }
+  .apply-facts__row--top {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2px 10px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  }
+  .apply-facts__label {
+    font-size: 11px;
+  }
+  .apply-facts__value {
+    font-size: 13px;
+    overflow-wrap: normal;
+  }
+  .apply-facts__value--lg {
+    font-size: 16px;
+  }
+  .apply-modal__close {
+    right: 12px;
+    top: 14px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .apply-modal__main {
+    padding: 18px 16px 0;
+  }
+  .apply-form__title {
+    font-size: 20px;
+  }
+  .apply-form__lead {
+    font-size: 13px;
+  }
+  .apply-form__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .apply-field {
+    gap: 6px;
+  }
+  .apply-field__input--textarea {
+    resize: none;
+  }
+  .apply-form__actions {
+    margin: 2px -16px 0;
+    padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .apply-success {
+    padding: 20px 4px 28px;
+  }
+  .apply-success__title {
+    font-size: 21px;
+  }
+  .apply-success__btn {
+    width: 100%;
+  }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .apply-modal,
+  .apply-overlay__backdrop {
+    animation: none;
+  }
+}
+
+/* ---------- Xác nhận email bằng mã OTP ---------- */
+.apply-field__input--invalid {
+  border-color: var(--danger);
+}
+.apply-field__error {
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 600;
+}
+.apply-field__error--center {
+  text-align: center;
+}
+.apply-otp {
+  align-items: center;
+  text-align: center;
+}
+.apply-otp .apply-form__head {
+  align-items: center;
+}
+.apply-otp__back {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-3);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.apply-otp__back:hover {
+  color: var(--primary);
+}
+.apply-otp__icon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  margin-top: 6px;
+  border-radius: 18px;
+  background: var(--accent-soft);
+  color: var(--primary);
+}
+.apply-otp__email {
+  color: var(--text);
+  word-break: break-all;
+}
+.otp-input {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.otp-input__cell {
+  width: 52px;
+  height: 60px;
+  padding: 0;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 26px;
+  font-weight: 800;
+  text-align: center;
+  caret-color: var(--btn-primary);
+}
+.otp-input__cell:focus {
+  border-color: var(--btn-primary);
+  outline: none;
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.otp-input__cell--filled {
+  border-color: var(--primary-lighter);
+  background: var(--bg-alt);
+}
+.otp-input__cell--invalid {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+.apply-otp__dev {
+  margin: 0;
+  padding: 6px 12px;
+  border: 1px dashed var(--orange-border);
+  border-radius: 8px;
+  background: var(--orange-soft);
+  color: var(--orange-dark);
+  font-size: 12px;
+}
+.apply-otp__resend {
+  margin: 0;
+  color: var(--text-3);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.apply-otp__resend button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--primary);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.apply-otp .apply-form__actions {
+  width: 100%;
+}
+.apply-success__mail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+@media (max-width: 767px) {
+  .otp-input {
+    gap: 6px;
+  }
+  .otp-input__cell {
+    width: 44px;
+    height: 54px;
+    font-size: 22px;
+  }
+}

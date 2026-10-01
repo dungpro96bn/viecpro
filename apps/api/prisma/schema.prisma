@@ -1,0 +1,827 @@
+// ============================================================================
+// viecpro – Database schema (PostgreSQL)
+// Giá trị enum khớp với hằng số trong @viecpro/shared (src/enums.ts).
+// Đổi schema: sửa file này → npm run db:migrate -- --name <ten-thay-doi>
+// ============================================================================
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enum
+// ---------------------------------------------------------------------------
+enum Role {
+  seeker
+  employer
+  admin
+}
+
+enum Program {
+  tts
+  tok
+  ks
+}
+
+enum Region {
+  hkt
+  kanto
+  chubu
+  kansai
+  cs
+  kyu
+}
+
+enum Badge {
+  new
+  hot
+  urgent
+}
+
+enum Gender {
+  nam
+  nu
+}
+
+enum JobGender {
+  nam
+  nu
+  both
+}
+
+enum JobStatus {
+  draft
+  pending
+  open
+  /// NTD tạm ẩn – không hiển thị công khai, mở lại được
+  paused
+  rejected
+  closed
+}
+
+/// Gói hiển thị tin: tiêu chuẩn / nổi bật (lên đầu ngành 7 ngày) / tuyển gấp
+enum JobVisibility {
+  standard
+  featured
+  urgent
+}
+
+enum ApplicationStatus {
+  submitted
+  /// Cán bộ đã xem / đã liên hệ
+  viewed
+  interview
+  passed
+  /// Đã xuất cảnh
+  departed
+  rejected
+  withdrawn
+}
+
+/// Nguồn hồ sơ ứng tuyển
+enum ApplicationSource {
+  viecpro
+  recommended
+  zalo
+  consultant
+  hotline
+  referral
+  job_fair
+  social
+  other
+}
+
+enum InterviewKind {
+  online
+  onsite
+  skill_test
+}
+
+enum InterviewStatus {
+  scheduled
+  done
+  cancelled
+}
+
+/// Trạng thái của từng ứng viên trong một lịch hẹn
+enum AttendeeStatus {
+  pending
+  confirmed
+  declined
+  attended
+  no_show
+}
+
+enum OtpPurpose {
+  register
+  login
+  reset_password
+}
+
+enum Platform {
+  web
+  ios
+  android
+}
+
+enum VerificationStatus {
+  pending
+  needs_info
+  approved
+  rejected
+}
+
+enum ReportStatus {
+  open
+  resolved
+  dismissed
+}
+
+// ---------------------------------------------------------------------------
+// Tài khoản
+// ---------------------------------------------------------------------------
+model User {
+  id               String    @id @default(cuid())
+  role             Role      @default(seeker)
+  name             String
+  /// E.164: +84xxxxxxxxx
+  phone            String?   @unique
+  email            String?   @unique
+  passwordHash     String?
+  googleId         String?   @unique
+  avatarUrl        String?
+  phoneVerifiedAt  DateTime?
+  /// Email đã xác thực bằng OTP (đổi email thì đặt lại null)
+  emailVerifiedAt  DateTime?
+  lastLoginAt      DateTime?
+  /// Bị admin khoá: không đăng nhập / refresh được
+  lockedAt         DateTime?
+  lockReason       String?
+  /// Đếm đăng nhập sai liên tiếp – quá 10 lần khoá tạm tới loginLockedUntil
+  failedLogins     Int       @default(0)
+  loginLockedUntil DateTime?
+  /// Xoá mềm (yêu cầu xoá tài khoản của App Store / Google Play)
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // ---- Chỉ dùng cho role = admin ----
+  adminRoleId       String?
+  adminRole         AdminRole? @relation(fields: [adminRoleId], references: [id])
+  /// Khoá bí mật TOTP đã mã hoá AES-256-GCM (ADMIN_MFA_KEY)
+  mfaSecretEnc      String?
+  mfaEnabledAt      DateTime?
+  /// SHA-256 của mã khôi phục 2FA, dùng 1 lần
+  mfaRecoveryHashes String[]
+
+  seekerProfile         SeekerProfile?
+  recruiter             Recruiter?
+  sessions              Session[]
+  pushTokens            PushToken[]
+  applications          Application[]
+  savedJobs             SavedJob[]
+  follows               Follow[]
+  notifications         Notification[]
+  profileViews          ProfileView[]         @relation("ViewedSeeker")
+  auditLogs             AuditLog[]
+  reports               Report[]              @relation("Reporter")
+  moderatedJobs         Job[]                 @relation("ModeratedBy")
+  reviewedVerifications VerificationRequest[] @relation("ReviewedBy")
+  resolvedReports       Report[]              @relation("ResolvedBy")
+
+  @@index([role])
+}
+
+/// Vai trò quản trị: tập quyền (ADMIN_PERMISSIONS trong @viecpro/shared)
+model AdminRole {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String?
+  permissions String[]
+  /// Vai trò mặc định – không xoá được
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users User[]
+}
+
+/// Nhật ký thao tác quản trị – chỉ thêm, không sửa / xoá
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  actor      User     @relation(fields: [actorId], references: [id])
+  /// vd. job.approve, job.reject, verification.approve, user.lock, admin.login
+  action     String
+  targetType String?
+  targetId   String?
+  before     Json?
+  after      Json?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt(sort: Desc)])
+  @@index([actorId, createdAt])
+  @@index([targetType, targetId])
+}
+
+/// Hồ sơ người tìm việc (trang tài khoản ứng viên)
+model SeekerProfile {
+  userId        String     @id
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  birthYear     Int?
+  gender        Gender?
+  hometown      String?
+  address       String?
+  programs      Program[]
+  industries    String[]
+  /// Tỉnh Nhật Bản quan tâm
+  prefs         String[]
+  jlpt          String?
+  about         String?
+  videoUrl      String?
+  lookingForJob Boolean    @default(true)
+  /// Cho phép nhà tuyển dụng tìm thấy hồ sơ (ẩn số điện thoại cho tới khi ứng tuyển)
+  discoverable  Boolean    @default(true)
+  heightCm      Int?
+  weightKg      Int?
+  /// Thị lực, vd. "10/10, không mù màu"
+  eyesight      String?
+  maritalStatus String?
+  tattoo        Boolean?
+  /// Lương mong muốn tối thiểu (yên/tháng)
+  desiredSalary Int?
+  /// Có thể xuất cảnh trong: 3 | 6 | 12 (tháng)
+  departWithin  String?
+  /// Chi phí xuất cảnh tối đa chấp nhận (USD)
+  maxFeeUsd     Int?
+  /// Đang học tiếng Nhật (vd. "N5") khi chưa có chứng chỉ
+  jlptLearning  String?
+  /// [{ name, level 1–5, note, verified }]
+  skills        Json       @default("[]")
+  /// [{ kind: work | education, title, org, from, to, desc, tags[] }]
+  experiences   Json       @default("[]")
+  /// [{ key: cccd | photo | passport | criminal | health, status, note }]
+  documents     Json       @default("[]")
+  /// Cán bộ tư vấn phụ trách
+  consultantId  String?
+  consultant    Recruiter? @relation("Consultant", fields: [consultantId], references: [id], onDelete: SetNull)
+  updatedAt     DateTime   @updatedAt
+}
+
+/// Phiên đăng nhập theo thiết bị – mỗi phiên giữ 1 refresh token (xoay vòng)
+model Session {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash  String    @unique
+  /// Hash token trước lần xoay gần nhất – bị dùng lại là dấu hiệu lộ token → thu hồi phiên
+  previousTokenHash String?   @unique
+  /// Phiên đăng nhập trang quản trị (đã qua 2FA)
+  isAdmin           Boolean   @default(false)
+  /// Hạn tuyệt đối, không gia hạn khi refresh (admin: 12 giờ)
+  absoluteExpiresAt DateTime?
+  platform          Platform  @default(web)
+  deviceName        String?
+  userAgent         String?
+  ip                String?
+  expiresAt         DateTime
+  revokedAt         DateTime?
+  lastUsedAt        DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+
+  @@index([userId])
+}
+
+/// Token thông báo đẩy của app mobile (FCM / APNs)
+model PushToken {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token      String   @unique
+  platform   Platform
+  deviceName String?
+  appVersion String?
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Mục đích mã OTP gửi qua email (khớp EMAIL_OTP_PURPOSES ở shared)
+enum EmailOtpPurpose {
+  apply
+}
+
+/// Mã OTP gửi tới email (xác nhận email khi ứng tuyển). Chỉ lưu HMAC của mã
+model EmailOtpCode {
+  id         String          @id @default(cuid())
+  /// Email đã chuẩn hoá chữ thường
+  email      String
+  purpose    EmailOtpPurpose
+  codeHash   String
+  attempts   Int             @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime        @default(now())
+
+  @@index([email, purpose, createdAt])
+}
+
+model OtpCode {
+  id         String     @id @default(cuid())
+  phone      String
+  purpose    OtpPurpose
+  codeHash   String
+  attempts   Int        @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime   @default(now())
+
+  @@index([phone, purpose, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Nhà tuyển dụng
+// ---------------------------------------------------------------------------
+/// Doanh nghiệp / công ty phái cử (trang /nha-tuyen-dung/[slug])
+model Employer {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  shortName String?
+  logoUrl   String?
+  coverUrl  String?
+  intro     String?
+  phone     String?
+  email     String?
+  website   String?
+  address   String?
+  taxCode   String?
+  verified  Boolean  @default(false)
+  /// Khối nội dung linh hoạt: stats, values, offices, fields, contacts, legal…
+  sections  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  recruiters    Recruiter[]
+  jobs          Job[]
+  followers     Follow[]
+  leads         Lead[]
+  verifications VerificationRequest[]
+  reports       Report[]
+  plan          BusinessPlan?
+  partners      RecruiterPartner[]
+  interviews    Interview[]
+}
+
+/// Cán bộ tuyển dụng / tư vấn viên (người đăng tin, trang /tu-van-vien/[slug])
+model Recruiter {
+  id             String    @id @default(cuid())
+  slug           String    @unique
+  /// Tài khoản đăng nhập (null nếu chỉ là hồ sơ hiển thị)
+  userId         String?   @unique
+  user           User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  employerId     String?
+  employer       Employer? @relation(fields: [employerId], references: [id], onDelete: SetNull)
+  name           String
+  title          String
+  photoUrl       String?
+  rating         Float     @default(0)
+  city           String?
+  headline       String?
+  intro          String?
+  phone          String?
+  online         Boolean   @default(false)
+  /// Số lượt đánh giá (điểm trung bình ở `rating`)
+  reviewCount    Int       @default(0)
+  /// NTD cá nhân đã xác minh CCCD
+  cccdVerifiedAt DateTime?
+  /// stats, values, fields, timeline, certificates, partners, contacts, checks…
+  sections       Json      @default("{}")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  jobs          Job[]
+  followers     Follow[]
+  leads         Lead[]
+  consultees    SeekerProfile[]       @relation("Consultant")
+  viewed        ProfileView[]
+  verifications VerificationRequest[]
+  plan          BusinessPlan?
+  partners      RecruiterPartner[]
+  jobEvents     JobEvent[]
+  assigned      Application[]         @relation("Assignee")
+  notes         ApplicationNote[]
+  ownInterviews Interview[]           @relation("InterviewOwner")
+  interviewing  Interview[]           @relation("InterviewInterviewers")
+
+  @@index([employerId])
+}
+
+/// Gói dịch vụ của doanh nghiệp hoặc NTD cá nhân (giới hạn tin hiển thị, lượt đẩy tin)
+model BusinessPlan {
+  id          String     @id @default(cuid())
+  employerId  String?    @unique
+  employer    Employer?  @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  recruiterId String?    @unique
+  recruiter   Recruiter? @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  /// "Gói Pro", "Gói Cá nhân Plus"…
+  name        String
+  jobQuota    Int
+  boostQuota  Int
+  boostsUsed  Int        @default(0)
+  expiresAt   DateTime
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+/// Doanh nghiệp phái cử mà NTD cá nhân được phép đăng tin thay
+model RecruiterPartner {
+  id               String    @id @default(cuid())
+  recruiterId      String
+  recruiter        Recruiter @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  employerId       String
+  employer         Employer  @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  /// Hạn liên kết; hết hạn thì tin đăng qua doanh nghiệp này bị tạm ẩn
+  expiresAt        DateTime?
+  renewRequestedAt DateTime?
+  /// Lao động của NTD này đã xuất cảnh qua doanh nghiệp (hiển thị thống kê)
+  departedCount    Int       @default(0)
+  createdAt        DateTime  @default(now())
+
+  @@unique([recruiterId, employerId])
+}
+
+// ---------------------------------------------------------------------------
+// Đơn hàng
+// ---------------------------------------------------------------------------
+model Job {
+  id            String        @id @default(cuid())
+  /// Mã hiển thị: VP-10231
+  code          String        @unique
+  slug          String        @unique
+  title         String
+  /// Chuỗi không dấu (tiêu đề, tỉnh, ngành, mã) để tìm kiếm
+  searchText    String
+  imageUrl      String
+  pref          String
+  region        Region
+  program       Program
+  industry      String
+  /// Lương cơ bản (yên/tháng)
+  salary        Int
+  quantity      Int
+  gender        JobGender
+  birthYearFrom Int
+  birthYearTo   Int
+  tags          String[]
+  badges        Badge[]
+  views         Int           @default(0)
+  status        JobStatus     @default(draft)
+  departureAt   DateTime?
+  deadline      DateTime?
+  /// Nội dung chi tiết (overview, tasks, requirements, incomes, steps…)
+  detail        Json          @default("{}")
+  recruiterId   String
+  recruiter     Recruiter     @relation(fields: [recruiterId], references: [id])
+  employerId    String?
+  employer      Employer?     @relation(fields: [employerId], references: [id], onDelete: SetNull)
+  publishedAt   DateTime?
+  /// Thời điểm gửi duyệt (tính SLA kiểm duyệt)
+  submittedAt   DateTime?
+  moderatedAt   DateTime?
+  moderatedById String?
+  moderatedBy   User?         @relation("ModeratedBy", fields: [moderatedById], references: [id], onDelete: SetNull)
+  rejectReason  String?
+  /// Gói hiển thị + lần đẩy tin gần nhất (xếp lên đầu)
+  visibility    JobVisibility @default(standard)
+  boostedAt     DateTime?
+  /// Chi phí xuất cảnh (USD) – 0 là đơn miễn phí
+  feeUsd        Int?
+  /// Thời hạn hợp đồng (năm)
+  contractYears Int?
+  /// Tiếng Nhật tối thiểu: N5 | N4 | N3 (null = không yêu cầu)
+  jlptRequired  String?
+  /// Ngày thi tuyển
+  examAt        DateTime?
+  /// Công việc cụ thể, vd. "Lắp ráp điện tử" → tên ngắn "Lắp ráp điện tử – Saitama"
+  position      String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  applications Application[]
+  savedBy      SavedJob[]
+  leads        Lead[]
+  reports      Report[]
+  events       JobEvent[]
+  viewDays     JobViewDay[]
+
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([status, region])
+  @@index([status, program])
+  @@index([status, salary])
+  @@index([status, submittedAt])
+  @@index([recruiterId])
+  @@index([employerId])
+}
+
+/// Nhật ký thao tác trên tin (khối "Hoạt động gần đây" của NTD)
+model JobEvent {
+  id        String     @id @default(cuid())
+  jobId     String
+  job       Job        @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  actorId   String?
+  actor     Recruiter? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  /// create | submit | update | boost | pause | resume | close | approve | reject
+  action    String
+  note      String?
+  createdAt DateTime   @default(now())
+
+  @@index([jobId, createdAt])
+}
+
+/// Lượt xem tin theo ngày (biểu đồ, phễu tuyển dụng)
+model JobViewDay {
+  jobId String
+  job   Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  day   DateTime @db.Date
+  count Int      @default(0)
+
+  @@id([jobId, day])
+  @@index([day])
+}
+
+// ---------------------------------------------------------------------------
+// Tương tác
+// ---------------------------------------------------------------------------
+model Application {
+  id            String            @id @default(cuid())
+  jobId         String
+  job           Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  /// null khi khách ứng tuyển không đăng nhập
+  userId        String?
+  user          User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  fullName      String
+  phone         String
+  email         String?
+  birthYear     Int
+  gender        Gender
+  address       String?
+  note          String?
+  status        ApplicationStatus @default(submitted)
+  interviewAt   DateTime?
+  /// Số thứ tự hiển thị mã hồ sơ (HS-000123)
+  number        Int               @unique @default(autoincrement())
+  /// Thời điểm ứng viên xác nhận email bằng OTP khi ứng tuyển
+  emailVerifiedAt DateTime?
+  source        ApplicationSource @default(viecpro)
+  /// Nhãn kỹ năng / điều kiện: "Khéo tay", "Có hộ chiếu", "N4"…
+  tags          String[]
+  hometown      String?
+  heightCm      Int?
+  weightKg      Int?
+  maritalStatus String?
+  education     String?
+  jlpt          String?
+  /// has | processing | none
+  passport      String?
+  /// Có thể xuất cảnh trong: 3 | 6 | 12 (tháng)
+  departWithin  String?
+  experience    String?
+  /// [{ name, kind: pdf | image, sizeKb }]
+  documents     Json              @default("[]")
+  /// % phù hợp với đơn, tính khi nộp / khi NTD thêm
+  matchScore    Int?
+  /// Cán bộ phụ trách
+  assigneeId    String?
+  assignee      Recruiter?        @relation("Assignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  /// NTD mở xem hồ sơ lần đầu (lọc "Chưa xem")
+  seenAt        DateTime?
+  /// Thời điểm liên hệ đầu tiên (đo thời gian phản hồi)
+  contactedAt   DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  events    ApplicationEvent[]
+  notes     ApplicationNote[]
+  attendees InterviewAttendee[]
+
+  @@index([jobId, status])
+  @@index([userId])
+  @@index([phone, jobId])
+}
+
+/// Ghi chú nội bộ của NTD trên hồ sơ (ứng viên không thấy)
+model ApplicationNote {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  authorId      String?
+  author        Recruiter?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  body          String
+  createdAt     DateTime    @default(now())
+
+  @@index([applicationId, createdAt])
+}
+
+/// Lịch phỏng vấn / thi tay nghề – một lịch có thể gồm nhiều ứng viên
+model Interview {
+  id           String              @id @default(cuid())
+  kind         InterviewKind
+  status       InterviewStatus     @default(scheduled)
+  startAt      DateTime
+  endAt        DateTime
+  /// zoom | meet | zalo (online)
+  platform     String?
+  meetingUrl   String?
+  location     String?
+  note         String?
+  /// Đối tác Nhật tham gia (vd. "Kenji Sato – xí nghiệp Saitama")
+  partnerName  String?
+  /// zalo | sms | email
+  channels     String[]
+  remind24h    Boolean             @default(true)
+  remind2h     Boolean             @default(true)
+  result       String?
+  /// Phạm vi sở hữu: doanh nghiệp (nếu có) + cán bộ tạo lịch
+  employerId   String?
+  employer     Employer?           @relation(fields: [employerId], references: [id], onDelete: SetNull)
+  ownerId      String
+  owner        Recruiter           @relation("InterviewOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  interviewers Recruiter[]         @relation("InterviewInterviewers")
+  attendees    InterviewAttendee[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@index([employerId, startAt])
+  @@index([ownerId, startAt])
+}
+
+model InterviewAttendee {
+  id            String         @id @default(cuid())
+  interviewId   String
+  interview     Interview      @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  applicationId String
+  application   Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  status        AttendeeStatus @default(pending)
+  respondedAt   DateTime?
+
+  @@unique([interviewId, applicationId])
+  @@index([applicationId])
+}
+
+/// Lịch sử trạng thái hồ sơ (timeline "Đã gửi → Cán bộ đã xem → Hẹn phỏng vấn → Kết quả")
+model ApplicationEvent {
+  id            String            @id @default(cuid())
+  applicationId String
+  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  status        ApplicationStatus
+  note          String?
+  createdAt     DateTime          @default(now())
+
+  @@index([applicationId, createdAt])
+}
+
+model SavedJob {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, jobId])
+}
+
+/// Theo dõi nhà tuyển dụng hoặc tư vấn viên
+model Follow {
+  id          String     @id @default(cuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employerId  String?
+  employer    Employer?  @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  recruiterId String?
+  recruiter   Recruiter? @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+
+  @@unique([userId, employerId])
+  @@unique([userId, recruiterId])
+}
+
+/// Lượt NTD xem hồ sơ ứng viên ("9 lượt NTD xem hồ sơ")
+model ProfileView {
+  id          String    @id @default(cuid())
+  seekerId    String
+  seeker      User      @relation("ViewedSeeker", fields: [seekerId], references: [id], onDelete: Cascade)
+  recruiterId String
+  recruiter   Recruiter @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@index([seekerId, createdAt])
+}
+
+/// Đăng ký tư vấn (form "Đăng ký tư vấn miễn phí")
+model Lead {
+  id          String     @id @default(cuid())
+  name        String
+  phone       String
+  employerId  String?
+  employer    Employer?  @relation(fields: [employerId], references: [id], onDelete: SetNull)
+  recruiterId String?
+  recruiter   Recruiter? @relation(fields: [recruiterId], references: [id], onDelete: SetNull)
+  jobId       String?
+  job         Job?       @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  handledAt   DateTime?
+  createdAt   DateTime   @default(now())
+
+  @@index([recruiterId, createdAt])
+  @@index([employerId, createdAt])
+}
+
+/// Nhận đơn hàng mới qua email / Zalo (form ở footer)
+model Subscription {
+  id        String    @id @default(cuid())
+  /// Email hoặc số điện thoại E.164
+  contact   String    @unique
+  channel   String
+  prefs     String[]
+  programs  Program[]
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  body      String?
+  /// Đường dẫn trong app (deep link): /viec-lam/xxx, /tai-khoan/ho-so-ung-tuyen…
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Kiểm duyệt
+// ---------------------------------------------------------------------------
+/// Hồ sơ xác minh doanh nghiệp hoặc NTD cá nhân
+model VerificationRequest {
+  id           String             @id @default(cuid())
+  /// company | individual
+  kind         String
+  employerId   String?
+  employer     Employer?          @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  recruiterId  String?
+  recruiter    Recruiter?         @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  /// Mã số thuế / số CCCD đã che (vd. 0109•••482)
+  idMasked     String?
+  location     String?
+  /// [{ key: "dkkd", label: "ĐKKD", ok: true }, …]
+  documents    Json               @default("[]")
+  status       VerificationStatus @default(pending)
+  note         String?
+  reviewedById String?
+  reviewedBy   User?              @relation("ReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt   DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([status, createdAt])
+}
+
+/// Báo cáo vi phạm từ người dùng
+model Report {
+  id           String       @id @default(cuid())
+  jobId        String?
+  job          Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  employerId   String?
+  employer     Employer?    @relation(fields: [employerId], references: [id], onDelete: SetNull)
+  reporterId   String?
+  reporter     User?        @relation("Reporter", fields: [reporterId], references: [id], onDelete: SetNull)
+  /// Lý do ngắn: "Thu phí ngoài hợp đồng", "Tin trùng lặp, sai lương"…
+  reason       String
+  detail       String?
+  status       ReportStatus @default(open)
+  resolvedById String?
+  resolvedBy   User?        @relation("ResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+  resolvedAt   DateTime?
+  createdAt    DateTime     @default(now())
+
+  @@index([status, createdAt])
+  @@index([jobId])
+  @@index([employerId])
+}

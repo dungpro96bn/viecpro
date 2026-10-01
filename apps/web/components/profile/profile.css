@@ -1,0 +1,681 @@
+/* ==========================================================================
+   Thành phần dùng chung cho trang hồ sơ (doanh nghiệp & cá nhân)
+   ========================================================================== */
+
+/* ---------- Ảnh bìa + thẻ hồ sơ ---------- */
+.profile-hero {
+  position: relative;
+  background: var(--bg-alt);
+}
+.profile-cover {
+  position: relative;
+  overflow: hidden;
+}
+.profile-cover__crumb {
+  position: relative;
+  padding-top: 22px;
+}
+.profile-card-wrap {
+  position: relative;
+}
+.profile-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: var(--shadow-lg);
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.profile-card__top {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+.profile-card__main {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.profile-card__pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.profile-card__name {
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+.profile-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: var(--text-3);
+}
+.profile-card__meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.profile-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.profile-card__cta {
+  height: 46px;
+  padding: 0 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  box-shadow: 0 8px 18px var(--btn-shadow);
+}
+
+/* Hàng số liệu */
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-radius: 16px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border-soft);
+}
+.profile-stats__item {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.profile-stats__item + .profile-stats__item {
+  border-left: 1px solid var(--border);
+}
+.profile-stats__value {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.profile-stats__label {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+/* Nút theo dõi */
+.follow-btn {
+  height: 46px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.follow-btn--active {
+  border-color: #bbf7d0;
+  background: var(--success-soft);
+  color: var(--success-dark);
+}
+
+/* Thanh mục lục (cách thẻ hồ sơ 24px) */
+.profile-tabs {
+  margin-top: 24px;
+}
+.profile-tabs__phone {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.profile-tabs__cta {
+  font-weight: 700;
+}
+
+/* ---------- Nội dung ---------- */
+.profile-main {
+  background: var(--bg-alt);
+  padding: 28px 0 64px;
+}
+.profile-main__inner {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+.profile-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.profile-text {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text-body);
+}
+
+/* Ô giá trị / thế mạnh */
+.value-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.value-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border-soft);
+}
+.value-item__icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+.value-item__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.value-item__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.value-item__desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+/* Nhóm tag (lĩnh vực, khu vực…) */
+.tag-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.tag-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tag-group__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.tag-group__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.soft-tag {
+  height: 30px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+}
+.soft-tag--outline {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-weight: 500;
+  color: var(--text);
+}
+.soft-tag--brand {
+  background: var(--accent-soft);
+  font-weight: 600;
+  color: var(--active-text);
+}
+
+.profile-view-all {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 14px;
+  border: 1px dashed #b8ccf5;
+  background: var(--bg-alt);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ---------- Sidebar ---------- */
+.profile-aside {
+  width: 384px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.side-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.side-card--tight {
+  gap: 12px;
+}
+.side-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.side-card__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.side-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.contact-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.contact-item__icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.contact-item__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.contact-item__label {
+  font-size: 12px;
+  color: var(--text-3);
+}
+.contact-item__value {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--text);
+}
+.contact-item__value--button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.contact-item__value:hover {
+  color: var(--primary);
+}
+.contact-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.contact-actions__btn {
+  height: 46px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Khối đăng ký tư vấn (nền xanh) */
+.consult-box {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 22px;
+  background: var(--gradient-brand);
+  color: #fff;
+}
+.consult-box__bubble {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  right: -80px;
+  top: -90px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+.consult-box__form,
+.consult-box__done {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.consult-box__title {
+  font-size: 18px;
+  font-weight: 700;
+}
+.consult-box__desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+}
+.consult-box__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.consult-box__row .field-input {
+  padding: 0 10px;
+}
+.consult-box__submit {
+  height: 46px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.consult-box__done {
+  align-items: center;
+  gap: 10px;
+  padding: 16px 0;
+  text-align: center;
+}
+.consult-box__done-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.consult-box__done-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+.consult-box__again {
+  margin-top: 4px;
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ---------- Thanh liên hệ dính đáy (chỉ tablet / mobile) ---------- */
+.profile-bar {
+  display: none;
+}
+
+/* ==========================================================================
+   Responsive – tablet (≤ 1024px) & mobile (≤ 767px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  /* Breadcrumb trên ảnh bìa: 1 dòng, tên dài thì rút gọn */
+  .profile-cover__crumb {
+    padding-top: 16px;
+    white-space: nowrap;
+  }
+  .profile-cover__crumb .breadcrumb__current {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .profile-card {
+    padding: 20px 22px;
+    gap: 18px;
+  }
+  .profile-card__top {
+    flex-wrap: wrap;
+    gap: 16px 20px;
+  }
+  .profile-card__main {
+    flex: 1 1 360px;
+  }
+  .profile-card__name {
+    font-size: 26px;
+  }
+  .profile-card__meta {
+    gap: 8px 18px;
+    font-size: 13px;
+  }
+  /* Nút theo dõi / tư vấn xuống hàng riêng, chia đều chiều ngang */
+  .profile-card__actions {
+    width: 100%;
+  }
+  .profile-card__actions > .follow-btn,
+  .profile-card__actions > .profile-card__cta {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .profile-stats__item {
+    padding: 14px 16px;
+  }
+  .profile-stats__value {
+    font-size: 21px;
+  }
+  .profile-stats__label {
+    font-size: 12px;
+  }
+
+  .profile-tabs {
+    margin-top: 20px;
+  }
+
+  /* Nội dung full width, sidebar xuống dưới (2 cột) */
+  .profile-main {
+    padding: 24px 0 40px;
+  }
+  .profile-main__inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+  .profile-aside {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  .profile-content .content-card {
+    padding: 22px;
+  }
+
+  /* Thanh liên hệ dính đáy */
+  .profile-bar {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -8px 24px -12px rgba(15, 37, 56, 0.25);
+    transform: translateY(110%);
+    transition: transform 0.3s var(--ease);
+  }
+  .profile-bar--show {
+    transform: none;
+  }
+  .profile-bar__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 10px;
+  }
+  .profile-bar__btn {
+    height: 46px;
+    min-width: 0;
+    padding: 0 12px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .profile-bar__cta {
+    box-shadow: 0 6px 16px var(--btn-shadow);
+  }
+}
+
+@media (max-width: 767px) {
+  .profile-card {
+    padding: 16px;
+    gap: 16px;
+    border-radius: 20px;
+  }
+  .profile-card__top {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .profile-card__main {
+    flex: none;
+    width: 100%;
+    gap: 8px;
+  }
+  .profile-card__pills {
+    gap: 6px;
+  }
+  .profile-card__name {
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+  .profile-card__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .profile-card__meta > span {
+    align-items: flex-start;
+  }
+  .profile-card__meta .icon {
+    margin-top: 1px;
+  }
+  .profile-card__actions {
+    gap: 8px;
+  }
+  .profile-card__cta,
+  .follow-btn {
+    min-width: 0;
+    height: 44px;
+    padding: 0 12px;
+    gap: 6px;
+  }
+
+  /* Số liệu: lưới 2 cột, ô lẻ cuối giãn full hàng */
+  .profile-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    overflow: hidden;
+    border: 0;
+    background: var(--border);
+    border-radius: 14px;
+  }
+  .profile-stats__item {
+    padding: 12px 14px;
+    background: var(--bg-alt);
+  }
+  .profile-stats__item + .profile-stats__item {
+    border-left: 0;
+  }
+  .profile-stats__item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+  .profile-stats__value {
+    font-size: 19px;
+  }
+
+  .profile-tabs {
+    margin-top: 16px;
+  }
+
+  .profile-main {
+    padding: 16px 0 32px;
+  }
+  .profile-content {
+    gap: 14px;
+  }
+  .profile-content .content-card {
+    padding: 18px 16px;
+    gap: 14px;
+    border-radius: 16px;
+  }
+  .profile-content .content-card__title {
+    font-size: 18px;
+  }
+  .profile-content .content-card__head--between {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .value-grid,
+  .tag-groups {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .value-item {
+    padding: 12px 14px;
+  }
+  /* Nút "Xem tất cả đơn…": chữ dài được xuống dòng, căn giữa */
+  .profile-view-all {
+    height: auto;
+    min-height: 48px;
+    padding: 10px 16px;
+    text-align: center;
+  }
+
+  .profile-aside {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .side-card,
+  .consult-box {
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+
+  .profile-bar {
+    padding-top: 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+  .profile-bar__btn {
+    font-size: 14px;
+  }
+}

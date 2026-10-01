@@ -1,0 +1,23 @@
+# Hạ tầng chạy local: PostgreSQL cho API
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: viecpro-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: viecpro
+      POSTGRES_PASSWORD: viecpro
+      POSTGRES_DB: viecpro
+    ports:
+      # Cổng 5433 trên máy để không đụng Postgres khác đang chạy ở 5432
+      - '${POSTGRES_PORT:-5433}:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U viecpro']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres-data:
