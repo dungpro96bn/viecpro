@@ -4,11 +4,12 @@ import type { AdminBadges } from '@viecpro/shared';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import ChangePasswordDialog from '@/components/account/ChangePasswordDialog';
 import { API_URL } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { cx, initials } from '@/lib/format';
 import { NAV } from '@/lib/nav';
-import { IconLogoMark, IconLogout, IconSearch } from '../ui/Icons';
+import { IconKey, IconLogoMark, IconLogout, IconSearch } from '../ui/Icons';
 
 /** Kiểm tra /health mỗi phút để hiện đèn trạng thái ở chân sidebar */
 function useSystemStatus() {
@@ -28,6 +29,7 @@ function useSystemStatus() {
 export default function Sidebar({ badges, onClose }: { badges: AdminBadges | null; onClose: () => void }) {
   const pathname = usePathname();
   const { admin, can, logout } = useAuth();
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const systemOk = useSystemStatus();
 
   return (
@@ -89,11 +91,15 @@ export default function Sidebar({ badges, onClose }: { badges: AdminBadges | nul
                 {admin.role.name} · {admin.mfaEnabled ? '2FA bật' : '2FA tắt'}
               </span>
             </span>
+            <button type="button" className="sidebar__logout" aria-label="Đổi mật khẩu" title="Đổi mật khẩu" onClick={() => setPasswordOpen(true)}>
+              <IconKey size={17} />
+            </button>
             <button type="button" className="sidebar__logout" aria-label="Đăng xuất" title="Đăng xuất" onClick={() => void logout()}>
               <IconLogout size={17} />
             </button>
           </span>
         )}
+        <ChangePasswordDialog open={passwordOpen} onClose={() => setPasswordOpen(false)} />
       </div>
     </aside>
   );
