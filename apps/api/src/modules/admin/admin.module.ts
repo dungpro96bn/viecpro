@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module.js';
 import { AdminGuard } from './admin-access.js';
+import { AdminAccountsController } from './admins/admin-accounts.controller.js';
+import { AdminAccountsService } from './admins/admin-accounts.service.js';
+import { AdminRolesController } from './admins/admin-roles.controller.js';
+import { AdminRolesService } from './admins/admin-roles.service.js';
 import { AuditLogsController } from './audit/audit-logs.controller.js';
 import { AdminAuthController, AdminMeController } from './auth/admin-auth.controller.js';
 import { AdminAuthService } from './auth/admin-auth.service.js';
@@ -32,6 +36,8 @@ import { VerificationsService } from './verifications/verifications.service.js';
     AdminEmployersController,
     AdminReportsController,
     AuditLogsController,
+    AdminAccountsController,
+    AdminRolesController,
   ],
   providers: [
     AdminGuard,
@@ -44,6 +50,8 @@ import { VerificationsService } from './verifications/verifications.service.js';
     AdminReportsService,
     SanctionsService,
     StepUpService,
+    AdminAccountsService,
+    AdminRolesService,
   ],
 })
 export class AdminModule {}

@@ -65,7 +65,7 @@ export default function MobileMenu({ nav, active }: MobileMenuProps) {
             <Link href="/dang-nhap" tabIndex={open ? undefined : -1} className="btn btn--outline btn--lg btn--block" onClick={close}>
               Đăng nhập
             </Link>
-            <Link href="#" tabIndex={open ? undefined : -1} className="btn btn--primary btn--lg btn--block btn--shadow" onClick={close}>
+            <Link href="/quan-ly-tuyen-dung/don-hang/dang-tin" tabIndex={open ? undefined : -1} className="btn btn--primary btn--lg btn--block btn--shadow" onClick={close}>
               Đăng tin tuyển dụng
             </Link>
           </div>

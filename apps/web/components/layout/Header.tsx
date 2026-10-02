@@ -33,7 +33,7 @@ export default function Header({ active = 'jobs' }: { active?: NavKey }) {
           <Link href="/dang-nhap" className="btn btn--pill site-header__login">
             Đăng nhập
           </Link>
-          <Link href="#" className="btn btn--primary btn--pill site-header__post">
+          <Link href="/quan-ly-tuyen-dung/don-hang/dang-tin" className="btn btn--primary btn--pill site-header__post">
             Đăng tin tuyển dụng
           </Link>
           <MobileMenu nav={NAV} active={active} />

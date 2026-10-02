@@ -22,6 +22,8 @@ interface AuthState {
   /** Hoàn tất đăng nhập (sau bước 2FA) */
   complete: (result: Done) => void;
   logout: (notice?: string) => Promise<void>;
+  /** Cập nhật thông tin admin sau khi đổi (vd. đổi mật khẩu xong) */
+  updateAdmin: (admin: AdminMe) => void;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -120,6 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       can: (p) => !!admin?.permissions.includes(p),
       complete: apply,
       logout,
+      updateAdmin: setAdmin,
     }),
     [status, admin, notice, apply, logout],
   );

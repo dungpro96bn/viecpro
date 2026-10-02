@@ -95,6 +95,8 @@ export const ERROR_CODES = [
   /** Đối tượng đang bị tạm khoá / tạm ẩn bởi quản trị */
   'SUSPENDED',
   'NOT_IMPLEMENTED',
+  /** Admin đang dùng mật khẩu tạm – phải đổi mật khẩu trước khi dùng khu quản trị */
+  'PASSWORD_CHANGE_REQUIRED',
   'INTERNAL_ERROR',
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
@@ -499,6 +501,45 @@ export interface AdminMe {
   role: { key: string; name: string };
   permissions: AdminPermission[];
   mfaEnabled: boolean;
+  /** Đang dùng mật khẩu tạm do admin khác cấp – giao diện bắt đổi trước khi làm việc */
+  mustChangePassword: boolean;
+}
+
+/* ---------- Phân quyền (A-11) ---------- */
+export interface AdminAccountItem {
+  id: string;
+  name: string;
+  email: string;
+  role: { id: string; key: string; name: string };
+  mfaEnabled: boolean;
+  lockedAt: string | null;
+  lockReason: string | null;
+  lastLoginAt: string | null;
+  createdAt: string;
+  /** Là tài khoản đang đăng nhập (không tự đổi vai trò / tự khoá) */
+  isSelf: boolean;
+}
+
+export interface AdminAccountList extends Paginated<AdminAccountItem> {
+  stats: { total: number; active: number; locked: number; mfaPending: number };
+}
+
+/** Tạo admin / đặt lại mật khẩu: mật khẩu tạm chỉ trả 1 lần, người nhận đổi sau khi đăng nhập */
+export interface AdminTemporaryPassword {
+  admin: AdminAccountItem;
+  temporaryPassword: string;
+}
+
+export interface AdminRoleItem {
+  id: string;
+  key: string;
+  name: string;
+  description: string | null;
+  permissions: AdminPermission[];
+  /** Vai trò mặc định – không xoá được */
+  isSystem: boolean;
+  adminCount: number;
+  updatedAt: string;
 }
 
 /** Kết quả từng bước đăng nhập admin */
@@ -856,7 +897,8 @@ export interface EmployerApplicantDetail extends EmployerApplicantItem {
   note: string | null;
   source: ApplicationSource;
   interviewAt: string | null;
-  documents: Array<{ name: string; kind: 'pdf' | 'image'; sizeKb: number }>;
+  /** `url` = link xem / tải tệp; null với giấy tờ chỉ ghi tên (chưa tải tệp lên) */
+  documents: Array<{ name: string; kind: 'pdf' | 'image'; sizeKb: number; url: string | null }>;
   matchReasons: Array<{ ok: boolean; text: string }>;
   events: Array<{ status: ApplicationStatus; note: string | null; createdAt: string }>;
   notes: ApplicantNoteItem[];

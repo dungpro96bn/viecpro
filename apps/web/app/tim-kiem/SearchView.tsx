@@ -67,6 +67,9 @@ function useCompact() {
     () => false,
   );
 }
+/** Từ khoá gợi ý dưới ô tìm kiếm */
+const POPULAR_SEARCHES = ['Kaigo Osaka', 'Xây dựng Aichi', 'Điện tử nữ', 'Kỹ sư IT Tokyo'];
+
 export default function SearchView({ breadcrumb }: { breadcrumb: ReactNode }) {
   const [advOpen, setAdvOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -342,10 +345,19 @@ export default function SearchView({ breadcrumb }: { breadcrumb: ReactNode }) {
               </button>
               <div className="popular-searches">
                 <span>Tìm nhiều:</span>
-                <Link href="#">Kaigo Osaka</Link>
-                <Link href="#">Xây dựng Aichi</Link>
-                <Link href="#">Điện tử nữ</Link>
-                <Link href="#">Kỹ sư IT Tokyo</Link>
+                {POPULAR_SEARCHES.map((q) => (
+                  <Link
+                    key={q}
+                    href={`/tim-kiem?q=${encodeURIComponent(q)}`}
+                    onClick={() => {
+                      setQueryDraft(q);
+                      setQuery(q);
+                      setPage(1);
+                    }}
+                  >
+                    {q}
+                  </Link>
+                ))}
               </div>
             </div>
           </div>

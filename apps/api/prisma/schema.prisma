@@ -183,31 +183,33 @@ enum AlertFrequency {
 // Tài khoản
 // ---------------------------------------------------------------------------
 model User {
-  id                String    @id @default(cuid())
-  role              Role      @default(seeker)
-  name              String
+  id                 String    @id @default(cuid())
+  role               Role      @default(seeker)
+  name               String
   /// E.164: +84xxxxxxxxx
-  phone             String?   @unique
-  email             String?   @unique
-  passwordHash      String?
-  googleId          String?   @unique
-  avatarUrl         String?
-  phoneVerifiedAt   DateTime?
+  phone              String?   @unique
+  email              String?   @unique
+  passwordHash       String?
+  googleId           String?   @unique
+  avatarUrl          String?
+  phoneVerifiedAt    DateTime?
   /// Email đã xác thực bằng OTP (đổi email thì đặt lại null)
-  emailVerifiedAt   DateTime?
-  lastLoginAt       DateTime?
+  emailVerifiedAt    DateTime?
+  lastLoginAt        DateTime?
   /// Bị admin khoá: không đăng nhập / refresh được
-  lockedAt          DateTime?
-  lockReason        String?
+  lockedAt           DateTime?
+  lockReason         String?
   /// Đếm đăng nhập sai liên tiếp – quá 10 lần khoá tạm tới loginLockedUntil
-  failedLogins      Int       @default(0)
-  loginLockedUntil  DateTime?
+  failedLogins       Int       @default(0)
+  loginLockedUntil   DateTime?
   /// Xoá mềm (yêu cầu xoá tài khoản của App Store / Google Play)
-  deletedAt         DateTime?
+  deletedAt          DateTime?
   /// Lần đổi / đặt lại mật khẩu gần nhất (Cài đặt: "Đổi lần cuối 3 tháng trước")
-  passwordChangedAt DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  passwordChangedAt  DateTime?
+  /// Đang dùng mật khẩu tạm do admin khác cấp – phải đổi trước khi dùng khu quản trị
+  mustChangePassword Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   // ---- Chỉ dùng cho role = admin ----
   adminRoleId       String?

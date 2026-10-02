@@ -460,8 +460,15 @@ function ApplicantPanel({ id, onPatch, onChanged }: { id: string; onPatch: (id: 
           <div className="appl-section">
             <b>Giấy tờ đính kèm</b>
             {d.documents.map((doc) => (
-              // Chưa có API: tải tệp đính kèm (chỉ lưu tên tệp demo)
-              <a key={doc.name} className="emp-doc" href="#" aria-label={`Tải ${doc.name}`}>
+              <a
+                key={doc.name}
+                className="emp-doc"
+                href={doc.url ?? undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-disabled={!doc.url}
+                aria-label={doc.url ? `Tải ${doc.name}` : `${doc.name} (chưa tải tệp lên)`}
+              >
                 <span className={cx('emp-doc__type', doc.kind === 'image' && 'emp-doc__type--image')}>{doc.kind === 'pdf' ? 'PDF' : 'JPG'}</span>
                 <span className="emp-doc__text">
                   <span className="emp-doc__name">{doc.name}</span>

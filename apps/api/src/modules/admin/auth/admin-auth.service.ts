@@ -2,6 +2,7 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
   ADMIN_PERMISSIONS,
+  type AdminChangePasswordInput,
   type AdminLoginInput,
   type AdminLoginResult,
   type AdminMe,
@@ -18,7 +19,7 @@ import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import { SecretBox } from '../../../core/security/secret-box.js';
 import { generateTotpSecret, otpauthUrl, verifyTotp } from '../../../core/security/totp.js';
 import { assertNotTemporarilyLocked, clearFailedLogins, invalidCredentials, registerFailedLogin } from '../../auth/login-guard.js';
-import { verifyPassword } from '../../auth/password.js';
+import { hashPassword, verifyPassword } from '../../auth/password.js';
 import { type IssuedTokens, SessionService } from '../../auth/session.service.js';
 
 const CHALLENGE_TTL = 300;
@@ -46,6 +47,7 @@ const adminSelect = {
   mfaSecretEnc: true,
   mfaEnabledAt: true,
   mfaRecoveryHashes: true,
+  mustChangePassword: true,
   adminRole: { select: { key: true, name: true, permissions: true } },
 } as const;
 
@@ -88,7 +90,7 @@ export class AdminAuthService {
     return user;
   }
 
-  toMe(user: { id: string; name: string; email: string | null; mfaEnabledAt: Date | null; adminRole: { key: string; name: string; permissions: string[] } | null }): AdminMe {
+  toMe(user: { id: string; name: string; email: string | null; mfaEnabledAt: Date | null; mustChangePassword: boolean; adminRole: { key: string; name: string; permissions: string[] } | null }): AdminMe {
     return {
       id: user.id,
       name: user.name,
@@ -96,6 +98,7 @@ export class AdminAuthService {
       role: { key: user.adminRole?.key ?? '', name: user.adminRole?.name ?? '' },
       permissions: (user.adminRole?.permissions ?? []).filter((p): p is AdminPermission => (ADMIN_PERMISSIONS as readonly string[]).includes(p)),
       mfaEnabled: !!user.mfaEnabledAt,
+      mustChangePassword: user.mustChangePassword,
     };
   }
 
@@ -191,6 +194,28 @@ export class AdminAuthService {
       result: { step: 'done', accessToken: tokens.accessToken, expiresIn: tokens.expiresIn, admin: this.toMe(updated), recoveryCodes },
       tokens,
     };
+  }
+
+  /** Tự đổi mật khẩu: giữ phiên hiện tại, đăng xuất thiết bị khác (RULE-BE.md mục 5.2) */
+  async changePassword(adminId: string, sessionId: string, input: AdminChangePasswordInput, req: Request): Promise<AdminMe> {
+    const user = await this.loadAdmin(adminId);
+    await assertNotTemporarilyLocked(user);
+    if (!user.passwordHash || !(await verifyPassword(input.currentPassword, user.passwordHash))) {
+      await registerFailedLogin(this.prisma, user);
+      throw new ApiException('INVALID_CREDENTIALS', 'Mật khẩu hiện tại không đúng', HttpStatus.BAD_REQUEST, { currentPassword: 'Mật khẩu hiện tại không đúng' });
+    }
+    const passwordHash = await hashPassword(input.newPassword);
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const saved = await tx.user.update({
+        where: { id: adminId },
+        data: { passwordHash, passwordChangedAt: new Date(), mustChangePassword: false, failedLogins: 0, loginLockedUntil: null },
+        select: adminSelect,
+      });
+      await tx.session.updateMany({ where: { userId: adminId, id: { not: sessionId }, revokedAt: null }, data: { revokedAt: new Date() } });
+      await this.audit.log({ actorId: adminId, action: 'admin.password_change', targetType: 'user', targetId: adminId, after: { wasTemporary: user.mustChangePassword } }, req, tx);
+      return saved;
+    });
+    return this.toMe(updated);
   }
 
   async refresh(refreshToken: string) {

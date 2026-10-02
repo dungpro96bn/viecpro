@@ -43,7 +43,8 @@ export type AdminRequest = AuthRequest & { admin?: AdminContext };
  * 1. IP nằm trong ADMIN_IP_ALLOWLIST (nếu cấu hình)
  * 2. Token là phiên admin đã qua 2FA (adm = true)
  * 3. Kiểm tra DB mỗi request: phiên chưa thu hồi / hết hạn, tài khoản chưa khoá
- * 4. Vai trò quản trị có quyền khai báo bằng @RequirePermission
+ * 4. Không còn dùng mật khẩu tạm (trừ route @AnyAdmin)
+ * 5. Vai trò quản trị có quyền khai báo bằng @RequirePermission
  */
 @Injectable()
 export class AdminGuard implements CanActivate {
@@ -71,10 +72,15 @@ export class AdminGuard implements CanActivate {
 
     const admin = await this.prisma.user.findUnique({
       where: { id: user.sub },
-      select: { id: true, name: true, email: true, mfaEnabledAt: true, adminRole: { select: { key: true, name: true, permissions: true } } },
+      select: { id: true, name: true, email: true, mfaEnabledAt: true, mustChangePassword: true, adminRole: { select: { key: true, name: true, permissions: true } } },
     });
     // ADMIN_MFA_BYPASS chỉ có ở dev / test (env.ts từ chối ở production) – khi đó phiên được cấp không qua 2FA
     if (!admin?.adminRole || (!admin.mfaEnabledAt && !this.env.ADMIN_MFA_BYPASS)) throw ApiException.forbidden();
+
+    // Mật khẩu tạm: chỉ cho xem bản thân, đổi mật khẩu, đăng xuất
+    if (admin.mustChangePassword && permission !== ANY_ADMIN) {
+      throw new ApiException('PASSWORD_CHANGE_REQUIRED', 'Hãy đổi mật khẩu tạm trước khi tiếp tục', HttpStatus.FORBIDDEN);
+    }
 
     const permissions = admin.adminRole.permissions.filter((p): p is AdminPermission => (ADMIN_PERMISSIONS as readonly string[]).includes(p));
     if (permission !== ANY_ADMIN && !permissions.includes(permission)) throw ApiException.forbidden(`Bạn chưa có quyền "${permission}"`);
