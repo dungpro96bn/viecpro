@@ -466,9 +466,19 @@
 
 /* ---------- Mobile ---------- */
 @media (max-width: 767px) {
+  /* Chọn cách thêm + cột phụ là grid → xếp 1 cột */
   .aa-modes,
-  .aa-side,
-    .aa-person {
+  .aa-side {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .aa-mode {
+    padding: 12px 14px;
+  }
+  .aa-mode__text {
+    min-width: 0;
+  }
+  .aa-person {
     flex-direction: column;
   }
   .aa-import {

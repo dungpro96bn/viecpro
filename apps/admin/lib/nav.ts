@@ -40,11 +40,11 @@ export const NAV: Array<{ title: string; items: NavItem[] }> = [
   {
     title: 'Vận hành',
     items: [
-      { href: '/kiem-duyet-tin', label: 'Kiểm duyệt tin', icon: IconModeration, permission: 'jobs.read', badge: 'pendingJobs' },
-      { href: '/xac-minh-doanh-nghiep', label: 'Xác minh doanh nghiệp', icon: IconShieldCheck, permission: 'employers.read', badge: 'pendingVerifications' },
-      { href: '/nguoi-lao-dong', label: 'Người lao động', icon: IconWorkers, permission: 'users.read' },
-      { href: '/nha-tuyen-dung', label: 'Nhà tuyển dụng', icon: IconBriefcase, permission: 'employers.read' },
-      { href: '/bao-cao-vi-pham', label: 'Báo cáo vi phạm', icon: IconFlag, permission: 'jobs.moderate', badge: 'openReports', urgent: true },
+      { href: '/kiem-duyet-tin', label: 'Kiểm duyệt tin', icon: IconModeration, permission: 'jobs.read', badge: 'pendingJobs', ready: true },
+      { href: '/xac-minh-doanh-nghiep', label: 'Xác minh doanh nghiệp', icon: IconShieldCheck, permission: 'employers.read', badge: 'pendingVerifications', ready: true },
+      { href: '/nguoi-lao-dong', label: 'Danh sách ứng viên', icon: IconWorkers, permission: 'users.read', ready: true },
+      { href: '/nha-tuyen-dung', label: 'Nhà tuyển dụng', icon: IconBriefcase, permission: 'employers.read', ready: true },
+      { href: '/bao-cao-vi-pham', label: 'Báo cáo vi phạm', icon: IconFlag, permission: 'jobs.moderate', badge: 'openReports', urgent: true, ready: true },
     ],
   },
   {

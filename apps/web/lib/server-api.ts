@@ -1,7 +1,8 @@
 import { cache } from 'react';
 import type { EmployerProfile, JobDetail, JobListItem, Paginated, RecruiterProfile, RegionDirectoryItem } from '@viecpro/shared';
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000/api/v1').replace(/\/$/, '');
+// Server (SSR) gọi API qua mạng nội bộ khi chạy Docker (API_INTERNAL_URL=http://api:4000/api/v1); trình duyệt dùng NEXT_PUBLIC_API_BASE_URL
+const API_BASE_URL = (process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000/api/v1').replace(/\/$/, '');
 
 async function get<T>(path: string): Promise<T | null> {
   try {

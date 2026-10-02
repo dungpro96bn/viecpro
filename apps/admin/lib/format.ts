@@ -35,9 +35,14 @@ export function timeAgo(iso: string, now = Date.now()): string {
   return `${Math.floor(h / 24)} ngày`;
 }
 
-/** 125 → "2 giờ 05"; 24 → "24 phút"; âm → "Quá hạn 5 phút" */
+/** 125 → "2 giờ 05"; 24 → "24 phút"; âm → "Quá hạn 5 phút" / "Quá hạn 22 giờ 45" / "Quá hạn 3 ngày" */
 export function formatSla(minutes: number): string {
-  if (minutes < 0) return `Quá hạn ${Math.abs(minutes)} phút`;
+  if (minutes < 0) {
+    const late = Math.abs(minutes);
+    if (late < 60) return `Quá hạn ${late} phút`;
+    if (late < 1440) return `Quá hạn ${Math.floor(late / 60)} giờ ${String(late % 60).padStart(2, '0')}`;
+    return `Quá hạn ${Math.floor(late / 1440)} ngày`;
+  }
   if (minutes < 60) return minutes < 20 ? `Còn ${minutes} phút` : `${minutes} phút`;
   return `${Math.floor(minutes / 60)} giờ ${String(minutes % 60).padStart(2, '0')}`;
 }

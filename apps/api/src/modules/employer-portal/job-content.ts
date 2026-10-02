@@ -42,9 +42,9 @@ export function deriveTags(f: Pick<JobFormFacts, 'feeUsd' | 'posting' | 'program
 }
 
 const DOCUMENTS: Record<Program, string[]> = {
-  tts: ['CCCD và xác nhận cư trú', 'Hộ chiếu (nếu đã có)', '4 ảnh 4x6 nền trắng', 'Sơ yếu lý lịch có xác nhận', 'Bằng tốt nghiệp cao nhất'],
-  tok: ['CCCD và hộ chiếu', 'Chứng chỉ JLPT', 'Chứng chỉ kỹ năng đặc định', '4 ảnh 4x6 nền trắng'],
-  ks: ['CCCD và hộ chiếu', 'Bằng tốt nghiệp và bảng điểm', 'Chứng chỉ tiếng Nhật', 'CV tiếng Nhật (rirekisho)'],
+  tts: ['Giấy tờ tuỳ thân và xác nhận cư trú', 'Hộ chiếu (nếu đã có)', '4 ảnh 4x6 nền trắng', 'Sơ yếu lý lịch có xác nhận', 'Bằng tốt nghiệp cao nhất'],
+  tok: ['Giấy tờ tuỳ thân và hộ chiếu', 'Chứng chỉ JLPT', 'Chứng chỉ kỹ năng đặc định', '4 ảnh 4x6 nền trắng'],
+  ks: ['Giấy tờ tuỳ thân và hộ chiếu', 'Bằng tốt nghiệp và bảng điểm', 'Chứng chỉ tiếng Nhật', 'CV tiếng Nhật (rirekisho)'],
 };
 
 export function buildJobContent(f: JobFormFacts, now = new Date()): JobDetailContent {

@@ -98,12 +98,6 @@
 .account-notifications__item a { display: grid; gap: 4px; padding: 12px 2px; color: var(--text-body); text-decoration: none; }
 .account-notifications__item--unread a { color: var(--text); }
 .account-notifications__item span, .account-notifications__item small { color: var(--text-3); font-size: 12px; }
-.account-security__heading { margin: 22px 0 8px; color: var(--text); font-size: 14px; }
-.account-security__sessions { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.account-security__sessions li, .account-security__delete { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px; border: 1px solid var(--border-soft); border-radius: var(--radius-sm); }
-.account-security__sessions li > span, .account-security__delete > span { display: grid; gap: 3px; }
-.account-security__sessions small, .account-security__delete small { color: var(--text-3); font-size: 12px; }
-.account-security__delete { margin-top: 16px; border-color: var(--border); }
 
 /* ---------- Việc làm gợi ý ---------- */
 .account-recommendations { display: flex; flex-direction: column; gap: 13px; }
@@ -161,7 +155,7 @@
   .account-recommendations__heading h2 { font-size: 15px; }
   .account-recommendations__heading p { max-width: 270px; line-height: 1.45; }
   .account-job-grid { grid-template-columns: 1fr; }
-  .account-job-card:last-child { display: block; }
+  .account-job-card, .account-job-card:last-child { display: grid; }
   .account-job-card { display: grid; grid-template-columns: 112px minmax(0, 1fr); }
   .account-job-card__media { height: 100%; min-height: 160px; }
   .account-job-card__location { align-items: flex-start; font-size: 8px; }

@@ -1,0 +1,62 @@
+/*
+ * Công tắc bật / tắt dùng chung (components/ui/Switch.tsx)
+ * Cỡ sm 38×22 theo design-new 04, 05 · cỡ md 44×24
+ */
+
+.ui-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 38px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--border-strong);
+  cursor: pointer;
+  transition: background 0.2s var(--ease);
+}
+.ui-switch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(56, 121, 255, 0.14);
+}
+.ui-switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.ui-switch__knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s var(--ease);
+}
+.ui-switch--on {
+  background: var(--btn-primary);
+}
+.ui-switch--on .ui-switch__knob {
+  transform: translateX(16px);
+}
+
+/* ---------- Cỡ lớn ---------- */
+.ui-switch--md {
+  width: 44px;
+  height: 24px;
+}
+.ui-switch--md .ui-switch__knob {
+  width: 18px;
+  height: 18px;
+}
+.ui-switch--md.ui-switch--on .ui-switch__knob {
+  transform: translateX(20px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-switch,
+  .ui-switch__knob {
+    transition: none;
+  }
+}

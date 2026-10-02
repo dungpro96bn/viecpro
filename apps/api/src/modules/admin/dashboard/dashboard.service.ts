@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { ActivityItem, AdminBadges, AdminDashboard, DashboardRange, KpiCard, ReportGroup } from '@viecpro/shared';
+import { REPORT_REASON_LABEL, type ActivityItem, type AdminBadges, type AdminDashboard, type DashboardRange, type KpiCard, type ReportGroup, type ReportReason } from '@viecpro/shared';
 import { readFileSync } from 'node:fs';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import { ModerationService } from '../moderation/moderation.service.js';
@@ -29,7 +29,7 @@ export class DashboardService {
     const [pendingJobs, pendingVerifications, openReports] = await Promise.all([
       this.prisma.job.count({ where: { status: 'pending' } }),
       this.prisma.verificationRequest.count({ where: { status: { in: ['pending', 'needs_info'] } } }),
-      this.prisma.report.count({ where: { status: 'open' } }),
+      this.prisma.report.count({ where: { status: { in: ['open', 'investigating'] } } }),
     ]);
     return { pendingJobs, pendingVerifications, openReports };
   }
@@ -152,26 +152,29 @@ export class DashboardService {
   /* ---------------- Báo cáo vi phạm ---------------- */
   private async reportGroups(): Promise<{ open: number; groups: ReportGroup[]; employersByReason: Map<string, Set<string>>; jobsByReason: Map<string, number> }> {
     const reports = await this.prisma.report.findMany({
-      where: { status: 'open' },
+      where: { status: { in: ['open', 'investigating'] } },
       orderBy: { createdAt: 'desc' },
-      select: { reason: true, jobId: true, employerId: true, createdAt: true, job: { select: { title: true, employerId: true } }, employer: { select: { name: true, shortName: true } } },
+      select: { reason: true, severity: true, jobId: true, employerId: true, createdAt: true, job: { select: { title: true, employerId: true } }, employer: { select: { name: true, shortName: true } } },
       take: 500,
     });
-    const groups = new Map<string, ReportGroup & { latest: number }>();
+    const groups = new Map<string, ReportGroup & { latest: number; urgent: boolean }>();
     const employersByReason = new Map<string, Set<string>>();
     const jobsByReason = new Map<string, number>();
     for (const r of reports) {
+      // Báo cáo mới lưu mã lý do (fee, scam…); dữ liệu cũ lưu nguyên câu
+      const reason = REPORT_REASON_LABEL[r.reason as ReportReason] ?? r.reason;
       const target = r.employer ? (r.employer.shortName ?? r.employer.name) : short(r.job?.title ?? '—', 36);
-      const key = `${r.reason}|${target}`;
-      const g = groups.get(key) ?? { reason: r.reason, target, reporters: 0, severity: 'medium' as const, latestAt: r.createdAt.toISOString(), latest: r.createdAt.getTime() };
+      const key = `${reason}|${target}`;
+      const g = groups.get(key) ?? { reason, target, reporters: 0, severity: 'medium' as const, urgent: false, latestAt: r.createdAt.toISOString(), latest: r.createdAt.getTime() };
       g.reporters++;
+      g.urgent ||= r.severity === 'critical' || r.severity === 'high';
       groups.set(key, g);
       const employerId = r.employerId ?? r.job?.employerId;
-      if (employerId) employersByReason.set(r.reason, (employersByReason.get(r.reason) ?? new Set()).add(employerId));
-      if (r.jobId) jobsByReason.set(r.reason, (jobsByReason.get(r.reason) ?? 0) + 1);
+      if (employerId) employersByReason.set(reason, (employersByReason.get(reason) ?? new Set()).add(employerId));
+      if (r.jobId) jobsByReason.set(reason, (jobsByReason.get(reason) ?? 0) + 1);
     }
     const list = [...groups.values()]
-      .map(({ latest: _l, ...g }) => ({ ...g, severity: g.reporters >= 3 || /phí|lừa/i.test(g.reason) ? ('high' as const) : ('medium' as const) }))
+      .map(({ latest: _l, urgent, ...g }) => ({ ...g, severity: urgent || g.reporters >= 3 ? ('high' as const) : ('medium' as const) }))
       .sort((a, b) => b.latestAt.localeCompare(a.latestAt))
       .slice(0, 3);
     return { open: reports.length, groups: list, employersByReason, jobsByReason };

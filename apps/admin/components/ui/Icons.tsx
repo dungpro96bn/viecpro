@@ -52,3 +52,17 @@ export const IconMenu = make('M4 7h16M4 12h16M4 17h16');
 export const IconClose = make('M6 6l12 12M18 6L6 18');
 export const IconLock = make('M7 10.5V8a5 5 0 0110 0v2.5M5 10.5h14v10H5z');
 export const IconCopy = make('M9 9h11v11H9zM5 15H4V4h11v1');
+
+export const IconChevronDown = make('M6 9l6 6 6-6');
+export const IconChevronLeft = make('M15 6l-6 6 6 6');
+export const IconEye = make('M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zM12 15a3 3 0 100-6 3 3 0 000 6z');
+export const IconPhone = make('M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2');
+export const IconMail = make('M3 6h18v12H3zM3 7l9 6 9-6');
+export const IconUnlock = make('M5 11h14v10H5zM8 11V7a4 4 0 017.5-2');
+export const IconBan = make('M12 21a9 9 0 100-18 9 9 0 000 18zM5.6 5.6l12.8 12.8');
+/** Kiểm tra tự động (spec R8 – thay icon "AI") */
+export const IconScanCheck = make('M4 8V5a1 1 0 011-1h3M16 4h3a1 1 0 011 1v3M20 16v3a1 1 0 01-1 1h-3M8 20H5a1 1 0 01-1-1v-3M8.5 12l2.5 2.5 4.5-5');
+export const IconFile = make('M6 3h8l5 5v13H6zM14 3v5h5M9 13h6M9 17h6');
+export const IconExternal = make('M14 4h6v6M20 4l-9 9M18 14v6H4V6h6');
+export const IconUserCheck = make('M9 11a4 4 0 100-8 4 4 0 000 8zM2.5 21c.6-3.8 3.3-6 6.5-6 1.4 0 2.7.4 3.8 1.2M16 18l2 2 4-4');
+export const IconHistory = make('M3 12a9 9 0 103-6.7L3 8M3 3v5h5M12 7v5l3 2');

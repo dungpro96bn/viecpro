@@ -67,7 +67,7 @@ ${spacer(22)}
 ${button(`${d.webBaseUrl}${d.trackPath}`, 'Xác nhận tham gia')}
 <p style="margin:12px 0 0;font-size:13px;line-height:20px;color:${C.muted};">Bận vào giờ này? Bấm nút trên và chọn <b>“Xin dời lịch”</b>, hoặc nhắn trực tiếp cán bộ qua Zalo.</p>
 ${spacer(20)}
-${callout(`<b>Chuẩn bị:</b> ${d.kind === 'online' ? 'thử micro, camera trước 15 phút; ngồi nơi yên tĩnh, đủ sáng' : 'đến sớm 15 phút, mang CCCD và bằng cấp bản gốc'}; tập giới thiệu bản thân bằng tiếng Nhật khoảng 1 phút.`, 'green')}`;
+${callout(`<b>Chuẩn bị:</b> ${d.kind === 'online' ? 'thử micro, camera trước 15 phút; ngồi nơi yên tĩnh, đủ sáng' : 'đến sớm 15 phút, mang giấy tờ tuỳ thân và bằng cấp bản gốc'}; tập giới thiệu bản thân bằng tiếng Nhật khoảng 1 phút.`, 'green')}`;
   return {
     subject: `Lời mời ${kind}: ${start.time} ${start.weekday} ${start.date.slice(0, 5)} – ${d.jobTitle}`,
     tag: 'interview-invite',

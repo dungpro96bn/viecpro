@@ -52,3 +52,9 @@
 .btn--warning-solid:hover:not(:disabled) {
   background: #9a3412;
 }
+
+/* Ô mã 2FA trong hộp thoại xác nhận */
+.dialog__otp {
+  letter-spacing: 0.3em;
+  font-weight: 700;
+}

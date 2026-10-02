@@ -1,4 +1,24 @@
-# Hạ tầng chạy local: PostgreSQL cho API
+# ============================================================================
+# viecpro – chạy bằng Docker
+#   npm run db:up       → chỉ PostgreSQL + Redis (API / web / admin chạy trên máy bằng npm run dev)
+#   npm run docker:up   → toàn bộ: PostgreSQL, Redis, API, web, admin (profile "app")
+# Cổng trên máy đổi được trong file .env ở thư mục gốc (mẫu: .env.example).
+# Mặc định tránh các cổng thường bị project khác chiếm: web 3100 (thay 3000), Redis 6380 (thay 6379).
+# ============================================================================
+
+x-app: &app
+  image: viecpro-app:local
+  build:
+    context: .
+    args:
+      # Trình duyệt gọi API / mở web qua cổng trên máy
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:${API_PORT:-4000}/api/v1
+      NEXT_PUBLIC_API_URL: http://localhost:${API_PORT:-4000}/api/v1
+      NEXT_PUBLIC_WEB_URL: http://localhost:${WEB_PORT:-3100}
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+  restart: unless-stopped
+  profiles: ['app']
+
 services:
   postgres:
     image: postgres:17-alpine
@@ -9,7 +29,7 @@ services:
       POSTGRES_PASSWORD: viecpro
       POSTGRES_DB: viecpro
     ports:
-      # Cổng 5433 trên máy để không đụng Postgres khác đang chạy ở 5432
+      # 5433 trên máy để không đụng Postgres khác đang chạy ở 5432
       - '${POSTGRES_PORT:-5433}:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
@@ -18,6 +38,87 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: viecpro-redis
+    restart: unless-stopped
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    ports:
+      # 6380 trên máy để không đụng Redis khác ở 6379
+      - '${REDIS_PORT:-6380}:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    <<: *app
+    container_name: viecpro-api
+    working_dir: /app/apps/api
+    # Áp migration rồi chạy API (seed dữ liệu demo: npm run docker:seed)
+    command: ['sh', '-c', 'npx prisma migrate deploy && node dist/main']
+    env_file:
+      - path: apps/api/.env
+        required: false
+    environment:
+      # Local: chế độ development (OTP in ra log, email ghi ra tmp/mail). Production cấu hình riêng
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: postgresql://viecpro:viecpro@postgres:5432/viecpro?schema=public
+      REDIS_URL: redis://redis:6379
+      CORS_ORIGINS: http://localhost:${WEB_PORT:-3100},http://localhost:${ADMIN_PORT:-3001}
+      ASSET_BASE_URL: http://localhost:${WEB_PORT:-3100}
+      WEB_BASE_URL: http://localhost:${WEB_PORT:-3100}
+      # Secret dev mặc định khi chưa có apps/api/.env – KHÔNG dùng cho production
+      JWT_SECRET: ${JWT_SECRET:-docker-dev-jwt-secret-change-me-0123456789abcdef}
+      OTP_SECRET: ${OTP_SECRET:-docker-dev-otp-secret-change-me-0123456789abcdef}
+      ADMIN_MFA_KEY: ${ADMIN_MFA_KEY:-docker-dev-admin-mfa-key-change-me-0123456789}
+    ports:
+      - '${API_PORT:-4000}:4000'
+    volumes:
+      # Email xem trước (EMAIL_PROVIDER=console) ghi ra máy: apps/api/tmp/mail
+      - ./apps/api/tmp:/app/apps/api/tmp
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:4000/api/v1/health']
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 20s
+
+  web:
+    <<: *app
+    container_name: viecpro-web
+    working_dir: /app/apps/web
+    command: ['npx', 'next', 'start', '-p', '3100']
+    environment:
+      NODE_ENV: production
+      # Render phía server gọi API qua mạng nội bộ Docker
+      API_INTERNAL_URL: http://api:4000/api/v1
+    ports:
+      - '${WEB_PORT:-3100}:3100'
+    depends_on:
+      api:
+        condition: service_healthy
+
+  admin:
+    <<: *app
+    container_name: viecpro-admin
+    working_dir: /app/apps/admin
+    command: ['npx', 'next', 'start', '-p', '3001']
+    environment:
+      NODE_ENV: production
+    ports:
+      - '${ADMIN_PORT:-3001}:3001'
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   postgres-data:

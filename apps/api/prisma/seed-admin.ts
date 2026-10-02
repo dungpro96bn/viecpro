@@ -110,11 +110,12 @@ export async function seedAdmin(prisma: PrismaClient, ctx: Ctx) {
   const doc = (key: string, label: string, ok: boolean) => ({ key, label, ok });
   const individual = await prisma.recruiter.create({ data: { slug: 'nguyen-van-binh-ctv', name: 'Nguyễn Văn Bình', title: 'Cộng tác viên tuyển dụng', city: 'Nghệ An' } });
   const verifications = [
-    { kind: 'company', employerId: employer.saomai!.id, idMasked: '0109•••482', location: 'Hà Nội', documents: [doc('dkkd', 'ĐKKD', true), doc('gpxkld', 'GP XKLĐ', true), doc('cccd', 'CCCD đại diện', true)], ageH: 30 },
-    { kind: 'company', employerId: employer.hoanglong!.id, idMasked: '0316•••907', location: 'TP.HCM', documents: [doc('dkkd', 'ĐKKD', true), doc('gpxkld', 'GP XKLĐ', false), doc('cccd', 'CCCD đại diện', true)], ageH: 20 },
-    { kind: 'individual', recruiterId: individual.id, idMasked: '•••• 4821', location: 'Nghệ An', documents: [doc('cccd', 'CCCD', true), doc('photo', 'Ảnh chân dung', true), doc('contract', 'Hợp đồng CTV', true)], ageH: 12 },
-    { kind: 'company', employerId: employer.donga!.id, idMasked: '0107•••215', location: 'Hà Nội', documents: [doc('dkkd', 'ĐKKD', true), doc('gpxkld', 'GP XKLĐ', false), doc('cccd', 'CCCD đại diện', false)], ageH: 8 },
-    { kind: 'company', employerId: employer.nexa!.id, idMasked: '0315•••660', location: 'TP.HCM', documents: [doc('dkkd', 'ĐKKD', true), doc('gpxkld', 'GP XKLĐ', true), doc('cccd', 'CCCD đại diện', false)], ageH: 5 },
+    // Giấy tờ theo spec 3.7 / R5 – không thu thập CCCD (R4)
+    { kind: 'company', employerId: employer.saomai!.id, idMasked: '0109•••482', location: 'Hà Nội', documents: [doc('dkkd', 'ĐKKD', true), doc('gpxkld', 'GP XKLĐ', true), doc('uy_quyen', 'Thư uỷ quyền', true)], ageH: 30 },
+    { kind: 'company', employerId: employer.hoanglong!.id, idMasked: '0316•••907', location: 'TP.HCM', documents: [doc('dkkd', 'ĐKKD', true), doc('gpxkld', 'GP XKLĐ', false), doc('uy_quyen', 'Thư uỷ quyền', true)], ageH: 20 },
+    { kind: 'individual', recruiterId: individual.id, idMasked: '098•••4521', location: 'Nghệ An', documents: [doc('contract', 'Hợp đồng CTV', true), doc('partner_confirm', 'Xác nhận đơn vị', true), doc('phone_otp', 'SĐT', true)], ageH: 12 },
+    { kind: 'company', employerId: employer.donga!.id, idMasked: '0107•••215', location: 'Hà Nội', documents: [doc('dkkd', 'ĐKKD', true), doc('gpxkld', 'GP XKLĐ', false), doc('uy_quyen', 'Thư uỷ quyền', false)], ageH: 8 },
+    { kind: 'company', employerId: employer.nexa!.id, idMasked: '0315•••660', location: 'TP.HCM', documents: [doc('dkkd', 'ĐKKD', true), doc('gpxkld', 'GP XKLĐ', true), doc('uy_quyen', 'Thư uỷ quyền', false)], ageH: 5 },
   ];
   for (const { ageH, ...v } of verifications) {
     await prisma.verificationRequest.create({ data: { ...v, createdAt: new Date(now - ageH * 3600_000) } });
@@ -123,12 +124,14 @@ export async function seedAdmin(prisma: PrismaClient, ctx: Ctx) {
   /* ---------- Báo cáo vi phạm ---------- */
   const reporters = await prisma.user.findMany({ where: { role: 'seeker' }, select: { id: true }, take: 3 });
   const reports = [
-    ...[0, 1, 2].map((i) => ({ employerId: employer.donga!.id, jobId: pendingJobIds.donga, reason: 'Thu phí ngoài hợp đồng', detail: 'Yêu cầu nộp thêm "phí giữ chỗ" 500 USD', minutesAgo: 12 + i * 40, reporterId: reporters[i]?.id })),
-    { employerId: employer.nexa!.id, jobId: pendingJobIds.nexa, reason: 'Tin trùng lặp, sai lương', detail: 'Kỹ sư cơ khí Osaka – 2 bản', minutesAgo: 60, reporterId: undefined },
-    { employerId: employer.saomai!.id, jobId: pendingJobIds.saomai, reason: 'Ảnh không đúng thực tế', detail: 'Thực phẩm Hokkaido', minutesAgo: 180, reporterId: undefined },
+    // Mã lý do + mức độ + hạn xử lý theo spec 3.9 (critical 2h · medium 24h · low 72h)
+    ...[0, 1, 2].map((i) => ({ employerId: employer.donga!.id, jobId: pendingJobIds.donga, reason: 'fee', severity: 'critical' as const, slaH: 2, detail: 'Yêu cầu nộp thêm "phí giữ chỗ" 500 USD', minutesAgo: 12 + i * 40, reporterId: reporters[i]?.id })),
+    { employerId: employer.nexa!.id, jobId: pendingJobIds.nexa, reason: 'duplicate', severity: 'low' as const, slaH: 72, detail: 'Kỹ sư cơ khí Osaka – 2 bản', minutesAgo: 60, reporterId: undefined },
+    { employerId: employer.saomai!.id, jobId: pendingJobIds.saomai, reason: 'fake_photo', severity: 'medium' as const, slaH: 24, detail: 'Thực phẩm Hokkaido', minutesAgo: 180, reporterId: undefined },
   ];
-  for (const { minutesAgo, ...r } of reports) {
-    await prisma.report.create({ data: { ...r, createdAt: new Date(now - minutesAgo * 60_000) } });
+  for (const { minutesAgo, slaH, ...r } of reports) {
+    const createdAt = new Date(now - minutesAgo * 60_000);
+    await prisma.report.create({ data: { ...r, targetType: 'job', createdAt, dueAt: new Date(createdAt.getTime() + slaH * 3600_000) } });
   }
 
   /* ---------- Người dùng hoạt động (phiên) + ứng tuyển 60 ngày ---------- */

@@ -29,9 +29,22 @@ import type {
   Program,
   RegionKey,
   Role,
+  AlertChannel,
+  AlertFrequency,
+  Locale,
+  NotificationGroup,
+  PhoneVisibility,
+  ReportDecision,
+  ReportSeverity,
+  ReportStatus,
+  ReportTarget,
+  ResetChannel,
+  Theme,
+  VerificationStatus,
 } from './enums.js';
 import type { AdminPermission } from './admin.js';
 import type { JobDetailContent, JobPosting } from './schemas/jobs.js';
+import type { JobAlertCriteria } from './schemas/account.js';
 
 /** Danh sách có phân trang */
 export interface Paginated<T> {
@@ -73,6 +86,14 @@ export const ERROR_CODES = [
   'SLOT_TAKEN',
   /** Email chưa xác thực bằng OTP (ứng tuyển nhanh nhiều việc) */
   'EMAIL_NOT_VERIFIED',
+  /** Email đã thuộc tài khoản khác (đổi email trong Cài đặt) */
+  'EMAIL_TAKEN',
+  /** Vượt số thông báo việc làm tối đa */
+  'ALERT_LIMIT',
+  /** Đã báo cáo đối tượng này và báo cáo còn đang xử lý */
+  'ALREADY_REPORTED',
+  /** Đối tượng đang bị tạm khoá / tạm ẩn bởi quản trị */
+  'SUSPENDED',
   'NOT_IMPLEMENTED',
   'INTERNAL_ERROR',
 ] as const;
@@ -515,6 +536,9 @@ export interface DashboardInsight {
 
 export interface ModerationItem {
   id: string;
+  /** Mã tin VP-10231 */
+  code: string;
+  status: JobStatus;
   title: string;
   imageUrl: string;
   employerName: string;
@@ -529,6 +553,47 @@ export interface ModerationItem {
   reasons: string[];
   /** Số phút còn lại tới hạn SLA (âm = quá hạn) */
   slaMinutes: number;
+  /** Tab "Đã xử lý" / "Yêu cầu sửa": thời điểm, người xử lý, lý do */
+  moderatedAt: string | null;
+  moderatorName: string | null;
+  rejectReason: string | null;
+  changesRequested: boolean;
+}
+
+export interface ModerationList extends Paginated<ModerationItem> {
+  stats: { pending: number; nearSla: number; processedToday: number };
+  tabs: { pending: number; changes: number; done: number };
+}
+
+/** Kết quả một mục kiểm tra tự động (A-02) */
+export interface ModerationCheck {
+  key: string;
+  label: string;
+  status: 'pass' | 'warn' | 'fail';
+  note: string | null;
+}
+
+export interface ModerationDetail extends ModerationItem {
+  slug: string;
+  region: RegionKey;
+  pref: string;
+  quantity: number;
+  gender: JobGender;
+  birthYearFrom: number;
+  birthYearTo: number;
+  feeUsd: number | null;
+  contractYears: number | null;
+  jlptRequired: string | null;
+  examAt: string | null;
+  deadline: string | null;
+  departureAt: string | null;
+  employer: { name: string; verified: boolean; createdAt: string | null; openJobs: number } ;
+  recruiterName: string;
+  content: { overview: string; tasks: string[]; requirements: Array<[string, string]>; benefits: string[]; incomes: Array<{ label: string; value: string }> };
+  medianSalary: number | null;
+  checks: ModerationCheck[];
+  events: Array<{ action: string; note: string | null; actor: string | null; at: string }>;
+  reports: Array<{ code: string; reason: string; status: ReportStatus; createdAt: string }>;
 }
 
 export interface VerificationItem {
@@ -945,4 +1010,313 @@ export interface InterviewAvailability {
     date: string;
     busy: Array<{ recruiterId: string; start: string; end: string; kind: InterviewKind }>;
   }>;
+}
+
+/* ================================================================== */
+/* Quên mật khẩu (design 03)                                          */
+/* ================================================================== */
+/**
+ * Luôn trả cùng dạng dù tài khoản có tồn tại hay không (RULE-BE.md mục 5.3).
+ * `sentTo` chỉ che lại chính giá trị người dùng đã nhập, không tra từ tài khoản.
+ */
+export interface PasswordResetSent {
+  channel: ResetChannel;
+  sentTo: string | null;
+  resendAfter: number;
+  expiresIn: number;
+  /** Chỉ có ở môi trường dev */
+  devCode?: string;
+}
+
+/* ================================================================== */
+/* Thông báo việc làm (design 04)                                     */
+/* ================================================================== */
+export interface JobAlertItem {
+  id: string;
+  name: string;
+  criteria: JobAlertCriteria;
+  /** Chip hiển thị: ["Điện tử", "Kanto", "Thực tập sinh", "+2"] đã rút gọn sẵn ở client */
+  chips: string[];
+  channels: AlertChannel[];
+  frequency: AlertFrequency;
+  enabled: boolean;
+  /** Việc mới khớp tiêu chí từ lần xem gần nhất */
+  newCount: number;
+  lastSentAt: string | null;
+  createdAt: string;
+}
+
+export interface JobAlertList {
+  items: JobAlertItem[];
+  total: number;
+  enabledCount: number;
+  /** Tổng việc mới chưa xem của mọi thông báo đang bật */
+  unseen: number;
+  max: number;
+}
+
+/** "Việc mới cho bạn" – có % phù hợp */
+export interface AlertFeedItem extends JobListItem {
+  matchScore: number;
+}
+
+/** Gợi ý tạo thông báo từ hồ sơ ("Kiểm tra ngoại quan · Chiba · Nữ – 8 việc phù hợp mới trong tuần") */
+export interface JobAlertSuggestion {
+  name: string;
+  criteria: JobAlertCriteria;
+  /** Số việc khớp đăng trong 7 ngày */
+  weeklyCount: number;
+  reason: string;
+}
+
+/* ================================================================== */
+/* Cài đặt (design 05)                                                */
+/* ================================================================== */
+export type ChannelToggles = Record<AlertChannel, boolean>;
+
+export interface SeekerSettings {
+  account: {
+    email: string | null;
+    emailVerified: boolean;
+    phone: string | null;
+    phoneVerified: boolean;
+    hasPassword: boolean;
+    passwordChangedAt: string | null;
+    googleLinked: boolean;
+  };
+  notifications: Record<NotificationGroup, ChannelToggles>;
+  quietHours: { enabled: boolean; from: string; to: string };
+  privacy: { discoverable: boolean; phoneVisibility: PhoneVisibility };
+  locale: Locale;
+  theme: Theme;
+}
+
+/** Bản xuất dữ liệu cá nhân (Nghị định 13/2023 – quyền truy cập dữ liệu) */
+export interface PersonalDataExport {
+  exportedAt: string;
+  account: Record<string, unknown>;
+  profile: Record<string, unknown> | null;
+  settings: Record<string, unknown> | null;
+  applications: Array<Record<string, unknown>>;
+  savedJobs: Array<Record<string, unknown>>;
+  alerts: Array<Record<string, unknown>>;
+  notifications: Array<Record<string, unknown>>;
+  sessions: Array<Record<string, unknown>>;
+}
+
+/* ================================================================== */
+/* Báo cáo vi phạm (M18 + A-06)                                       */
+/* ================================================================== */
+export interface ReportCreated {
+  /** Mã hiển thị BC-xxxx */
+  code: string;
+  /** Hạn xử lý dự kiến */
+  dueAt: string;
+}
+
+/** Báo cáo của tôi – người báo cáo chỉ thấy trạng thái và kết quả, không thấy ghi chú nội bộ */
+export interface MyReportItem {
+  code: string;
+  targetType: ReportTarget;
+  targetName: string;
+  reason: string;
+  status: ReportStatus;
+  /** Kết quả rút gọn khi đã xử lý */
+  outcome: string | null;
+  createdAt: string;
+}
+
+/** Một "vụ" báo cáo = các báo cáo cùng đối tượng, cùng lý do đang mở */
+export interface AdminReportItem {
+  id: string;
+  code: string;
+  targetType: ReportTarget;
+  targetId: string | null;
+  targetName: string;
+  /** "Tin đăng · Đông Á Nhân Lực · BC-4821" */
+  targetMeta: string;
+  reason: string;
+  reasonLabel: string;
+  /** Mô tả đầu tiên có nội dung */
+  detail: string | null;
+  severity: ReportSeverity;
+  /** Đối tượng đã từng bị xác nhận vi phạm */
+  repeatOffender: boolean;
+  reporterCount: number;
+  /** Chữ cái đầu người báo cáo (ẩn danh) – "AI" khi hệ thống tự gắn cờ */
+  reporterInitials: string[];
+  status: ReportStatus;
+  dueAt: string | null;
+  /** Phút còn lại tới hạn (âm = quá hạn) */
+  dueMinutes: number | null;
+  assignee: { id: string; name: string; isMe: boolean } | null;
+  decision: ReportDecision | null;
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
+export interface AdminReportList extends Paginated<AdminReportItem> {
+  stats: {
+    open: number;
+    openToday: number;
+    overdue: number;
+    /** Thời gian xử lý trung bình 7 ngày (giờ) */
+    avgHandleHours: number | null;
+    /** % báo cáo được xác nhận vi phạm (30 ngày) */
+    confirmedRate: number | null;
+  };
+  tabs: { open: number; resolved: number; dismissed: number };
+}
+
+export interface AdminReportDetail extends AdminReportItem {
+  reports: Array<{ code: string; reason: string; detail: string | null; reporter: string; contact: string | null; createdAt: string }>;
+  target: { type: ReportTarget; id: string | null; name: string; link: string | null; status: string | null; previousViolations: number };
+  decisionNote: string | null;
+}
+
+/* ================================================================== */
+/* Admin – xác minh (design 08)                                       */
+/* ================================================================== */
+export interface VerificationListItem {
+  id: string;
+  kind: 'company' | 'individual';
+  name: string;
+  /** "Công ty XKLĐ" / "NTD cá nhân" */
+  kindLabel: string;
+  /** "MST 0109•••482 · Hà Nội" */
+  subtitle: string;
+  documents: Array<{ key: string; label: string; ok: boolean }>;
+  validDocs: number;
+  totalDocs: number;
+  /** Điểm đối chiếu tự động 0–100 */
+  autoScore: number;
+  /** "Tất cả khớp" hoặc "Giấy phép XKLĐ – lỗi (+1)" */
+  autoSummary: string;
+  status: VerificationStatus;
+  note: string | null;
+  submittedAt: string;
+  reviewedAt: string | null;
+}
+
+export interface VerificationList extends Paginated<VerificationListItem> {
+  stats: { pending: number; missingDocs: number; suspicious: number; approvedThisMonth: number; avgReviewMinutes: number | null };
+  tabs: Record<VerificationStatus, number>;
+}
+
+/* ================================================================== */
+/* Admin – ứng viên (design 09)                                       */
+/* ================================================================== */
+export type AdminSeekerStatus = 'seeking' | 'interviewing' | 'passed' | 'departed' | 'locked' | 'idle';
+
+export interface AdminSeekerItem {
+  id: string;
+  /** UV-20481 */
+  code: string;
+  name: string;
+  gender: Gender | null;
+  age: number | null;
+  hometown: string | null;
+  /** Ngành / chương trình mong muốn đầu tiên */
+  industry: string | null;
+  program: Program | null;
+  jlpt: string | null;
+  completion: number;
+  applicationCount: number;
+  reportCount: number;
+  isNew: boolean;
+  lastActiveAt: string | null;
+  status: AdminSeekerStatus;
+  /** Liên hệ đã che – bấm "Hiện" cần quyền users.pii (ghi nhật ký) */
+  phoneMasked: string | null;
+  emailMasked: string | null;
+}
+
+export interface AdminSeekerList extends Paginated<AdminSeekerItem> {
+  stats: {
+    total: number;
+    newThisWeek: number;
+    seeking: number;
+    /** % hồ sơ đạt ≥ 80% */
+    completeRate: number;
+    reported: number;
+    reportedOpen: number;
+  };
+  tabs: Record<'all' | 'seeking' | 'interviewing' | 'passed' | 'locked', number>;
+}
+
+export interface AdminSeekerDetail extends AdminSeekerItem {
+  createdAt: string;
+  lockedAt: string | null;
+  lockReason: string | null;
+  address: string | null;
+  prefs: string[];
+  programs: Program[];
+  industries: string[];
+  applications: Array<{ id: string; jobTitle: string; employerName: string | null; status: ApplicationStatus; createdAt: string }>;
+  reports: Array<{ code: string; reason: string; status: ReportStatus; createdAt: string }>;
+}
+
+export interface RevealedContact {
+  phone: string | null;
+  email: string | null;
+}
+
+/* ================================================================== */
+/* Admin – nhà tuyển dụng (design 10)                                 */
+/* ================================================================== */
+export type AdminEmployerStatus = 'active' | 'pending' | 'expiring' | 'suspended';
+
+export interface AdminEmployerItem {
+  /** "company:<employerId>" hoặc "individual:<recruiterId>" */
+  key: string;
+  kind: 'company' | 'individual';
+  id: string;
+  name: string;
+  logoUrl: string | null;
+  /** "MST 0109•••482 · Hà Nội" / "SĐT 098•••4521 · Nghệ An · Liên kết: Minh Phát Global" */
+  subtitle: string;
+  verified: boolean;
+  reportCount: number;
+  openJobs: number;
+  totalJobs: number;
+  applicants30d: number;
+  /** % thay đổi so với 30 ngày trước */
+  applicantsDelta: number | null;
+  /** % hồ sơ đã được phản hồi (đã xem / liên hệ) */
+  responseRate: number | null;
+  plan: { name: string; expiresAt: string; daysLeft: number } | null;
+  status: AdminEmployerStatus;
+}
+
+export interface AdminEmployerList extends Paginated<AdminEmployerItem> {
+  stats: { total: number; newThisMonth: number; withOpenJobs: number; paid: number; expiring: number };
+  kinds: { all: number; company: number; individual: number };
+  tabs: Record<AdminEmployerStatus | 'all', number>;
+}
+
+export interface AdminEmployerDetail extends AdminEmployerItem {
+  createdAt: string;
+  suspendedAt: string | null;
+  suspendReason: string | null;
+  contact: { phone: string | null; email: string | null; website: string | null; address: string | null };
+  members: Array<{ id: string; name: string; title: string; locked: boolean }>;
+  partners: Array<{ id: string; name: string; expiresAt: string | null }>;
+  jobs: Array<{ id: string; code: string; title: string; status: JobStatus; applicants: number; suspended: boolean; createdAt: string }>;
+  violations: Array<{ code: string; reason: string; status: ReportStatus; decision: ReportDecision | null; createdAt: string }>;
+  history: AuditLogItem[];
+}
+
+/* ================================================================== */
+/* Admin – nhật ký hệ thống (A-12)                                    */
+/* ================================================================== */
+export interface AuditLogItem {
+  id: string;
+  actor: { id: string; name: string };
+  action: string;
+  targetType: string | null;
+  targetId: string | null;
+  before: unknown;
+  after: unknown;
+  ip: string | null;
+  createdAt: string;
 }

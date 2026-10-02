@@ -78,7 +78,7 @@ export class MeService {
     if (!user.passwordHash || !(await verifyPassword(input.currentPassword, user.passwordHash))) {
       throw new ApiException('INVALID_CREDENTIALS', 'Mật khẩu hiện tại không đúng', HttpStatus.BAD_REQUEST, { currentPassword: 'Mật khẩu hiện tại không đúng' });
     }
-    await this.prisma.user.update({ where: { id: userId }, data: { passwordHash: await hashPassword(input.newPassword) } });
+    await this.prisma.user.update({ where: { id: userId }, data: { passwordHash: await hashPassword(input.newPassword), passwordChangedAt: new Date() } });
     // Giữ phiên hiện tại, đăng xuất các thiết bị khác
     await this.prisma.session.updateMany({ where: { userId, id: { not: sessionId }, revokedAt: null }, data: { revokedAt: new Date() } });
   }

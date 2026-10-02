@@ -6,6 +6,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import Sidebar from './Sidebar';
+import Topbar from './Topbar';
 import './layout.css';
 
 interface ShellState {
@@ -60,9 +61,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         <Sidebar badges={badges} onClose={() => setMenuOpen(false)} />
         <button type="button" className="shell__backdrop" aria-label="Đóng menu" onClick={() => setMenuOpen(false)} />
         <div className="shell__main">
-          <button type="button" className="shell__menu-toggle icon-btn" aria-label="Mở menu" onClick={() => setMenuOpen(true)}>
-            <span className="shell__menu-icon" />
-          </button>
+          <Topbar badges={badges} onMenu={() => setMenuOpen(true)} />
           {children}
         </div>
       </div>

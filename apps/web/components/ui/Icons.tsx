@@ -570,3 +570,31 @@ export const IconStarLine = (p: IconProps) => (
     <path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z" />
   </StrokeIcon>
 );
+
+/** Mục tiêu – "gợi ý phù hợp" (spec R8, thay cho icon sao "AI") */
+export const IconTarget = (p: IconProps) => (
+  <StrokeIcon {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <circle cx="12" cy="12" r="4.5" />
+    <circle cx="12" cy="12" r="1" />
+  </StrokeIcon>
+);
+export const IconTrash = (p: IconProps) => (
+  <StrokeIcon {...p}>
+    <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12M9 7V4h6v3" />
+  </StrokeIcon>
+);
+/** Ngôn ngữ / quả địa cầu (Cài đặt) */
+export const IconGlobe = (p: IconProps) => (
+  <StrokeIcon {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z" />
+  </StrokeIcon>
+);
+/** Dữ liệu / cơ sở dữ liệu (Cài đặt – tải dữ liệu, xoá tài khoản) */
+export const IconDatabase = (p: IconProps) => (
+  <StrokeIcon {...p}>
+    <ellipse cx="12" cy="5.5" rx="7.5" ry="2.8" />
+    <path d="M4.5 5.5v13c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-13M4.5 12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8" />
+  </StrokeIcon>
+);

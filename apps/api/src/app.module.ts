@@ -15,11 +15,13 @@ import { AdminModule } from './modules/admin/admin.module.js';
 import { ApplicationsModule } from './modules/applications/applications.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { EmployerPortalModule } from './modules/employer-portal/employer-portal.module.js';
+import { JobAlertsModule } from './modules/job-alerts/job-alerts.module.js';
 import { JobsModule } from './modules/jobs/jobs.module.js';
 import { LeadsModule } from './modules/leads/leads.module.js';
 import { MeModule } from './modules/me/me.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { ProfilesModule } from './modules/profiles/profiles.module.js';
+import { ReportsModule } from './modules/reports/reports.module.js';
 import { SavedJobsModule } from './modules/saved-jobs/saved-jobs.module.js';
 import { SystemController } from './modules/system/system.controller.js';
 
@@ -51,10 +53,12 @@ import { SystemController } from './modules/system/system.controller.js';
     MeModule,
     JobsModule,
     SavedJobsModule,
+    JobAlertsModule,
     ApplicationsModule,
     ProfilesModule,
     EmployerPortalModule,
     LeadsModule,
+    ReportsModule,
 
     // Quản trị
     AdminModule,

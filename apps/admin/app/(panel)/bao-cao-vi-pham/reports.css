@@ -1,0 +1,138 @@
+/*
+ * Báo cáo vi phạm (/bao-cao-vi-pham) – design-new/11
+ * Phần chung (thẻ số liệu, tab, bảng, ngăn kéo) ở components/list/list.css
+ */
+
+/* ---------- Bộ lọc ---------- */
+.rp-filter-label {
+  color: var(--text-disabled);
+  font-size: 12.5px;
+}
+.rp-dot--critical { background: var(--danger-text); }
+.rp-dot--high { background: var(--orange); }
+.rp-dot--medium { background: var(--warning); }
+.rp-dot--low { background: var(--text-disabled); }
+.rp-sort {
+  padding: 0 20px 10px;
+  color: var(--text-3);
+  font-size: 12.5px;
+}
+.rp-sort b {
+  color: var(--text);
+}
+
+/* ---------- Nhãn mức độ ---------- */
+.rp-sev--critical { background: var(--danger-text); color: #fff; }
+.rp-sev--high { background: var(--warning-soft-2); color: var(--warning-text); }
+.rp-sev--medium { background: #fef9c3; color: #a16207; }
+.rp-sev--low { background: var(--surface-sunken); color: var(--text-2); }
+
+/* ---------- Bảng ---------- */
+.rp-row--late {
+  background: #fffafa;
+}
+.rp-target {
+  max-width: 380px;
+}
+.rp-reason {
+  max-width: 240px;
+}
+.rp-reporters {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rp-due {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.rp-due--soon {
+  color: var(--warning-text);
+}
+.rp-due--late {
+  color: var(--danger-text);
+  font-weight: 800;
+}
+.rp-assignee {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.rp-assignee .avatar--sm {
+  border: 0;
+}
+
+/* ---------- Ngăn kéo ---------- */
+.rp-drawer-skeleton {
+  height: 240px;
+}
+.rp-gap {
+  margin-left: 6px;
+}
+.rp-target-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+}
+.rp-target-box b {
+  font-size: 14px;
+}
+.rp-report .dlist__text {
+  gap: 4px;
+}
+.rp-report__detail {
+  color: var(--text-body);
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.45;
+}
+.rp-hint {
+  color: var(--text-3);
+  font-size: 12px;
+}
+.rp-req {
+  color: var(--danger-text);
+}
+.rp-decisions {
+  display: grid;
+  gap: 8px;
+}
+.rp-decision {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: left;
+}
+.rp-decision b {
+  font-size: 13.5px;
+}
+.rp-decision span {
+  color: var(--text-3);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.rp-decision:hover {
+  border-color: var(--primary-300);
+}
+.rp-decision--on {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  box-shadow: 0 0 0 3px rgba(56, 121, 255, 0.1);
+}
+.rp-decision--danger.rp-decision--on {
+  border-color: var(--danger-text);
+  background: var(--danger-soft);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}

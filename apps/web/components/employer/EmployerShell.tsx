@@ -74,6 +74,11 @@ function Topbar({ onMenu }: { onMenu: () => void }) {
   const { account } = useEmployerAccount();
   const router = useRouter();
   const searchRef = useRef<HTMLInputElement>(null);
+  /** Mobile: ô tìm kiếm ẩn sau nút kính lúp, mở ra phủ cả thanh trên */
+  const [searchOpen, setSearchOpen] = useState(false);
+  useEffect(() => {
+    if (searchOpen) searchRef.current?.focus();
+  }, [searchOpen]);
 
   // Ctrl / ⌘ + K: tìm ứng viên
   useEffect(() => {
@@ -126,19 +131,33 @@ function Topbar({ onMenu }: { onMenu: () => void }) {
 
       <form
         role="search"
-        className="emp-search"
+        className={cx('emp-search', searchOpen && 'emp-search--open')}
         onSubmit={(e) => {
           e.preventDefault();
           const q = searchRef.current?.value.trim();
+          setSearchOpen(false);
           router.push(`${EMPLOYER_BASE}/ung-vien${q ? `?q=${encodeURIComponent(q)}` : ''}`);
         }}
       >
         <IconSearch size={17} />
-        <input ref={searchRef} type="search" className="emp-search__input" placeholder="Tìm ứng viên, số điện thoại, mã đơn…" aria-label="Tìm ứng viên" />
+        <input
+          ref={searchRef}
+          type="search"
+          className="emp-search__input"
+          placeholder="Tìm ứng viên, số điện thoại, mã đơn…"
+          aria-label="Tìm ứng viên"
+          onKeyDown={(e) => e.key === 'Escape' && setSearchOpen(false)}
+        />
         <kbd className="emp-search__kbd">Ctrl K</kbd>
+        <button type="button" className="emp-search__close" aria-label="Đóng tìm kiếm" onClick={() => setSearchOpen(false)}>
+          <IconClose size={18} />
+        </button>
       </form>
 
       <div className="emp-topbar__actions">
+        <button type="button" className="emp-topbar__search-btn" aria-label="Tìm ứng viên" aria-expanded={searchOpen} onClick={() => setSearchOpen(true)}>
+          <IconSearch size={20} />
+        </button>
         <Link href={`${EMPLOYER_BASE}/don-hang/dang-tin`} className="emp-topbar__post">
           <IconPlus size={17} className="icon--w22" />
           <span>Đăng tin mới</span>
@@ -245,9 +264,27 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
     <>
       <div className={cx('emp-sidebar__backdrop', open && 'emp-sidebar__backdrop--open')} onClick={onClose} aria-hidden="true" />
       <aside className={cx('emp-sidebar', open && 'emp-sidebar--open')} aria-label="Menu khu quản lý">
-        <button type="button" className="emp-sidebar__close" aria-label="Đóng menu" onClick={onClose}>
-          <IconClose size={18} />
-        </button>
+        {/* Đầu ngăn trượt (tablet / mobile): thông tin tổ chức + đăng tin – thay phần đã ẩn trên thanh trên */}
+        <div className="emp-drawer-head">
+          <div className="emp-drawer-head__org">
+            {account.company?.logoUrl ? (
+              <img className="emp-org__logo" src={account.company.logoUrl} alt="" />
+            ) : (
+              <span className="emp-org__logo emp-org__logo--text">{initialOf(account.company?.name ?? account.user.name)}</span>
+            )}
+            <span className="emp-drawer-head__text">
+              <b>{account.company ? (account.company.shortName ?? account.company.name) : account.user.name}</b>
+              <span>{account.company ? `${account.plan?.name ?? 'Gói miễn phí'} · ${account.company.memberCount} thành viên` : 'Tài khoản cá nhân'}</span>
+            </span>
+            <button type="button" className="emp-sidebar__close" aria-label="Đóng menu" onClick={onClose}>
+              <IconClose size={18} />
+            </button>
+          </div>
+          <Link href={`${EMPLOYER_BASE}/don-hang/dang-tin`} className="emp-drawer-head__post">
+            <IconPlus size={17} className="icon--w22" />
+            Đăng tin mới
+          </Link>
+        </div>
         <nav className="emp-nav" aria-label="Tuyển dụng">
           <span className="emp-nav__group">Tuyển dụng</span>
           {recruiting.map(renderItem)}

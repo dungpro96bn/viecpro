@@ -2,6 +2,7 @@ import { Controller, HttpCode, HttpStatus, Inject, Post, Req, Res } from '@nestj
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import {
+  forgotPasswordSchema,
   googleLoginSchema,
   loginSchema,
   refreshSchema,
@@ -10,7 +11,9 @@ import {
   sendOtpSchema,
   verifyRegisterSchema,
   type AuthResponse,
+  type ForgotPasswordInput,
   type GoogleLoginInput,
+  type PasswordResetSent,
   type LoginInput,
   type OtpSentResponse,
   type RefreshInput,
@@ -128,9 +131,18 @@ export class AuthController {
 
   @Public()
   @Throttle(STRICT)
+  @Post('password/forgot')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Quên mật khẩu: gửi mã qua SMS hoặc email (không cho biết tài khoản có tồn tại)' })
+  forgotPassword(@ZodBody(forgotPasswordSchema) body: ForgotPasswordInput): Promise<PasswordResetSent> {
+    return this.auth.forgotPassword(body);
+  }
+
+  @Public()
+  @Throttle(STRICT)
   @Post('password/reset')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Đặt lại mật khẩu bằng OTP (gửi OTP purpose=reset_password trước)' })
+  @ApiOperation({ summary: 'Đặt lại mật khẩu bằng mã (email / SĐT + kênh). Vẫn nhận `phone` như bản cũ' })
   async resetPassword(@ZodBody(resetPasswordSchema) body: ResetPasswordInput) {
     await this.auth.resetPassword(body);
   }

@@ -14,9 +14,166 @@
   display: flex;
   flex-direction: column;
 }
-.shell__backdrop,
-.shell__menu-toggle {
+.shell__backdrop {
   display: none;
+}
+
+/* ---------- Thanh trên (tablet / mobile) ---------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  height: 60px;
+  flex-shrink: 0;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px 0 12px;
+  background: var(--side-bg);
+  color: #fff;
+}
+.topbar__btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #c8d3e2;
+}
+.topbar__btn:hover,
+.topbar__btn[aria-expanded='true'] {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  color: #fff;
+}
+.topbar__name {
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+.topbar__actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.topbar__pop {
+  position: relative;
+}
+.topbar__dot {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--side-bg);
+  border-radius: var(--radius-full);
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+.topbar__avatar {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--violet));
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+.topbar__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  width: min(300px, calc(100vw - 32px));
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-pop);
+}
+.topbar__menu-title {
+  padding: 8px 10px 6px;
+  color: var(--text-3);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.topbar__item {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: left;
+}
+.topbar__item span {
+  flex: 1;
+}
+.topbar__item:hover {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+.topbar__item--danger {
+  color: var(--danger-text);
+}
+.topbar__count {
+  min-width: 26px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0 7px;
+  border-radius: var(--radius-full);
+  background: var(--surface-sunken);
+  color: var(--text-3);
+  font-size: 12px;
+}
+.topbar__count--on {
+  background: var(--danger-soft);
+  color: var(--danger-strong);
+}
+.topbar__me {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.topbar__me b {
+  font-size: 14px;
+}
+.topbar__me span {
+  color: var(--text-3);
+  font-size: 12px;
 }
 .shell-loading {
   min-height: 100vh;
@@ -342,34 +499,39 @@
     border: 0;
     background: rgba(11, 20, 36, 0.45);
   }
-  .shell__menu-toggle {
-    display: inline-flex;
-    position: fixed;
-    left: 16px;
-    top: 15px;
-    z-index: 20;
+  /* Thanh trên thay cho nút ☰ nổi; tiêu đề trang nằm ngay dưới, không dính nữa */
+  .topbar {
+    display: flex;
   }
-  .shell__menu-icon,
-  .shell__menu-icon::before,
-  .shell__menu-icon::after {
-    display: block;
-    width: 16px;
-    height: 2px;
-    border-radius: 2px;
-    background: currentColor;
-  }
-  .shell__menu-icon {
-    position: relative;
-  }
-  .shell__menu-icon::before,
-  .shell__menu-icon::after {
-    content: '';
-    position: absolute;
-    left: 0;
-  }
-  .shell__menu-icon::before { top: -5px; }
-  .shell__menu-icon::after { top: 5px; }
   .page-header {
-    padding-left: 68px;
+    position: static;
+  }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 767px) {
+  /* Đầu trang: tiêu đề trên, thao tác (tìm kiếm, lọc thời gian, xuất…) xuống dòng dưới */
+  .page-header {
+    height: auto;
+    min-height: 0;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 16px;
+  }
+  .page-header__actions {
+    width: 100%;
+    margin-left: 0;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .page-header__title {
+    font-size: 17px;
+  }
+  .page-header__meta {
+    font-size: 11.5px;
+  }
+  .page-body {
+    padding: 16px 16px 28px;
+    gap: 16px;
   }
 }

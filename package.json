@@ -14,12 +14,16 @@
     "build": "npm run build -w @viecpro/shared && npm run build -w @viecpro/api && npm run build -w @viecpro/web && npm run build -w @viecpro/admin",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test -w @viecpro/api",
-    "db:up": "docker compose up -d",
+    "db:up": "docker compose up -d postgres redis",
     "db:down": "docker compose down",
     "db:migrate": "npm run db:migrate -w @viecpro/api",
     "db:seed": "npm run db:seed -w @viecpro/api",
     "db:studio": "npm run db:studio -w @viecpro/api",
-    "dev:admin": "npm run dev -w @viecpro/admin"
+    "dev:admin": "npm run dev -w @viecpro/admin",
+    "docker:up": "docker compose --profile app up -d --build",
+    "docker:down": "docker compose --profile app down",
+    "docker:logs": "docker compose --profile app logs -f api web admin",
+    "docker:seed": "docker compose exec api npx prisma db seed"
   },
   "devDependencies": {
     "concurrently": "^10.0.5"

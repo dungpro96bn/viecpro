@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { WEB_LINKS } from '@viecpro/shared';
@@ -50,16 +50,20 @@ function SeekerFrame({ children }: { children: ReactNode }) {
   const consultant = dashboard.consultant;
   const contact = dashboard.consultantContact;
 
-  // Chưa có trang riêng cho thông báo và cài đặt: là các mục trên trang Tổng quan
   const nav = [
     { href: SEEKER_BASE, label: 'Tổng quan', icon: IconHome, count: '' },
     { href: `${SEEKER_BASE}/ho-so`, label: 'Hồ sơ của tôi', icon: IconUser, count: `${profile.completion}%` },
     { href: WEB_LINKS.seekerApplications, label: 'Việc đã ứng tuyển', icon: IconSend, count: String(dashboard.applications.total) },
     { href: WEB_LINKS.seekerSaved, label: 'Việc đã lưu', icon: IconHeart, count: String(dashboard.saved.total) },
-    { href: `${SEEKER_BASE}#notifications`, label: 'Thông báo việc làm', icon: IconBellLine, count: '' },
-    { href: `${SEEKER_BASE}#security`, label: 'Cài đặt', icon: IconSettings, count: '' },
+    { href: WEB_LINKS.seekerAlerts, label: 'Thông báo việc làm', icon: IconBellLine, count: '' },
+    { href: WEB_LINKS.seekerSettings, label: 'Cài đặt', icon: IconSettings, count: '' },
   ];
-  const isActive = (href: string) => !href.includes('#') && (href === SEEKER_BASE ? pathname === SEEKER_BASE : pathname.startsWith(href));
+  const isActive = (href: string) => (href === SEEKER_BASE ? pathname === SEEKER_BASE : pathname.startsWith(href));
+  const navRef = useRef<HTMLElement>(null);
+  // Mobile: menu là hàng cuộn ngang – cuộn mục đang mở vào giữa màn hình
+  useEffect(() => {
+    navRef.current?.querySelector<HTMLElement>('[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }, [pathname]);
   const meta = [profile.gender === 'nu' ? 'Nữ' : profile.gender === 'nam' ? 'Nam' : '', profile.birthYear ? `${new Date().getFullYear() - profile.birthYear} tuổi` : '', profile.hometown ?? ''].filter(Boolean).join(' · ');
 
   return (
@@ -92,7 +96,7 @@ function SeekerFrame({ children }: { children: ReactNode }) {
 
       <main className="account-main page-main">
         <div className="container account-layout">
-          <aside className="account-sidebar" aria-label="Tài khoản">
+          <aside className={cx('account-sidebar', pathname !== SEEKER_BASE && 'account-sidebar--sub')} aria-label="Tài khoản">
             <section className="account-profile-card">
               <div className="account-profile-card__cover">
                 <span />
@@ -122,7 +126,7 @@ function SeekerFrame({ children }: { children: ReactNode }) {
               </div>
             </section>
 
-            <nav className="account-side-nav" aria-label="Mục tài khoản">
+            <nav className="account-side-nav" aria-label="Mục tài khoản" ref={navRef}>
               {nav.map(({ href, label, icon: Icon, count }) => {
                 const active = isActive(href);
                 return (

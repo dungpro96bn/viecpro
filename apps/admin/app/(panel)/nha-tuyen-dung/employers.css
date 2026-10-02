@@ -1,0 +1,78 @@
+/*
+ * Nhà tuyển dụng (/nha-tuyen-dung) – design-new/10
+ * Phần chung (thẻ số liệu, tab, bảng, ngăn kéo) ở components/list/list.css
+ */
+
+/* ---------- Chọn loại: Tất cả / Công ty XKLĐ / NTD cá nhân ---------- */
+.em-kinds {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.em-kind {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: left;
+}
+.em-kind b {
+  font-size: 14px;
+}
+.em-kind span {
+  color: var(--text-3);
+  font-size: 12.5px;
+}
+.em-kind:hover {
+  border-color: var(--primary-300);
+}
+.em-kind--on {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  box-shadow: 0 0 0 3px rgba(56, 121, 255, 0.1);
+}
+
+/* ---------- Bảng ---------- */
+.em-verified {
+  color: var(--primary);
+}
+.em-up {
+  color: var(--success-text);
+  font-weight: 700;
+}
+.em-down {
+  color: var(--danger-text);
+  font-weight: 700;
+}
+
+/* ---------- Ngăn kéo ---------- */
+.em-drawer-skeleton {
+  height: 240px;
+}
+.em-span {
+  grid-column: 1 / -1;
+}
+.em-history-icon {
+  flex-shrink: 0;
+  color: var(--text-disabled);
+}
+
+@media (max-width: 767px) {
+  /* 3 ô loại nằm ngang, gọn */
+  .em-kinds {
+    gap: 6px;
+  }
+  .em-kind {
+    padding: 9px 10px;
+  }
+  .em-kind b {
+    font-size: 12.5px;
+  }
+  .em-kind span {
+    font-size: 11.5px;
+  }
+}

@@ -218,7 +218,7 @@ export class EmployerJobsService {
 
   /** Tin thuộc phạm vi NTD (điều kiện sở hữu trong câu truy vấn – trả 404 nếu không có quyền) */
   private async own(actor: EmployerActor, jobId: string) {
-    const job = await this.prisma.job.findFirst({ where: { id: jobId, ...this.ctx.jobScope(actor) }, select: { id: true, status: true } });
+    const job = await this.prisma.job.findFirst({ where: { id: jobId, ...this.ctx.jobScope(actor) }, select: { id: true, status: true, suspendedAt: true, suspendReason: true } });
     if (!job) throw ApiException.notFound('Không tìm thấy đơn hàng');
     return job;
   }
@@ -263,6 +263,8 @@ export class EmployerJobsService {
     const actor = await this.ctx.resolve(userId);
     const job = await this.own(actor, jobId);
     if (job.status !== 'paused') throw new ApiException('CONFLICT', 'Tin không ở trạng thái tạm ẩn', HttpStatus.CONFLICT);
+    // Tin bị hệ thống / quản trị tạm ẩn chỉ mở lại được sau khi kiểm duyệt xử lý xong
+    if (job.suspendedAt) throw new ApiException('SUSPENDED', job.suspendReason ?? 'Tin đang bị tạm ẩn để kiểm tra, vui lòng liên hệ 1900 66 99', HttpStatus.CONFLICT);
     const status = actor.verified ? 'open' : 'pending';
     await this.prisma.$transaction([
       this.prisma.job.update({ where: { id: jobId }, data: { status, ...(status === 'pending' && { submittedAt: new Date() }) } }),

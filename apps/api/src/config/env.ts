@@ -7,9 +7,9 @@ const envSchema = z.object({
   /** Origin web + admin được gọi API */
   CORS_ORIGINS: z
     .string()
-    .default('http://localhost:3000,http://localhost:3001')
+    .default('http://localhost:3100,http://localhost:3001')
     .transform((v) => v.split(',').map((s) => s.trim()).filter(Boolean)),
-  ASSET_BASE_URL: z.url().default('http://localhost:3000'),
+  ASSET_BASE_URL: z.url().default('http://localhost:3100'),
   STORAGE_PROVIDER: z.enum(['local', 's3']).default('local'),
   S3_BUCKET: z.string().optional(),
   S3_REGION: z.string().default('ap-southeast-1'),
@@ -34,7 +34,7 @@ const envSchema = z.object({
   /** Người gửi, vd. "viecpro <no-reply@viecpro.vn>" (tên miền đã xác minh ở nhà cung cấp) */
   EMAIL_FROM: z.string().trim().default('viecpro <no-reply@viecpro.vn>'),
   /** URL trang web dùng cho link trong email */
-  WEB_BASE_URL: z.url().default('http://localhost:3000'),
+  WEB_BASE_URL: z.url().default('http://localhost:3100'),
   PUSH_PROVIDER: z.enum(['log', 'fcm']).default('log'),
   FCM_PROJECT_ID: z.string().optional(),
   FCM_CLIENT_EMAIL: z.email().optional(),
@@ -50,6 +50,9 @@ const envSchema = z.object({
     .transform((v) => v.split(',').map((s) => s.trim()).filter(Boolean)),
 
   GOOGLE_CLIENT_ID: z.string().optional(),
+
+  /** Worker gửi thông báo việc làm (5 phút / lần). Khi chạy nhiều instance chỉ bật ở 1 instance */
+  JOB_ALERT_WORKER: z.enum(['true', 'false']).default('true').transform((v) => v === 'true'),
 
   APP_MIN_VERSION_IOS: z.string().default('1.0.0'),
   APP_MIN_VERSION_ANDROID: z.string().default('1.0.0'),

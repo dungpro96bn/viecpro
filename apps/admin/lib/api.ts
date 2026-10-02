@@ -1,6 +1,8 @@
 import type { ApiError } from '@viecpro/shared';
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';
+/** Trang web công khai (viecpro.vn) – mở tin bị báo cáo trong tab mới */
+export const WEB_URL = (process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3100').replace(/\/$/, '');
 
 /** Header chống CSRF – API bắt buộc khi xác thực bằng cookie (RULE-BE.md mục 9.3) */
 const CSRF = { 'X-Requested-With': 'viecpro' };

@@ -307,8 +307,9 @@ Rà soát ngày 01/10/2026. Sửa cùng đợt dựng hệ thống admin. Đánh
 | 6 | 5.3 – khoá sau 10 lần đăng nhập sai | Có bộ đếm liên tiếp và khoá tạm độc lập với IP | ✅ Đã xử lý |
 | 7 | 9.3 – header `X-Requested-With` cho refresh bằng cookie | `/auth/refresh` xác thực header khi dùng cookie | ✅ Đã xử lý |
 | 8 | 7 – đơn của NTD chưa xác minh phải chờ duyệt | Tin của nhà tuyển dụng chưa xác minh chuyển `pending` | ✅ Đã xử lý |
-| 9 | 14 – test e2e phân quyền 401 / 403 / 404 | Đã có e2e cho `/me/profile`, `/me/sessions`, `/me/applications`, ứng tuyển (OTP email); cần mở rộng sang `/employer/*` và admin | Trung bình |
+| 9 | 14 – test e2e phân quyền 401 / 403 / 404 | Đã có e2e cho `/me/profile`, `/me/sessions`, `/me/applications`, ứng tuyển (OTP email), `/me/alerts`, `/me/settings`, `/reports`, `/admin/users`, `/admin/reports`; cần mở rộng sang `/employer/*` và các route admin còn lại | Trung bình |
 | 12 | 8 – giấy tờ tuỳ thân phải ở kho riêng mã hoá | Chưa có kho riêng: API chỉ nhận ảnh chân dung (NTD thêm ứng viên) và ảnh 4×6 (ứng viên); CCCD / hộ chiếu / CV kiểm tra bản gốc | Trung bình |
+| 14 | Spec R4 – không thu thập CCCD | Luồng xác minh NTD đã bỏ CCCD (ĐKKD, GP XKLĐ, Thư uỷ quyền / Hợp đồng CTV, xác nhận đơn vị, SĐT). Còn `Recruiter.cccdVerifiedAt`, điểm tin cậy NTD và mục giấy tờ `cccd` của ứng viên – cần đổi cùng giao diện web | Cao |
 | 13 | 2 – thay đổi phá vỡ cần route v2 | `POST /applications` bắt buộc `email` + `emailCode` (xác nhận email theo yêu cầu sản phẩm) – app mobile cũ cần cập nhật | Cao (nếu đã phát hành app) |
 | 10 | 9.4 – throttler dùng Redis khi nhiều instance | Đã có Redis storage; bật bằng `REDIS_URL` khi chạy nhiều instance. Mặc định dev vẫn dùng bộ nhớ | Thấp |
 | 11 | 9.7 – `npm audit` | `npm audit --omit=dev` báo 4 high ở `deepmerge-ts` / `mysql2`, đi theo Prisma CLI 7.10 qua peer optional của `@prisma/client`; `npm audit fix --force` sẽ hạ Prisma xuống 6 nên chưa áp dụng | Thấp |

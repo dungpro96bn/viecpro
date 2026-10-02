@@ -77,3 +77,16 @@ export function estimateIncome(salary: number, overtimeHours = 0): { low: number
 export function yenToMillionVnd(yen: number): number {
   return Math.round((yen * 170) / 100_000) / 10;
 }
+
+/** "lan.nguyen99@gmail.com" → "la•••99@gmail.com" (không lộ đủ email trong response / UI) */
+export function maskEmail(email: string): string {
+  const [user = '', domain = ''] = email.split('@');
+  const shown = user.length <= 3 ? user.slice(0, 1) : `${user.slice(0, 2)}•••${user.slice(-2)}`;
+  return `${shown}${user.length <= 3 ? '•••' : ''}@${domain}`;
+}
+
+/** "+84912345678" → "•••• 345 678" (ô chọn kênh nhận mã – design 03) */
+export function maskPhoneTail(e164: string): string {
+  const d = e164.replace(/^\+84/, '0');
+  return `•••• ${d.slice(4, 7)} ${d.slice(7)}`;
+}

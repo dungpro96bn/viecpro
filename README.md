@@ -7,7 +7,7 @@ Quy tắc code: **[RULE.md](RULE-FE.md)** (web) · **[RULE-BE.md](RULE-BE.md)** 
 
 ```
 apps/
-  web/        Next.js 16 – giao diện web                → http://localhost:3000
+  web/        Next.js 16 – giao diện web                → http://localhost:3100
   admin/      Next.js 16 – cổng quản trị                → http://localhost:3001
   api/        NestJS 12 + Prisma 7 + PostgreSQL – API    → http://localhost:4000/api/v1 · tài liệu /docs
 packages/
@@ -56,6 +56,8 @@ Môi trường dev in mã OTP SMS ra log API và trả thêm `devCode` trong res
 | `/tai-khoan-ung-vien/ho-so` | Hồ sơ của tôi (design 18): % hoàn thiện, sửa từng khối, giấy tờ, video, NTD đã xem |
 | `/tai-khoan-ung-vien/viec-da-ung-tuyen` | Việc đã ứng tuyển (design 19): tiến trình 5 bước, phỏng vấn sắp tới, xác nhận / xin dời lịch |
 | `/tai-khoan-ung-vien/viec-da-luu` | Việc đã lưu (design 20): sắp xếp, lọc ngành, so sánh, ứng tuyển nhanh việc sắp hết hạn |
+| `/tai-khoan-ung-vien/thong-bao-viec-lam` | Thông báo việc làm (design-new 04): tạo / sửa / bật tắt, việc mới cho bạn, gợi ý từ hồ sơ |
+| `/tai-khoan-ung-vien/cai-dat` | Cài đặt (design-new 05): email / SĐT / mật khẩu, thiết bị, thông báo theo kênh + giờ yên lặng, quyền riêng tư, ngôn ngữ, tải dữ liệu, xoá tài khoản |
 | `/quan-ly-tuyen-dung` | Tổng quan NTD doanh nghiệp / cá nhân (design 10, 11) |
 | `/quan-ly-tuyen-dung/don-hang` | Quản lý tin tuyển dụng (design 12); `/dang-tin`, `/[id]/sua`: đăng / sửa tin (design 15) |
 | `/quan-ly-tuyen-dung/ung-vien` | Quản lý ứng viên (design 13); `/them`: thêm ứng viên thủ công / Excel (design 16) |
@@ -70,7 +72,12 @@ Môi trường dev in mã OTP SMS ra log API và trả thêm `devCode` trong res
 | `/dang-nhap` | Đăng nhập admin, bắt buộc xác thực 2 lớp ngoài chế độ kiểm thử local |
 | `/` | Bảng điều khiển và hàng chờ tóm tắt |
 | `/kiem-duyet-tin` | Hàng chờ kiểm duyệt có tìm kiếm, phân trang, điểm rủi ro và thao tác duyệt / từ chối |
+| `/xac-minh-doanh-nghiep` | Xác minh doanh nghiệp / NTD cá nhân (design-new 08): tab trạng thái, đối chiếu tự động, xác minh / yêu cầu bổ sung / từ chối |
+| `/nguoi-lao-dong` | Danh sách ứng viên (design-new 09): lọc, thống kê, liên hệ che (hiện đầy đủ có ghi nhật ký), khoá / mở khoá |
+| `/nha-tuyen-dung` | Nhà tuyển dụng (design-new 10): gộp công ty + cá nhân, ngăn kéo 5 tab, cảnh cáo / tạm khoá (2FA) / mở khoá |
+| `/bao-cao-vi-pham` | Báo cáo vi phạm (design-new 11): gộp vụ, ưu tiên mức độ × hạn, nhận xử lý, quyết định |
 
+Mọi trang web và admin co giãn theo desktop (≥ 1180px), tablet (768 – 1180px) và mobile (390px): admin có thanh trên + menu trượt dưới 1180px, bảng danh sách thành thẻ trên mobile.
 Các màn hình admin khác đang được bổ sung theo từng đợt. Quyền trên giao diện chỉ hỗ trợ trải nghiệm; API vẫn kiểm tra RBAC cho từng thao tác.
 
 Đăng nhập, đăng ký/OTP, khôi phục mật khẩu, trang chủ/tìm kiếm, chi tiết việc làm, hồ sơ nhà tuyển dụng/tư vấn viên, ứng tuyển, theo dõi hồ sơ, tư vấn, nhận tin và tổng quan tài khoản đều gọi API. Khu vực ứng viên còn hỗ trợ sửa hồ sơ, xem thông báo, quản lý phiên, đổi mật khẩu, tải ảnh/video và xóa tài khoản.
@@ -83,7 +90,7 @@ Danh sách đầy đủ, thử trực tiếp: http://localhost:4000/docs (OpenAP
 
 | Nhóm | Endpoint chính | Phục vụ màn hình |
 | --- | --- | --- |
-| Auth | `POST /auth/register` → `/auth/register/verify`, `/auth/login`, `/auth/google`, `/auth/refresh`, `/auth/logout`, `/auth/otp`, `/auth/password/reset` | Đăng ký, đăng nhập, quên mật khẩu |
+| Auth | `POST /auth/register` → `/auth/register/verify`, `/auth/login`, `/auth/google`, `/auth/refresh`, `/auth/logout`, `/auth/otp`, `/auth/password/forgot` (email / SĐT, kênh SMS / email – không lộ tài khoản) → `/auth/password/reset` | Đăng ký, đăng nhập, quên mật khẩu (design-new 03) |
 | Việc làm | `GET /jobs` (lọc, sắp xếp, phân trang), `/jobs/facets`, `/jobs/:slug`, `/jobs/:slug/similar`, `/jobs/recommended`, `/regions` | Trang chủ, tìm kiếm, chi tiết đơn, việc phù hợp |
 | Ứng tuyển | `POST /applications/email-otp` → `POST /applications` (kèm `emailCode`), `GET /me/applications` (tab, tìm, sắp xếp), `/me/applications/summary`, `POST /me/applications/:id/withdraw`, `…/interview/confirm`, `…/interview/change-request`, `POST /me/applications/bulk` | Popup ứng tuyển (OTP email), việc đã ứng tuyển, ứng tuyển nhanh việc đã lưu |
 | Tài khoản | `GET /me`, `GET/PATCH /me/profile`, `/me/profile/insights`, `PUT /me/profile/documents/:key`, `/me/dashboard`, `/me/password`, `/me/sessions`, `DELETE /me`, `/me/assets/presign`, `/me/assets/complete` | Hồ sơ, bảo mật, upload ảnh/video |
@@ -91,10 +98,18 @@ Danh sách đầy đủ, thử trực tiếp: http://localhost:4000/docs (OpenAP
 | Hồ sơ NTD | `GET /employers/:slug`, `/recruiters/:slug`, `/recruiters/:slug/phone`, `PUT/DELETE …/follow` | Trang nhà tuyển dụng, tư vấn viên |
 | Cổng NTD | `/employer/me`, `/employer/dashboard`, `/employer/team`, `/employer/partners`, `/employer/jobs` (+ summary, market, form, stats, boost, pause, resume, close), `/employer/applications` (+ notes, status, duplicates, job-match, import), `/employer/interviews` (+ candidates, availability, dời lịch, kết quả, huỷ), `/employer/leads` | Khu quản lý tuyển dụng (design 10 – 17) |
 | Tư vấn & tin | `POST /leads/consultations`, `/leads/subscriptions` | Form đăng ký tư vấn, nhận đơn mới ở footer |
-| Thông báo | `GET /me/notifications`, `POST …/:id/read`, `…/read-all` | Chuông thông báo |
+| Thông báo | `GET /me/notifications`, `POST …/:id/read`, `…/read-all` – push tôn trọng Cài đặt + giờ yên lặng | Chuông thông báo |
+| Thông báo việc làm | `GET/POST /me/alerts` (tối đa 10), `PATCH/DELETE /me/alerts/:id`, `GET /me/alerts/:id/jobs`, `POST …/:id/seen`, `/me/alerts/feed`, `/me/alerts/suggestions`; worker 5 phút / lần (`JOB_ALERT_WORKER`) gửi app + email theo tần suất | C-05 (design-new 04) |
+| Cài đặt | `GET/PATCH /me/settings`, `POST /me/email/otp` → `/me/email`, `POST /me/phone/otp` → `/me/phone`, `DELETE /me/sessions` (đăng xuất thiết bị khác), `GET /me/export` (tải dữ liệu JSON) | C-06 (design-new 05) |
+| Báo cáo vi phạm | `POST /reports` (khách gửi được), `GET /me/reports`; ≥ 3 người báo "thu phí" / 24 giờ → tin tự tạm ẩn | M18 |
 | Mobile | `GET /app/config`, `PUT/DELETE /me/push-tokens` | Ép cập nhật app, thông báo đẩy |
 | Hệ thống | `GET /health` | Giám sát |
-| Admin | `GET /admin/jobs/pending` (tìm kiếm, phân trang), `POST /admin/jobs/:id/approve`, `/admin/jobs/:id/reject` | Kiểm duyệt tin |
+| Admin | `GET /admin/jobs/pending` (tìm kiếm, lọc nhanh, kiểm tra tự động nội dung), `POST /admin/jobs/:id/approve`, `/admin/jobs/:id/reject` | Kiểm duyệt tin (design-new 07) |
+| Admin – xác minh | `GET /admin/verifications` (tab, loại, đối chiếu tự động, thống kê), `GET …/:id`, `POST …/:id/approve`, `/request-info`, `/reject` | design-new 08 |
+| Admin – ứng viên | `GET /admin/users` (tab, lọc, thống kê), `GET …/:id`, `POST …/:id/reveal` (`users.pii`, ghi nhật ký), `/lock`, `/unlock` | design-new 09 |
+| Admin – NTD | `GET /admin/employers` (gộp công ty + cá nhân), `GET …/:kind/:id`, `POST …/warn`, `/suspend` (mã 2FA `otp`), `/unsuspend` | design-new 10 |
+| Admin – báo cáo | `GET /admin/reports` (gộp vụ, ưu tiên mức độ × hạn), `GET …/:id`, `POST …/:id/claim`, `/decide` (khoá cần `users.lock` + mã 2FA) | design-new 11 |
+| Admin – nhật ký | `GET /admin/audit-logs` (chỉ đọc) | A-12 |
 
 ### Sẵn sàng cho app mobile
 

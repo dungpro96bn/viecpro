@@ -233,7 +233,8 @@ export class EmployerJobFormService {
     const recruiterId = await this.assignee(actor, input.recruiterId ?? current.recruiterId);
     const { imageUrl, ...data } = await this.data(input);
     // Tin đã đóng giữ nguyên; còn lại tính lại (NTD chưa xác minh sửa tin → chờ duyệt lại)
-    const status = current.status === 'closed' ? 'closed' : !input.publish ? 'draft' : actor.verified ? 'open' : 'pending';
+    // Tin bị hệ thống / quản trị tạm ẩn: sửa được nội dung nhưng vẫn ẩn tới khi kiểm duyệt mở lại
+    const status = current.suspendedAt ? 'paused' : current.status === 'closed' ? 'closed' : !input.publish ? 'draft' : actor.verified ? 'open' : 'pending';
 
     await this.prisma.$transaction(async (tx) => {
       if (input.publish) await this.chargeVisibility(tx, actor, current.visibility, input.visibility);
@@ -248,6 +249,8 @@ export class EmployerJobFormService {
           publishedAt: current.publishedAt ?? (status === 'open' ? new Date() : null),
           submittedAt: status === 'pending' ? new Date() : current.submittedAt,
           rejectReason: null,
+          // Gửi lại sau khi kiểm duyệt yêu cầu sửa → rời tab "Yêu cầu sửa"
+          ...(input.publish && { changesRequestedAt: null }),
         },
       });
       await tx.jobEvent.create({ data: { jobId, actorId: actor.recruiterId, action: status === 'pending' && current.status !== 'pending' ? 'submit' : status === 'draft' ? 'draft' : 'update' } });

@@ -10,6 +10,8 @@ export const WEB_LINKS = {
   seekerApplications: '/tai-khoan-ung-vien/viec-da-ung-tuyen',
   seekerSaved: '/tai-khoan-ung-vien/viec-da-luu',
   seekerAccount: '/tai-khoan-ung-vien',
+  seekerAlerts: '/tai-khoan-ung-vien/thong-bao-viec-lam',
+  seekerSettings: '/tai-khoan-ung-vien/cai-dat',
   /** Khu quản lý của nhà tuyển dụng (tách khỏi /nha-tuyen-dung/[slug] là hồ sơ công khai) */
   employerJobs: '/quan-ly-tuyen-dung/don-hang',
   employerApplicants: '/quan-ly-tuyen-dung/ung-vien',

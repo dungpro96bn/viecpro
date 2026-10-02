@@ -19,6 +19,15 @@ import type {
   SavedJobSort,
   SeekerApplicationStep,
   SeekerApplicationTab,
+  AlertChannel,
+  AlertFrequency,
+  NotificationGroup,
+  PhoneVisibility,
+  ReportDecision,
+  ReportReason,
+  ReportSeverity,
+  ReportStatus,
+  ReportTarget,
 } from './enums.js';
 
 export const PROGRAM_LABEL: Record<Program, string> = {
@@ -197,4 +206,66 @@ export const SAVED_JOB_SORT_LABEL: Record<SavedJobSort, string> = {
   expiring: 'Sắp hết hạn',
   match: 'Phù hợp nhất',
   salary: 'Lương cao',
+};
+
+export const ALERT_FREQUENCY_LABEL: Record<AlertFrequency, string> = {
+  instant: 'Ngay khi có việc mới',
+  daily: 'Hằng ngày lúc 8:00',
+  weekly: 'Hằng tuần · sáng Thứ Hai',
+};
+
+export const ALERT_CHANNEL_LABEL: Record<AlertChannel, string> = { app: 'App', email: 'Email', sms: 'SMS' };
+
+/** Nhóm thông báo trong Cài đặt (design 05) */
+export const NOTIFICATION_GROUP_LABEL: Record<NotificationGroup, { title: string; desc: string }> = {
+  interview: { title: 'Lời mời phỏng vấn', desc: 'Khi nhà tuyển dụng hẹn lịch với bạn' },
+  profile_view: { title: 'Nhà tuyển dụng xem hồ sơ', desc: 'Biết ai đang quan tâm đến bạn' },
+  job_match: { title: 'Việc mới phù hợp', desc: 'Theo các thông báo việc làm đã tạo' },
+  application: { title: 'Trạng thái ứng tuyển', desc: 'Hồ sơ được xem, đổi bước, kết quả' },
+  system: { title: 'Tài khoản & hệ thống', desc: 'Bảo mật, kết quả báo cáo vi phạm' },
+};
+
+export const PHONE_VISIBILITY_LABEL: Record<PhoneVisibility, string> = {
+  applied: 'Khi tôi ứng tuyển',
+  verified: 'NTD đã xác minh',
+};
+
+export const REPORT_REASON_LABEL: Record<ReportReason, string> = {
+  fee: 'Thu phí ngoài hợp đồng',
+  wrong_info: 'Sai lương / sai thông tin',
+  duplicate: 'Tin trùng lặp',
+  fake_photo: 'Ảnh không thực tế',
+  scam: 'Lừa đảo / giả mạo',
+  harassment: 'Quấy rối / xúc phạm',
+  no_response: 'Phản hồi chậm / không liên hệ',
+  other: 'Khác',
+};
+
+export const REPORT_SEVERITY_LABEL: Record<ReportSeverity, string> = {
+  critical: 'Nghiêm trọng',
+  high: 'Cao',
+  medium: 'Trung bình',
+  low: 'Thấp',
+};
+
+export const REPORT_STATUS_LABEL: Record<ReportStatus, string> = {
+  open: 'Mở',
+  investigating: 'Đang xử lý',
+  resolved: 'Đã xử lý',
+  dismissed: 'Đã bỏ qua',
+};
+
+export const REPORT_TARGET_LABEL: Record<ReportTarget, string> = {
+  job: 'Tin đăng',
+  employer: 'Công ty XKLĐ',
+  recruiter: 'NTD cá nhân',
+  user: 'Ứng viên',
+};
+
+export const REPORT_DECISION_LABEL: Record<ReportDecision, string> = {
+  dismiss: 'Bỏ qua',
+  warn: 'Cảnh cáo',
+  remove_job: 'Gỡ tin',
+  suspend: 'Tạm khoá',
+  ban: 'Khoá vĩnh viễn',
 };

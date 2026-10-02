@@ -185,6 +185,11 @@
   background: rgba(255, 255, 255, 0.08);
   color: #7f8ea3;
 }
+.emp-search__close,
+.emp-topbar__search-btn,
+.emp-drawer-head {
+  display: none;
+}
 .emp-search:focus-within {
   border-color: rgba(99, 150, 255, 0.6);
 }
@@ -1107,10 +1112,15 @@
   .emp-topbar__menu {
     display: flex;
   }
+  /* Thông tin tổ chức + trợ giúp chuyển vào đầu menu trượt */
   .emp-topbar__sep,
-  .emp-org__text,
-  .emp-personal__meta {
+  .emp-org,
+  .emp-personal,
+  .emp-topbar__icon {
     display: none;
+  }
+  .emp-topbar__actions {
+    margin-left: auto;
   }
   .emp-main {
     padding: 24px;
@@ -1132,14 +1142,67 @@
   .emp-sidebar--open {
     transform: none;
   }
+  /* Đầu ngăn trượt: tổ chức + đăng tin mới */
+  .emp-drawer-head {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 8px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .emp-drawer-head__org {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .emp-drawer-head .emp-org__logo {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .emp-drawer-head__text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .emp-drawer-head__text b {
+    overflow: hidden;
+    color: var(--text);
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .emp-drawer-head__text span {
+    color: var(--text-3);
+    font-size: 12px;
+  }
+  .emp-drawer-head__post {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 12px;
+    background: var(--btn-primary);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .emp-drawer-head__post:hover {
+    background: var(--btn-primary-hover);
+  }
   .emp-sidebar__close {
     display: flex;
-    align-self: flex-end;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
     width: 36px;
     height: 36px;
-    margin-bottom: 4px;
     border: 0;
     border-radius: 10px;
     background: var(--bg-alt);
@@ -1168,6 +1231,59 @@
   }
 }
 
+/* ---------- Tablet hẹp + mobile: tìm kiếm thu thành nút kính lúp ---------- */
+@media (max-width: 900px) {
+  .emp-topbar__search-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #c8d3e2;
+    cursor: pointer;
+  }
+  .emp-topbar__search-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  /* Ô tìm kiếm ẩn, mở thành lớp phủ cả thanh trên */
+  .emp-search {
+    display: none;
+  }
+  .emp-search--open {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+    padding: 0 8px 0 16px;
+    border: 0;
+    border-radius: 0;
+    background: var(--bg-dark);
+  }
+  .emp-search--open .emp-search__input {
+    font-size: 16px;
+  }
+  .emp-search__close {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #c8d3e2;
+    cursor: pointer;
+  }
+}
+
 /* ---------- Mobile ---------- */
 @media (max-width: 767px) {
   .emp-brand__tag,
@@ -1176,17 +1292,17 @@
   .emp-topbar__icon {
     display: none;
   }
-  .emp-search {
-    margin-left: 0;
+  /* Thanh trên kiểu Facebook (spec R10): ☰ + logo trái · tìm kiếm, chuông, tài khoản phải */
+  .emp-topbar {
+    gap: 8px;
+    padding: 0 12px;
   }
   .emp-topbar__post {
-    width: 40px;
-    margin-right: 0;
-    padding: 0;
-    justify-content: center;
-  }
-  .emp-topbar__post span {
     display: none;
+  }
+  .emp-topbar__actions {
+    gap: 4px;
+    margin-left: auto;
   }
   .emp-main {
     padding: 20px 16px 28px;
@@ -1204,12 +1320,6 @@
   .emp-footer__left {
     flex-wrap: wrap;
     justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .emp-brand__name {
-    display: none;
   }
 }
 

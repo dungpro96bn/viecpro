@@ -64,12 +64,7 @@ export const googleLoginSchema = deviceSchema.extend({
 });
 export type GoogleLoginInput = z.infer<typeof googleLoginSchema>;
 
-export const resetPasswordSchema = z.object({
-  phone: phoneSchema,
-  code: z.string().trim().regex(/^\d{6}$/, 'Mã gồm 6 chữ số'),
-  password: passwordSchema,
-});
-export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+/** resetPasswordSchema: xem schemas/account.ts (email hoặc SĐT, kênh SMS / email) */
 
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1),

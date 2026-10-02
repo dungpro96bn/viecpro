@@ -54,11 +54,11 @@ export const APPLICATION_STATUSES = ['submitted', 'viewed', 'interview', 'passed
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
 /** Mục đích mã OTP */
-export const OTP_PURPOSES = ['register', 'login', 'reset_password'] as const;
+export const OTP_PURPOSES = ['register', 'login', 'reset_password', 'change_phone'] as const;
 export type OtpPurpose = (typeof OTP_PURPOSES)[number];
 
 /** Mục đích OTP gửi qua email (khớp enum EmailOtpPurpose của Prisma) */
-export const EMAIL_OTP_PURPOSES = ['apply'] as const;
+export const EMAIL_OTP_PURPOSES = ['apply', 'reset_password', 'change_email'] as const;
 export type EmailOtpPurpose = (typeof EMAIL_OTP_PURPOSES)[number];
 
 /** Nền tảng thiết bị (phiên đăng nhập, push) */
@@ -77,8 +77,8 @@ export type DepartureWithin = (typeof DEPARTURE_WITHIN)[number];
 export const VERIFICATION_STATUSES = ['pending', 'needs_info', 'approved', 'rejected'] as const;
 export type VerificationStatus = (typeof VERIFICATION_STATUSES)[number];
 
-/** Trạng thái báo cáo vi phạm */
-export const REPORT_STATUSES = ['open', 'resolved', 'dismissed'] as const;
+/** Trạng thái báo cáo vi phạm: mở → đang xử lý (đã có người nhận) → đã xử lý / bỏ qua */
+export const REPORT_STATUSES = ['open', 'investigating', 'resolved', 'dismissed'] as const;
 export type ReportStatus = (typeof REPORT_STATUSES)[number];
 
 /** Khoảng thời gian trên bảng điều khiển admin */
@@ -182,3 +182,88 @@ export type SeekerApplicationStep = (typeof SEEKER_APPLICATION_STEPS)[number];
 /** Sắp xếp "Việc đã lưu" (design 20) */
 export const SAVED_JOB_SORTS = ['expiring', 'match', 'salary'] as const;
 export type SavedJobSort = (typeof SAVED_JOB_SORTS)[number];
+
+/* ---------------- Quên mật khẩu ---------------- */
+/** Kênh nhận mã đặt lại mật khẩu (design 03) */
+export const RESET_CHANNELS = ['sms', 'email'] as const;
+export type ResetChannel = (typeof RESET_CHANNELS)[number];
+
+/* ---------------- Thông báo việc làm (job alert – design 04) ---------------- */
+export const ALERT_FREQUENCIES = ['instant', 'daily', 'weekly'] as const;
+export type AlertFrequency = (typeof ALERT_FREQUENCIES)[number];
+
+export const ALERT_CHANNELS = ['app', 'email', 'sms'] as const;
+export type AlertChannel = (typeof ALERT_CHANNELS)[number];
+
+/** Mỗi người tối đa 10 thông báo việc làm (spec 3.12) */
+export const MAX_JOB_ALERTS = 10;
+
+/* ---------------- Cài đặt (design 05) ---------------- */
+/** Nhóm thông báo người dùng bật / tắt theo kênh */
+export const NOTIFICATION_GROUPS = ['interview', 'profile_view', 'job_match', 'application', 'system'] as const;
+export type NotificationGroup = (typeof NOTIFICATION_GROUPS)[number];
+
+/** Kênh nhận thông báo trong Cài đặt (trùng ALERT_CHANNELS) */
+export const NOTIFICATION_CHANNELS = ALERT_CHANNELS;
+export type NotificationChannel = AlertChannel;
+
+/** Ai được xem số điện thoại: NTD tôi đã ứng tuyển / mọi NTD đã xác minh */
+export const PHONE_VISIBILITIES = ['applied', 'verified'] as const;
+export type PhoneVisibility = (typeof PHONE_VISIBILITIES)[number];
+
+export const LOCALES = ['vi', 'ja', 'en'] as const;
+export type Locale = (typeof LOCALES)[number];
+
+export const THEMES = ['light', 'dark', 'system'] as const;
+export type Theme = (typeof THEMES)[number];
+
+/* ---------------- Báo cáo vi phạm (M18, A-06) ---------------- */
+export const REPORT_TARGETS = ['job', 'employer', 'recruiter', 'user'] as const;
+export type ReportTarget = (typeof REPORT_TARGETS)[number];
+
+/** Lý do báo cáo (spec 3.9) */
+export const REPORT_REASONS = ['fee', 'wrong_info', 'duplicate', 'fake_photo', 'scam', 'harassment', 'no_response', 'other'] as const;
+export type ReportReason = (typeof REPORT_REASONS)[number];
+
+export const REPORT_SEVERITIES = ['critical', 'high', 'medium', 'low'] as const;
+export type ReportSeverity = (typeof REPORT_SEVERITIES)[number];
+
+/** Quyết định xử lý: bỏ qua / cảnh cáo / gỡ tin / tạm khoá / khoá vĩnh viễn */
+export const REPORT_DECISIONS = ['dismiss', 'warn', 'remove_job', 'suspend', 'ban'] as const;
+export type ReportDecision = (typeof REPORT_DECISIONS)[number];
+
+/* ---------------- Admin: danh sách ---------------- */
+/** Tab trạng thái ở danh sách ứng viên (design 09) */
+export const ADMIN_SEEKER_TABS = ['all', 'seeking', 'interviewing', 'passed', 'locked'] as const;
+export type AdminSeekerTab = (typeof ADMIN_SEEKER_TABS)[number];
+
+/** Tab trạng thái ở danh sách nhà tuyển dụng (design 10) */
+export const ADMIN_EMPLOYER_TABS = ['all', 'active', 'pending', 'expiring', 'suspended'] as const;
+export type AdminEmployerTab = (typeof ADMIN_EMPLOYER_TABS)[number];
+
+export const ADMIN_EMPLOYER_KINDS = ['all', 'company', 'individual'] as const;
+export type AdminEmployerKind = (typeof ADMIN_EMPLOYER_KINDS)[number];
+
+/** Tab ở trang xác minh (design 08) */
+export const VERIFICATION_TABS = ['pending', 'needs_info', 'approved', 'rejected'] as const;
+export type VerificationTab = (typeof VERIFICATION_TABS)[number];
+
+/** Tab ở trang báo cáo vi phạm (design 11) */
+export const REPORT_TABS = ['open', 'resolved', 'dismissed'] as const;
+export type ReportTab = (typeof REPORT_TABS)[number];
+
+/* ---------- Kiểm duyệt tin (design-new 07) ---------- */
+/** Chờ duyệt · yêu cầu NTD sửa · đã xử lý (7 ngày) */
+export const MODERATION_TABS = ['pending', 'changes', 'done'] as const;
+export type ModerationTab = (typeof MODERATION_TABS)[number];
+
+/** Lý do từ chối / yêu cầu sửa mẫu (spec 12.1) */
+export const JOB_REJECT_REASONS = [
+  'Thiếu chi phí xuất cảnh',
+  'Lương không hợp lý',
+  'Ảnh không thực tế',
+  'Có SĐT / link trong nội dung',
+  'Trùng tin đã đăng',
+  'Doanh nghiệp chưa xác minh',
+  'Thu phí ngoài bảng chi phí',
+] as const;

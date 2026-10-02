@@ -73,7 +73,8 @@ export class AdminGuard implements CanActivate {
       where: { id: user.sub },
       select: { id: true, name: true, email: true, mfaEnabledAt: true, adminRole: { select: { key: true, name: true, permissions: true } } },
     });
-    if (!admin?.adminRole || !admin.mfaEnabledAt) throw ApiException.forbidden();
+    // ADMIN_MFA_BYPASS chỉ có ở dev / test (env.ts từ chối ở production) – khi đó phiên được cấp không qua 2FA
+    if (!admin?.adminRole || (!admin.mfaEnabledAt && !this.env.ADMIN_MFA_BYPASS)) throw ApiException.forbidden();
 
     const permissions = admin.adminRole.permissions.filter((p): p is AdminPermission => (ADMIN_PERMISSIONS as readonly string[]).includes(p));
     if (permission !== ANY_ADMIN && !permissions.includes(permission)) throw ApiException.forbidden(`Bạn chưa có quyền "${permission}"`);

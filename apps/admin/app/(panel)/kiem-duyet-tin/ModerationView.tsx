@@ -1,357 +1,354 @@
 'use client';
 
-import type { ModerationItem, Paginated } from '@viecpro/shared';
-import { PROGRAM_LABEL } from '@viecpro/shared';
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import Dialog from '@/components/ui/Dialog';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import type { ModerationFilter, ModerationItem, ModerationList, ModerationTab } from '@viecpro/shared';
+import Pagination from '@/components/list/Pagination';
+import { errorText, relativeTime } from '@/components/list/list-utils';
+import { useDebounced } from '@/components/list/useDebounced';
 import { useShell } from '@/components/layout/AdminShell';
-import { IconAlert, IconArrowRight, IconCheck, IconClock, IconModeration, IconRefresh, IconSearch, IconShieldCheck, IconSparkle } from '@/components/ui/Icons';
-import { ApiRequestError, api, post } from '@/lib/api';
+import { IconArrowRight, IconCheck, IconList, IconModeration, IconScanCheck, IconSearch } from '@/components/ui/Icons';
+import { api, post } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { cx, formatNumber, formatSla } from '@/lib/format';
+import DecisionDialog, { type Decision } from './DecisionDialog';
+import ModerationDrawer from './ModerationDrawer';
+import { riskLevel } from './moderation-utils';
 
-type RiskFilter = 'all' | 'high' | 'medium' | 'low';
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
+/** Hoàn tác trong 10 giây (spec A-02) – thao tác chỉ gửi API sau khoảng này */
+const UNDO_MS = 10_000;
+/** Tin rủi ro thấp được duyệt nhanh ngay trên danh sách */
+const QUICK_APPROVE_BELOW = 30;
 
-const errorText = (error: unknown) => (error instanceof ApiRequestError ? error.message : 'Không thể kết nối máy chủ. Vui lòng thử lại.');
-const riskLevel = (score: number): Exclude<RiskFilter, 'all'> => (score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low');
-const dateTime = (value: string) => new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(value));
-
-const FILTERS: Array<{ key: RiskFilter; label: string }> = [
-  { key: 'all', label: 'Tất cả mức độ' },
-  { key: 'high', label: 'Rủi ro cao' },
-  { key: 'medium', label: 'Cần lưu ý' },
-  { key: 'low', label: 'Rủi ro thấp' },
+const TABS: Array<{ key: ModerationTab; label: string }> = [
+  { key: 'pending', label: 'Chờ duyệt' },
+  { key: 'changes', label: 'Yêu cầu sửa' },
+  { key: 'done', label: 'Đã xử lý' },
+];
+const FILTERS: Array<{ key: ModerationFilter; label: string }> = [
+  { key: 'high_risk', label: 'Rủi ro cao' },
+  { key: 'reported', label: 'Bị báo cáo' },
+  { key: 'new_employer', label: 'DN mới' },
+  { key: 'sla', label: 'Sắp quá SLA' },
 ];
 
+
+type ActionKind = 'approve' | Decision;
+interface PendingAction {
+  item: ModerationItem;
+  kind: ActionKind;
+  reason?: string;
+  timer: number;
+}
+const DONE_TEXT: Record<ActionKind, string> = { approve: 'Đã duyệt', reject: 'Đã từ chối', 'request-changes': 'Đã yêu cầu sửa' };
+
+/** Kiểm duyệt tin (design-new 07 – A-02) */
 export default function ModerationView() {
   const { can } = useAuth();
   const canModerate = can('jobs.moderate');
   const { refreshBadges } = useShell();
-  const [data, setData] = useState<Paginated<ModerationItem> | null>(null);
-  const [selected, setSelected] = useState<ModerationItem | null>(null);
-  const [page, setPage] = useState(1);
+  const [tab, setTab] = useState<ModerationTab>('pending');
+  const [filter, setFilter] = useState<ModerationFilter | null>(null);
   const [search, setSearch] = useState('');
-  const [query, setQuery] = useState('');
-  const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
+  const q = useDebounced(search.trim());
+  const [page, setPage] = useState(1);
+  const [data, setData] = useState<ModerationList | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [rejecting, setRejecting] = useState<ModerationItem | null>(null);
-  const requestId = useRef(0);
+  const [cursor, setCursor] = useState(0);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [deciding, setDeciding] = useState<{ item: ModerationItem; kind: Decision } | null>(null);
+  const [undo, setUndo] = useState<PendingAction | null>(null);
+  const undoRef = useRef<PendingAction | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
-  const load = useCallback(async (targetPage: number, term: string, quiet = false) => {
-    const id = ++requestId.current;
+  const load = useCallback(async () => {
+    setLoading(true);
     setError(null);
-    if (quiet) setRefreshing(true);
-    else setLoading(true);
     try {
-      const params = new URLSearchParams({ page: String(targetPage), limit: String(PAGE_SIZE) });
-      if (term) params.set('q', term);
-      const result = await api<Paginated<ModerationItem>>(`/admin/jobs/pending?${params.toString()}`);
-      if (id !== requestId.current) return;
-      setData(result);
-      setSelected((current) => result.items.find((item) => item.id === current?.id) ?? result.items[0] ?? null);
+      const p = new URLSearchParams({ tab, page: String(page), limit: String(PAGE_SIZE) });
+      if (q) p.set('q', q);
+      if (filter && tab === 'pending') p.set('filter', filter);
+      setData(await api<ModerationList>(`/admin/jobs/pending?${p.toString()}`));
     } catch (e) {
-      if (id === requestId.current) setError(errorText(e));
+      setError(errorText(e));
     } finally {
-      if (id === requestId.current) {
-        setLoading(false);
-        setRefreshing(false);
+      setLoading(false);
+    }
+  }, [tab, page, q, filter]);
+  useEffect(() => {
+    void load();
+  }, [load]);
+  useEffect(() => setPage(1), [q]);
+
+  /** Gửi thao tác đang chờ hoàn tác lên API */
+  const commit = useCallback(
+    async (action: PendingAction) => {
+      window.clearTimeout(action.timer);
+      if (undoRef.current === action) {
+        undoRef.current = null;
+        setUndo(null);
       }
-    }
-  }, []);
+      try {
+        if (action.kind === 'approve') await post(`/admin/jobs/${action.item.id}/approve`);
+        else await post(`/admin/jobs/${action.item.id}/${action.kind}`, { reason: action.reason });
+      } catch (e) {
+        setError(`Không lưu được quyết định cho “${action.item.title}”: ${errorText(e)}`);
+      }
+      await Promise.all([load(), refreshBadges()]);
+    },
+    [load, refreshBadges],
+  );
 
+  // Rời trang khi còn thao tác chờ → gửi luôn, không mất quyết định (chỉ chạy khi unmount)
+  const commitRef = useRef(commit);
+  commitRef.current = commit;
+  useEffect(
+    () => () => {
+      if (undoRef.current) void commitRef.current(undoRef.current);
+    },
+    [],
+  );
+
+  const act = (item: ModerationItem, kind: ActionKind, reason?: string) => {
+    if (undoRef.current) void commit(undoRef.current);
+    const action: PendingAction = { item, kind, reason, timer: 0 };
+    action.timer = window.setTimeout(() => void commit(action), UNDO_MS);
+    undoRef.current = action;
+    setUndo(action);
+    setOpenId(null);
+    setDeciding(null);
+  };
+  const cancelUndo = () => {
+    if (!undoRef.current) return;
+    window.clearTimeout(undoRef.current.timer);
+    undoRef.current = null;
+    setUndo(null);
+  };
+
+  // Tin đang chờ hoàn tác ẩn khỏi danh sách
+  const items = (data?.items ?? []).filter((i) => i.id !== undo?.item.id);
+  const selected = items[Math.min(cursor, items.length - 1)];
+
+  // Phím tắt: J / K chọn tin · Enter mở · A duyệt · R từ chối (spec A-02)
   useEffect(() => {
-    void load(page, query);
-  }, [load, page, query]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setPage(1);
-      setQuery(search.trim());
-    }, 280);
-    return () => window.clearTimeout(timer);
-  }, [search]);
-
-  const filteredItems = useMemo(() => {
-    if (!data) return [];
-    return riskFilter === 'all' ? data.items : data.items.filter((item) => riskLevel(item.risk) === riskFilter);
-  }, [data, riskFilter]);
-
-  const pageStats = useMemo(() => {
-    const items = data?.items ?? [];
-    return {
-      high: items.filter((item) => riskLevel(item.risk) === 'high').length,
-      urgent: items.filter((item) => item.slaMinutes <= 20).length,
-      averageRisk: items.length ? Math.round(items.reduce((sum, item) => sum + item.risk, 0) / items.length) : 0,
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement;
+      if (t.closest('input, textarea, [contenteditable], dialog[open]') || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (document.querySelector('dialog[open]')) return;
+      const key = e.key.toLowerCase();
+      if (key === 'j' || key === 'k') {
+        e.preventDefault();
+        setCursor((c) => Math.max(0, Math.min(items.length - 1, c + (key === 'j' ? 1 : -1))));
+      } else if (key === 'enter' && selected) {
+        setOpenId(selected.id);
+      } else if (key === 'a' && selected && canModerate && tab === 'pending') {
+        act(selected, 'approve');
+      } else if (key === 'r' && selected && canModerate && tab === 'pending') {
+        setDeciding({ item: selected, kind: 'reject' });
+      }
     };
-  }, [data]);
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  });
+  useEffect(() => {
+    listRef.current?.querySelector('.mod-row--cursor')?.scrollIntoView({ block: 'nearest' });
+  }, [cursor]);
 
-  const refresh = () => void load(page, query, true);
-
-  const reloadAfterDecision = async () => {
-    await refreshBadges();
-    if (data && page > 1 && data.items.length === 1) setPage((current) => Math.max(1, current - 1));
-    else await load(page, query, true);
-  };
-
-  const approve = async (item: ModerationItem) => {
-    setBusy(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      await post(`/admin/jobs/${item.id}/approve`);
-      setSuccess(`Đã duyệt “${item.title}”. Tin đã được đưa vào danh sách công khai.`);
-      setSelected(null);
-      await reloadAfterDecision();
-    } catch (e) {
-      setError(errorText(e));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const reject = async (reason: string) => {
-    if (!rejecting) return;
-    const item = rejecting;
-    setBusy(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      await post(`/admin/jobs/${item.id}/reject`, { reason });
-      setRejecting(null);
-      setSuccess(`Đã từ chối “${item.title}”. Lý do đã được gửi cho nhà tuyển dụng.`);
-      setSelected(null);
-      await reloadAfterDecision();
-    } catch (e) {
-      setError(errorText(e));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const submitSearch = (event: FormEvent) => {
-    event.preventDefault();
+  const switchTab = (t: ModerationTab) => {
+    setTab(t);
     setPage(1);
-    setQuery(search.trim());
+    setCursor(0);
   };
+  const s = data?.stats;
 
   return (
     <>
-      <header className="page-header">
+      <header className="page-header page-header--list">
         <span className="page-header__titles">
-          <span className="page-header__meta">Vận hành · Quy trình duyệt nội dung</span>
+          <span className="page-header__meta">
+            <Link href="/">Bảng điều khiển</Link> / Vận hành
+          </span>
           <h1 className="page-header__title">Kiểm duyệt tin</h1>
         </span>
-        <div className="page-header__actions moderation-head-actions">
-          <span className="moderation-live"><i />Hàng chờ trực tiếp</span>
-          <button type="button" className="btn btn--outline moderation-refresh" onClick={refresh} disabled={loading || refreshing}>
-            {refreshing ? <span className="spinner" /> : <IconRefresh size={16} />}
-            Làm mới
-          </button>
+        <div className="page-header__actions">
+          <label className="list-search">
+            <IconSearch size={16} />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tìm tin, doanh nghiệp, mã tin…" aria-label="Tìm tin cần kiểm duyệt" />
+          </label>
+          {/* Spec R9: không dùng chữ "AI" – hệ thống chấm điểm bằng quy tắc, chưa tự duyệt */}
+          <span className="mod-auto" title="Mọi tin được kiểm tra tự động: SĐT / link, từ khoá phí, lương bất thường, trùng tin, doanh nghiệp">
+            <IconScanCheck size={16} />
+            Kiểm tra tự động: Bật
+          </span>
         </div>
       </header>
 
-      <div className="page-body moderation-page">
-        <section className="moderation-intro">
-          <div className="moderation-intro__copy">
-            <span className="moderation-intro__eyebrow"><IconSparkle size={15} />TRUNG TÂM KIỂM SOÁT CHẤT LƯỢNG</span>
-            <h2>Duyệt đúng tin, giữ vững niềm tin</h2>
-            <p>Ưu tiên các tin có tín hiệu rủi ro và sắp chạm hạn xử lý. Điểm cảnh báo được tính theo quy tắc rõ ràng để bạn dễ kiểm tra.</p>
-          </div>
-          <div className="moderation-intro__art" aria-hidden="true">
-            <span className="moderation-intro__orbit moderation-intro__orbit--outer" />
-            <span className="moderation-intro__orbit moderation-intro__orbit--inner" />
-            <span className="moderation-intro__shield"><IconShieldCheck size={42} /></span>
-            <span className="moderation-intro__spark moderation-intro__spark--one" />
-            <span className="moderation-intro__spark moderation-intro__spark--two" />
-          </div>
-          <span className="moderation-intro__glow" />
-        </section>
+      <div className="page-body">
+        <div className="mod-stats">
+          <span className="mod-stat">
+            <i className="mod-stat__dot mod-stat__dot--blue" />
+            <b>{s ? formatNumber(s.pending) : '—'}</b>
+            <span>chờ duyệt</span>
+          </span>
+          <span className="mod-stat">
+            <i className="mod-stat__dot mod-stat__dot--red" />
+            <b>{s ? formatNumber(s.nearSla) : '—'}</b>
+            <span>sắp quá SLA</span>
+          </span>
+          <span className="mod-stat">
+            <i className="mod-stat__dot mod-stat__dot--green" />
+            <b>{s ? formatNumber(s.processedToday) : '—'}</b>
+            <span>đã xử lý hôm nay</span>
+          </span>
+          <Link href="/nhat-ky" className="mod-log">
+            <IconList size={15} />
+            Nhật ký kiểm duyệt
+          </Link>
+        </div>
 
-        {error && <p className="alert alert--danger" role="alert">{error} <button type="button" className="moderation-inline-link" onClick={refresh}>Thử lại</button></p>}
-        {success && <p className="moderation-success" role="status"><IconCheck size={16} />{success}<button type="button" aria-label="Đóng thông báo" onClick={() => setSuccess(null)}>×</button></p>}
+        {error && (
+          <p className="alert alert--danger" role="alert">
+            {error}
+          </p>
+        )}
 
-        <section className="moderation-kpis" aria-label="Tình hình hàng chờ">
-          <article className="moderation-kpi moderation-kpi--total">
-            <span className="moderation-kpi__top"><span className="moderation-kpi__icon"><IconModeration size={18} /></span><span className="moderation-kpi__hint">Cần xử lý</span></span>
-            <b className="moderation-kpi__value">{loading && !data ? '—' : formatNumber(data?.total ?? 0)}</b>
-            <span className="moderation-kpi__label">Tin đang chờ duyệt</span>
-          </article>
-          <article className="moderation-kpi moderation-kpi--risk">
-            <span className="moderation-kpi__top"><span className="moderation-kpi__icon"><IconAlert size={18} /></span><span className="moderation-kpi__hint">Trang này</span></span>
-            <b className="moderation-kpi__value">{loading && !data ? '—' : pageStats.high}</b>
-            <span className="moderation-kpi__label">Tin có rủi ro cao</span>
-          </article>
-          <article className="moderation-kpi moderation-kpi--sla">
-            <span className="moderation-kpi__top"><span className="moderation-kpi__icon"><IconClock size={18} /></span><span className="moderation-kpi__hint">Trang này</span></span>
-            <b className="moderation-kpi__value">{loading && !data ? '—' : pageStats.urgent}</b>
-            <span className="moderation-kpi__label">Tin còn ≤ 20 phút SLA</span>
-          </article>
-          <article className="moderation-kpi moderation-kpi--average">
-            <span className="moderation-kpi__top"><span className="moderation-kpi__icon"><IconSparkle size={18} /></span><span className="moderation-kpi__hint">Thang 100</span></span>
-            <b className="moderation-kpi__value">{loading && !data ? '—' : pageStats.averageRisk}</b>
-            <span className="moderation-kpi__label">Rủi ro trung bình trên trang</span>
-          </article>
-        </section>
-
-        <div className="moderation-workspace">
-          <section className="moderation-queue panel panel--flush" aria-labelledby="moderation-queue-title">
-            <div className="moderation-queue__head">
-              <div>
-                <span className="moderation-queue__eyebrow">HÀNG CHỜ KIỂM DUYỆT</span>
-                <h2 id="moderation-queue-title">Tin cần được xem xét</h2>
-                <p>Sắp xếp theo thời điểm gửi để tin gần hạn được ưu tiên.</p>
-              </div>
-              <span className="moderation-queue__count"><b>{data ? formatNumber(data.total) : '—'}</b><span>đang chờ</span></span>
-            </div>
-
-            <form className="moderation-tools" role="search" onSubmit={submitSearch}>
-              <div className="moderation-search">
-                <IconSearch size={17} />
-                <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm tiêu đề tin hoặc nhà tuyển dụng" aria-label="Tìm tiêu đề tin hoặc nhà tuyển dụng" />
-                {search && <button type="button" aria-label="Xóa tìm kiếm" onClick={() => setSearch('')}>×</button>}
-              </div>
-              <div className="moderation-filters" role="group" aria-label="Lọc theo mức rủi ro">
-                {FILTERS.map((filter) => (
-                  <button key={filter.key} type="button" className={cx('moderation-filter', riskFilter === filter.key && 'moderation-filter--active', filter.key !== 'all' && `moderation-filter--${filter.key}`)} aria-pressed={riskFilter === filter.key} onClick={() => setRiskFilter(filter.key)}>
-                    {filter.label}
+        <section className="list-card" aria-label="Tin cần kiểm duyệt">
+          <div className="mod-toolbar">
+            <span className="mod-tabs" role="tablist" aria-label="Trạng thái">
+              {TABS.map((t) => (
+                <button key={t.key} type="button" role="tab" aria-selected={tab === t.key} className={cx('mod-tabs__item', tab === t.key && 'mod-tabs__item--on')} onClick={() => switchTab(t.key)}>
+                  {t.label}
+                  <span className="mod-tabs__count">{data ? formatNumber(data.tabs[t.key]) : '…'}</span>
+                </button>
+              ))}
+            </span>
+            {tab === 'pending' && (
+              <span className="mod-filters">
+                {FILTERS.map((f) => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    aria-pressed={filter === f.key}
+                    className={cx('chip-toggle mod-chip', filter === f.key && 'chip-toggle--on')}
+                    onClick={() => {
+                      setFilter((cur) => (cur === f.key ? null : f.key));
+                      setPage(1);
+                      setCursor(0);
+                    }}
+                  >
+                    {f.label}
                   </button>
                 ))}
-              </div>
-            </form>
+              </span>
+            )}
+            <span className="mod-toolbar__meta">
+              {data ? `${formatNumber(data.total)} tin` : '…'} · {tab === 'pending' ? 'sắp xếp theo hạn SLA' : tab === 'changes' ? 'mới yêu cầu trước' : '7 ngày gần nhất'}
+            </span>
+          </div>
 
-            {loading && !data ? (
-              <div className="moderation-skeleton" aria-busy="true" aria-label="Đang tải hàng chờ">
-                {Array.from({ length: 5 }, (_, index) => <span key={index} className="skeleton moderation-skeleton__row" />)}
-              </div>
-            ) : data?.items.length === 0 ? (
-              <div className="moderation-empty">
-                <span><IconCheck size={23} /></span>
-                <b>{query ? 'Không tìm thấy tin phù hợp' : 'Hàng chờ đã thông thoáng'}</b>
-                <p>{query ? 'Thử từ khóa ngắn hơn hoặc xóa tìm kiếm để xem lại toàn bộ hàng chờ.' : 'Hiện không có tin nào cần kiểm duyệt. Hệ thống sẽ cập nhật khi có tin mới.'}</p>
-                {query && <button type="button" className="btn btn--outline" onClick={() => { setSearch(''); setQuery(''); }}>Xóa tìm kiếm</button>}
-              </div>
-            ) : filteredItems.length === 0 ? (
-              <div className="moderation-empty moderation-empty--compact">
-                <b>Không có tin thuộc mức rủi ro này trong trang hiện tại</b>
-                <p>Thử một mức rủi ro khác hoặc chuyển sang trang kế tiếp.</p>
-              </div>
-            ) : (
-              <div className="moderation-list" role="list" aria-label="Danh sách tin chờ duyệt">
-                <div className="moderation-list__labels" aria-hidden="true"><span>TIN TUYỂN DỤNG</span><span>RỦI RO</span><span>HẠN XỬ LÝ</span></div>
-                {filteredItems.map((item) => <ModerationRow key={item.id} item={item} selected={selected?.id === item.id} onSelect={() => setSelected(item)} />)}
+          <div className="mod-list" ref={listRef} role="list">
+            {loading && !data
+              ? Array.from({ length: 6 }, (_, i) => <span key={i} className="skeleton mod-skeleton" />)
+              : items.map((item, i) => (
+                  <Row
+                    key={item.id}
+                    item={item}
+                    tab={tab}
+                    cursor={i === cursor}
+                    canApprove={canModerate && tab === 'pending' && item.risk < QUICK_APPROVE_BELOW}
+                    onFocus={() => setCursor(i)}
+                    onApprove={() => act(item, 'approve')}
+                    onOpen={() => {
+                      setCursor(i);
+                      setOpenId(item.id);
+                    }}
+                  />
+                ))}
+            {data && !items.length && (
+              <div className="list-empty">
+                <IconModeration size={26} />
+                <b>{tab === 'pending' ? (filter || q ? 'Không có tin phù hợp bộ lọc' : 'Hàng chờ đã trống') : 'Chưa có tin nào'}</b>
+                {tab === 'pending' && !filter && !q ? 'Tin mới gửi duyệt sẽ hiện ở đây, sắp theo hạn SLA 2 giờ.' : 'Thử bỏ bộ lọc hoặc đổi từ khoá.'}
               </div>
             )}
-
-            <footer className="moderation-pagination">
-              <span>{data ? <>{data.total === 0 ? 'Chưa có tin' : `Trang ${data.page} · ${formatNumber(data.total)} tin`}</> : 'Đang tải dữ liệu'}</span>
-              <div>
-                <button type="button" className="btn btn--outline btn--sm" disabled={!data || data.page <= 1 || loading} onClick={() => setPage((current) => Math.max(1, current - 1))}>Trước</button>
-                <button type="button" className="btn btn--outline btn--sm" disabled={!data?.hasMore || loading} onClick={() => setPage((current) => current + 1)}>Tiếp<IconArrowRight size={13} /></button>
-              </div>
-            </footer>
-          </section>
-
-          <aside className="moderation-inspector" aria-label="Chi tiết tin đang chọn">
-            {selected ? (
-              <ModerationInspector item={selected} canModerate={canModerate} busy={busy} onApprove={() => void approve(selected)} onReject={() => setRejecting(selected)} />
-            ) : (
-              <div className="moderation-inspector__blank">
-                <span><IconModeration size={24} /></span>
-                <b>{data?.total ? 'Chọn một tin để xem chi tiết' : 'Chưa có tin để xem'}</b>
-                <p>Thông tin doanh nghiệp, tín hiệu rủi ro và thao tác kiểm duyệt sẽ hiện tại đây.</p>
-              </div>
-            )}
-          </aside>
-        </div>
+          </div>
+          {data && <Pagination page={data.page} limit={data.limit} total={data.total} unit="tin" onPage={setPage} />}
+          {tab === 'pending' && canModerate && (
+            <p className="mod-keys" aria-hidden="true">
+              Phím tắt: <kbd>J</kbd>/<kbd>K</kbd> chọn tin · <kbd>Enter</kbd> xem chi tiết · <kbd>A</kbd> duyệt · <kbd>R</kbd> từ chối
+            </p>
+          )}
+        </section>
       </div>
 
-      <Dialog
-        open={!!rejecting}
-        title="Từ chối tin tuyển dụng"
-        description={rejecting ? `Lý do sẽ được gửi cho nhà tuyển dụng của tin “${rejecting.title}”. Hãy nêu rõ nội dung cần chỉnh sửa.` : undefined}
-        input={{ label: 'Lý do từ chối', placeholder: 'Ví dụ: Thông tin mức lương chưa rõ, vui lòng bổ sung…', required: true, minLength: 5 }}
-        confirmLabel="Từ chối tin"
-        tone="danger"
-        busy={busy}
-        error={rejecting ? error : null}
-        onConfirm={(reason) => void reject(reason)}
-        onClose={() => { setRejecting(null); setError(null); }}
+      <ModerationDrawer
+        id={openId}
+        canModerate={canModerate}
+        onClose={() => setOpenId(null)}
+        onApprove={(item) => act(item, 'approve')}
+        onDecide={(item, kind) => setDeciding({ item, kind })}
       />
+
+      <DecisionDialog open={deciding?.kind ?? null} jobTitle={deciding?.item.title ?? ''} onConfirm={(reason) => deciding && act(deciding.item, deciding.kind, reason)} onClose={() => setDeciding(null)} />
+
+      {undo && (
+        <div className="mod-undo" role="status">
+          <IconCheck size={16} />
+          <span>
+            {DONE_TEXT[undo.kind]} “{undo.item.title}”
+          </span>
+          <button type="button" onClick={cancelUndo}>
+            Hoàn tác
+          </button>
+          <i className="mod-undo__bar" />
+        </div>
+      )}
     </>
   );
 }
 
-function ModerationRow({ item, selected, onSelect }: { item: ModerationItem; selected: boolean; onSelect: () => void }) {
+function Row({ item, tab, cursor, canApprove, onFocus, onApprove, onOpen }: { item: ModerationItem; tab: ModerationTab; cursor: boolean; canApprove: boolean; onFocus: () => void; onApprove: () => void; onOpen: () => void }) {
   const level = riskLevel(item.risk);
-  const slaUrgent = item.slaMinutes <= 20;
+  const urgent = item.slaMinutes <= 20;
   return (
-    <article className={cx('moderation-item', selected && 'moderation-item--selected', level === 'high' && 'moderation-item--high')} role="listitem">
-      <button type="button" className="moderation-item__select" aria-pressed={selected} onClick={onSelect}>
-        <span className="moderation-item__thumb"><img src={item.imageUrl} alt="" width={58} height={58} /><span className="moderation-item__thumb-mark"><IconModeration size={13} /></span></span>
-        <span className="moderation-item__main">
-          <b className="moderation-item__title">{item.title}</b>
-          <span className="moderation-item__employer">{item.employerName}{item.employerVerified && <IconShieldCheck size={13} className="moderation-item__verified" />}</span>
-          <span className="moderation-item__meta"><span>{item.industry}</span><i />{PROGRAM_LABEL[item.program]}<i />{formatNumber(item.salary)} ¥/tháng</span>
+    <div role="listitem" className={cx('mod-row', level === 'high' && tab === 'pending' && 'mod-row--high', cursor && 'mod-row--cursor')} onMouseEnter={onFocus}>
+      <img className="mod-row__img" src={item.imageUrl} alt="" width={48} height={48} />
+      <span className="mod-row__main">
+        <button type="button" className="mod-row__title" onClick={onOpen}>
+          {item.title}
+        </button>
+        <span className="mod-row__sub">
+          {item.employerName} · {item.code}
         </span>
-        <span className="moderation-risk">
-          <span className={cx('moderation-risk__pill', `moderation-risk__pill--${level}`)}>{item.risk}<small>/100</small></span>
-          <span className="moderation-risk__track"><i className={`moderation-risk__bar moderation-risk__bar--${level}`} style={{ width: `${item.risk}%` }} /></span>
-          <span className="moderation-risk__reason">{item.flag ?? 'Chưa có cảnh báo'}</span>
+      </span>
+      <span className="mod-row__risk">
+        <span className={cx('mod-score', `mod-score--${level}`)}>{item.risk}</span>
+        <span className="mod-row__flag">{item.flag ?? 'Không phát hiện vấn đề'}</span>
+      </span>
+      {tab === 'pending' ? (
+        <span className={cx('mod-row__sla', (urgent || item.slaMinutes < 0) && 'mod-row__sla--urgent')}>{formatSla(item.slaMinutes)}</span>
+      ) : (
+        <span className="mod-row__result">
+          <span className={cx('mod-result', item.status === 'open' ? 'mod-result--ok' : item.changesRequested ? 'mod-result--warn' : item.status === 'rejected' ? 'mod-result--bad' : 'mod-result--muted')}>
+            {item.changesRequested ? 'Yêu cầu sửa' : item.status === 'open' ? 'Đã duyệt' : item.status === 'rejected' ? 'Từ chối' : 'Đã đóng'}
+          </span>
+          <small>{[item.moderatorName, item.moderatedAt && relativeTime(item.moderatedAt)].filter(Boolean).join(' · ')}</small>
         </span>
-        <span className={cx('moderation-sla', slaUrgent && 'moderation-sla--urgent', item.slaMinutes < 0 && 'moderation-sla--late')}>
-          <IconClock size={14} />
-          <b>{formatSla(item.slaMinutes)}</b>
-          <small>từ {dateTime(item.submittedAt)}</small>
-        </span>
-        <IconArrowRight size={16} className="moderation-item__arrow" />
-      </button>
-    </article>
-  );
-}
-
-function ModerationInspector({ item, canModerate, busy, onApprove, onReject }: { item: ModerationItem; canModerate: boolean; busy: boolean; onApprove: () => void; onReject: () => void }) {
-  const level = riskLevel(item.risk);
-  return (
-    <section className="moderation-inspector__card">
-      <div className="moderation-inspector__topline"><span>HỒ SƠ KIỂM DUYỆT</span><span className={cx('moderation-inspector__level', `moderation-inspector__level--${level}`)}>{level === 'high' ? 'Ưu tiên cao' : level === 'medium' ? 'Cần xem kỹ' : 'Rủi ro thấp'}</span></div>
-      <div className="moderation-inspector__cover"><img src={item.imageUrl} alt="Ảnh minh họa tin tuyển dụng" /><span className="moderation-inspector__cover-shade" /><span className="moderation-inspector__score"><IconSparkle size={14} />{item.risk}<small>/100</small></span></div>
-      <div className="moderation-inspector__body">
-        <h2>{item.title}</h2>
-        <div className="moderation-inspector__company"><span className="moderation-inspector__company-icon">{item.employerName.trim().slice(0, 1).toUpperCase()}</span><span><b>{item.employerName}</b><small>{item.employerVerified ? 'Nhà tuyển dụng đã xác minh' : 'Nhà tuyển dụng chưa xác minh'}</small></span>{item.employerVerified && <IconShieldCheck size={17} />}</div>
-
-        <div className="moderation-facts">
-          <span><small>Chương trình</small><b>{PROGRAM_LABEL[item.program]}</b></span>
-          <span><small>Ngành nghề</small><b>{item.industry}</b></span>
-          <span><small>Mức lương</small><b>{formatNumber(item.salary)} ¥/tháng</b></span>
-          <span><small>Đã gửi lúc</small><b>{dateTime(item.submittedAt)}</b></span>
-        </div>
-
-        <div className="moderation-inspector__risk">
-          <div><b>Tín hiệu cần rà soát</b><span>{item.reportCount ? `${item.reportCount} báo cáo liên quan` : 'Đánh giá tự động'}</span></div>
-          <ul>
-            {item.reasons.length ? item.reasons.map((reason) => <li key={reason} className={reason === item.flag ? 'moderation-reason moderation-reason--primary' : 'moderation-reason'}><IconAlert size={14} />{reason}</li>) : <li className="moderation-reason moderation-reason--clear"><IconCheck size={14} />Chưa phát hiện dấu hiệu bất thường</li>}
-          </ul>
-          <p>Điểm được tính từ báo cáo vi phạm, mức lương, tin trùng và trạng thái doanh nghiệp; đây là tín hiệu hỗ trợ quyết định.</p>
-        </div>
-
-        <div className={cx('moderation-inspector__sla', item.slaMinutes <= 20 && 'moderation-inspector__sla--urgent')}>
-          <IconClock size={17} /><span><b>{formatSla(item.slaMinutes)}</b><small>thời gian còn lại theo SLA 2 giờ</small></span>
-        </div>
-
-        {canModerate ? (
-          <div className="moderation-inspector__actions">
-            <button type="button" className="btn btn--danger-outline" onClick={onReject} disabled={busy}>Từ chối</button>
-            <button type="button" className="btn btn--success" onClick={onApprove} disabled={busy}>{busy ? <span className="spinner" /> : <IconCheck size={16} className="icon--w24" />}Duyệt tin</button>
-          </div>
-        ) : (
-          <p className="moderation-inspector__readonly">Tài khoản của bạn chỉ có quyền xem hàng chờ.</p>
+      )}
+      <span className="mod-row__actions">
+        {canApprove && (
+          <button type="button" className="mod-approve" onClick={onApprove}>
+            <IconCheck size={14} />
+            Duyệt
+          </button>
         )}
-      </div>
-    </section>
+        <button type="button" className="row-btn" onClick={onOpen}>
+          Xem chi tiết
+          <IconArrowRight size={13} />
+        </button>
+      </span>
+    </div>
   );
 }

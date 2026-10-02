@@ -1,0 +1,36 @@
+/*
+ * Danh sách ứng viên (/nguoi-lao-dong) – design-new/09
+ * Phần chung (thẻ số liệu, tab, bảng, ngăn kéo) ở components/list/list.css
+ */
+
+.sk-wish {
+  max-width: 196px;
+}
+.sk-jlpt {
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 7px;
+  background: #fff1f2;
+  color: #be123c;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* ---------- Ngăn kéo ---------- */
+.sk-drawer-skeleton {
+  height: 220px;
+}
+.sk-contact {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.sk-contact svg {
+  color: var(--text-3);
+}
+.sk-reveal {
+  align-self: flex-start;
+}

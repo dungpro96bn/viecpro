@@ -85,22 +85,33 @@
   .account-main { padding: 18px 0 32px; }
   .account-layout { display: flex; flex-direction: column; gap: 16px; padding: 0 16px; }
   .account-sidebar, .account-content { width: 100%; }
-  .account-sidebar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; gap: 10px; }
-  .account-profile-card__body { padding-right: 10px; padding-left: 10px; }
-  .account-profile-card__name { font-size: 14px; }
-  .account-profile-card__meta { font-size: 10px; }
+  .account-sidebar { display: flex; flex-direction: column; gap: 10px; }
+  /* Trang con: chỉ giữ menu – thẻ hồ sơ, cán bộ tư vấn đã có ở trang Tổng quan */
+  .account-sidebar--sub .account-profile-card, .account-sidebar--sub .account-advisor { display: none; }
+  /* Thẻ hồ sơ dạng ngang: ảnh trái, thông tin phải */
+  .account-profile-card__cover { display: none; }
+  .account-profile-card__body { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: 'avatar name' 'avatar meta' 'avatar status' 'done done'; align-items: center; justify-items: start; gap: 4px 14px; margin-top: 0; padding: 14px; text-align: left; }
+  .account-profile-card__avatar-wrap { grid-area: avatar; width: 64px; height: 64px; }
+  .account-profile-card__avatar-wrap .account-avatar--large { width: 64px; height: 64px; font-size: 24px; }
+  .account-profile-card__camera { width: 24px; height: 24px; }
+  .account-profile-card__name { grid-area: name; font-size: 16px; }
+  .account-profile-card__meta { grid-area: meta; font-size: 12px; }
+  .account-profile-card .account-status { grid-area: status; }
+  .account-profile-card__completion { grid-area: done; margin-top: 6px; }
   /* Menu thành hàng cuộn ngang để vào được mọi trang */
   .account-side-nav { order: -1; grid-column: 1 / -1; flex-direction: row; gap: 4px; padding: 6px; overflow-x: auto; scrollbar-width: none; }
   .account-side-nav__item { flex: 0 0 auto; min-height: 36px; gap: 7px; padding: 0 10px; font-size: 12px; white-space: nowrap; }
   .account-side-nav__item svg { width: 15px; height: 15px; }
   .account-side-nav__item > b { font-size: 10px; }
   .account-side-nav__logout { display: none; }
-  .account-advisor { padding: 11px; }
-  .account-advisor__eyebrow { font-size: 9px; }
-  .account-advisor__person { margin: 9px 0; }
-  .account-advisor__photo { width: 32px; height: 32px; }
-  .account-advisor__info b { font-size: 10px; }
-  .account-advisor__actions .btn { height: 31px; font-size: 10px; }
+  /* Cán bộ tư vấn: 1 hàng – ảnh, tên, nút liên hệ */
+  .account-advisor { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 10px; padding: 12px 14px; }
+  .account-advisor__eyebrow { grid-column: 1 / -1; font-size: 11px; }
+  .account-advisor__person { margin: 0; }
+  .account-advisor__photo { width: 36px; height: 36px; flex-shrink: 0; }
+  .account-advisor__info b { font-size: 13px; }
+  .account-advisor__actions { display: flex; gap: 6px; }
+  .account-advisor__actions .btn { height: 36px; padding: 0 12px; font-size: 12px; }
 }
 
 /* Trạng thái phụ */

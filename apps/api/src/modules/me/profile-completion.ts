@@ -15,6 +15,9 @@ const ITEMS = [
   { key: 'email', label: 'Thêm email', gain: 10 },
 ] as const;
 
+/** Trọng số theo mục – dùng cho truy vấn SQL lọc "Hồ sơ ≥ 80%" ở trang admin */
+export const COMPLETION_WEIGHTS = Object.fromEntries(ITEMS.map((i) => [i.key, i.gain])) as Record<(typeof ITEMS)[number]['key'], number>;
+
 export type CompletionInput = Record<(typeof ITEMS)[number]['key'], boolean>;
 
 export function profileCompletion(input: CompletionInput) {

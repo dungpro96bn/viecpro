@@ -10,7 +10,6 @@ import ApplyButton from '@/components/apply/ApplyButton';
 import { IconArrowRight, IconBell, IconBriefcase, IconCalendar, IconCheck, IconDocList, IconHeart, IconPin, IconPlus, IconUserRound } from '@/components/ui/Icons';
 import { jobHref, toApplyJob } from '@/lib/data';
 import { cx } from '@/lib/format';
-import AccountSecurity from './AccountSecurity';
 
 /** Trạng thái hồ sơ còn rút được (khớp kiểm tra ở API) */
 const WITHDRAWABLE: string[] = ['submitted', 'viewed', 'interview'];
@@ -173,8 +172,6 @@ export default function CandidateAccountPage() {
                 {profile.suggestions.map((task) => <Link key={task.key} className="account-task" href={WEB_LINKS.seekerProfile}><span className="account-task__icon"><IconPlus size={14} /></span><span className="account-task__title">{task.label}</span><b className="account-task__score">+{task.gain}%</b></Link>)}
               </div>
             </section>
-
-            <AccountSecurity />
 
             <section className="account-recommendations" id="recommendations">
               <div className="account-recommendations__heading">
