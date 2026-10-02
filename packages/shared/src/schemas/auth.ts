@@ -39,7 +39,8 @@ export type VerifyRegisterInput = z.infer<typeof verifyRegisterSchema>;
 
 export const sendOtpSchema = z.object({
   phone: phoneSchema,
-  purpose: z.enum(OTP_PURPOSES),
+  /** join_company chỉ gửi qua link mời thành viên (/invites/:token/otp) */
+  purpose: z.enum(OTP_PURPOSES).exclude(['join_company']),
 });
 export type SendOtpInput = z.infer<typeof sendOtpSchema>;
 

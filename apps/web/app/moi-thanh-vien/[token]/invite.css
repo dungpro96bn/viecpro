@@ -1,0 +1,87 @@
+/* Trang nhận lời mời thành viên */
+.invite-loading {
+  min-height: 320px;
+}
+.invite-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-subtle);
+}
+.invite-card__logo {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-3);
+}
+.invite-card__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.invite-card b {
+  display: block;
+  font-size: 15px;
+}
+.invite-card small {
+  color: var(--text-3);
+  font-size: 13px;
+}
+.invite-rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: -6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.invite-rules li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-3);
+  font-size: 12.5px;
+}
+.invite-rules li svg {
+  opacity: 0.35;
+}
+.invite-rules__ok {
+  color: var(--success-text) !important;
+}
+.invite-rules__ok svg {
+  opacity: 1 !important;
+}
+.invite-done {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--success-soft);
+  color: var(--success-text);
+}
+.invite-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  color: #fff;
+  font-size: 15px;
+}
+.invite-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

@@ -45,6 +45,7 @@ import type {
 import type { AdminPermission } from './admin.js';
 import type { JobDetailContent, JobPosting } from './schemas/jobs.js';
 import type { JobAlertCriteria } from './schemas/account.js';
+import type { CompanyProfileSections, RecruiterProfileSections } from './schemas/employer-profile.js';
 
 /** Danh sách có phân trang */
 export interface Paginated<T> {
@@ -97,6 +98,8 @@ export const ERROR_CODES = [
   'NOT_IMPLEMENTED',
   /** Admin đang dùng mật khẩu tạm – phải đổi mật khẩu trước khi dùng khu quản trị */
   'PASSWORD_CHANGE_REQUIRED',
+  /** Cán bộ đã bị quản trị viên doanh nghiệp gỡ khỏi doanh nghiệp */
+  'MEMBER_REMOVED',
   'INTERNAL_ERROR',
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
@@ -252,6 +255,98 @@ export interface RecruiterProfile extends RecruiterSummary {
   followerCount: number;
   following?: boolean;
   jobCounts: Partial<Record<Program | 'all', number>>;
+}
+
+/* ---------------- Khu NTD: cài đặt hồ sơ công khai ---------------- */
+export interface EmployerProfileSettings {
+  kind: 'company' | 'individual';
+  recruiter: {
+    slug: string;
+    name: string;
+    title: string;
+    headline: string | null;
+    intro: string | null;
+    city: string | null;
+    phone: string | null;
+    photoUrl: string | null;
+    sections: RecruiterProfileSections;
+  };
+  company: {
+    slug: string;
+    /** Tên pháp lý / MST: đổi qua xác minh lại với admin */
+    name: string;
+    taxCode: string | null;
+    verified: boolean;
+    shortName: string | null;
+    intro: string | null;
+    phone: string | null;
+    email: string | null;
+    website: string | null;
+    address: string | null;
+    logoUrl: string | null;
+    coverUrl: string | null;
+    sections: CompanyProfileSections;
+    /** Người đang xem là quản trị viên doanh nghiệp (được sửa hồ sơ công ty) */
+    canEdit: boolean;
+  } | null;
+}
+
+/* ---------------- Khu NTD: thành viên doanh nghiệp ---------------- */
+export interface CompanyMember {
+  id: string;
+  slug: string;
+  name: string;
+  title: string;
+  photoUrl: string | null;
+  /** Số / email đăng nhập (chỉ hiện trong nội bộ doanh nghiệp) */
+  phone: string | null;
+  email: string | null;
+  companyAdmin: boolean;
+  /** false = hồ sơ hiển thị, chưa có tài khoản đăng nhập */
+  hasAccount: boolean;
+  isSelf: boolean;
+  lastLoginAt: string | null;
+  openJobs: number;
+  activeApplicants: number;
+}
+
+export interface CompanyMemberInvite {
+  id: string;
+  name: string;
+  phone: string;
+  email: string | null;
+  title: string;
+  companyAdmin: boolean;
+  invitedBy: string;
+  createdAt: string;
+  expiresAt: string;
+  expired: boolean;
+}
+
+export interface CompanyMembers {
+  /** Người xem là quản trị viên doanh nghiệp (mời, đổi quyền, gỡ thành viên) */
+  canManage: boolean;
+  limit: number;
+  members: CompanyMember[];
+  /** Lời mời chưa nhận – chỉ trả cho quản trị viên */
+  invites: CompanyMemberInvite[];
+}
+
+export interface MemberInviteSent {
+  invite: CompanyMemberInvite;
+  /** Chỉ có ngoài production: link mời để thử khi SMS / email đang in ra log */
+  devLink?: string;
+}
+
+/** Trang nhận lời mời (công khai, theo token) */
+export interface MemberInvitePreview {
+  companyName: string;
+  companyLogoUrl: string | null;
+  inviterName: string;
+  name: string;
+  title: string;
+  phoneMasked: string;
+  expiresAt: string;
 }
 
 /* ---------------- Ứng tuyển ---------------- */
@@ -1341,7 +1436,8 @@ export interface AdminEmployerDetail extends AdminEmployerItem {
   suspendedAt: string | null;
   suspendReason: string | null;
   contact: { phone: string | null; email: string | null; website: string | null; address: string | null };
-  members: Array<{ id: string; name: string; title: string; locked: boolean }>;
+  /** Thành viên đang hoạt động trước, người đã rời doanh nghiệp (leftAt) sau – giữ để tra cứu lịch sử */
+  members: Array<{ id: string; name: string; title: string; locked: boolean; leftAt: string | null }>;
   partners: Array<{ id: string; name: string; expiresAt: string | null }>;
   jobs: Array<{ id: string; code: string; title: string; status: JobStatus; applicants: number; suspended: boolean; createdAt: string }>;
   violations: Array<{ code: string; reason: string; status: ReportStatus; decision: ReportDecision | null; createdAt: string }>;

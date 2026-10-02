@@ -22,7 +22,7 @@ import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { uniqueSlug } from '../../core/utils/unique-slug.js';
 import { authUserInclude, toAuthUser } from './auth-user.js';
 import { OtpService } from './otp.service.js';
-import { assertNotTemporarilyLocked, clearFailedLogins, invalidCredentials, registerFailedLogin } from './login-guard.js';
+import { assertNotTemporarilyLocked, assertStillMember, clearFailedLogins, invalidCredentials, registerFailedLogin } from './login-guard.js';
 import { hashPassword, verifyPassword } from './password.js';
 import { type DeviceInfo, type IssuedTokens, SessionService } from './session.service.js';
 import { GoogleTokenVerifier } from './google-token-verifier.js';
@@ -157,6 +157,7 @@ export class AuthService {
     if (candidate.lockedAt) {
       throw new ApiException('FORBIDDEN', 'Tài khoản đã bị khoá. Vui lòng liên hệ 1900 66 88 để được hỗ trợ', HttpStatus.FORBIDDEN);
     }
+    await assertStillMember(this.prisma, candidate);
     if (input.role && input.role !== candidate.role) {
       throw new ApiException('WRONG_ROLE', `Đây là tài khoản ${ROLE_NAME[candidate.role]}, vui lòng chọn đúng vai trò`, HttpStatus.FORBIDDEN);
     }
@@ -179,6 +180,7 @@ export class AuthService {
     let user = await this.prisma.user.findFirst({ where: { OR: [{ googleId: identity.subject }, { email: identity.email }] } });
     if (user?.role === 'admin' || user?.deletedAt) throw new ApiException('INVALID_CREDENTIALS', 'Không thể đăng nhập bằng tài khoản này', HttpStatus.UNAUTHORIZED);
     if (user?.lockedAt) throw new ApiException('FORBIDDEN', 'Tài khoản đã bị khoá. Vui lòng liên hệ 1900 66 88 để được hỗ trợ', HttpStatus.FORBIDDEN);
+    if (user) await assertStillMember(this.prisma, user);
     if (user) {
       if (user.googleId && user.googleId !== identity.subject) throw new ApiException('CONFLICT', 'Email đã liên kết với tài khoản Google khác', HttpStatus.CONFLICT);
       user = await this.prisma.user.update({ where: { id: user.id }, data: { googleId: identity.subject, email: identity.email, avatarUrl: user.avatarUrl ?? identity.picture } });

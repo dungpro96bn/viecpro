@@ -15,5 +15,6 @@ export * from './schemas/jobs.js';
 export * from './schemas/uploads.js';
 export * from './schemas/engagement.js';
 export * from './schemas/account.js';
+export * from './schemas/employer-profile.js';
 export * from './admin.js';
 export * from './schemas/admin.js';

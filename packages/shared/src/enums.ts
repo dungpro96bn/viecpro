@@ -54,7 +54,7 @@ export const APPLICATION_STATUSES = ['submitted', 'viewed', 'interview', 'passed
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
 /** Mục đích mã OTP */
-export const OTP_PURPOSES = ['register', 'login', 'reset_password', 'change_phone'] as const;
+export const OTP_PURPOSES = ['register', 'login', 'reset_password', 'change_phone', 'join_company'] as const;
 export type OtpPurpose = (typeof OTP_PURPOSES)[number];
 
 /** Mục đích OTP gửi qua email (khớp enum EmailOtpPurpose của Prisma) */

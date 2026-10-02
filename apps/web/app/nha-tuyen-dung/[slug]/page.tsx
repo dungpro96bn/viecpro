@@ -22,6 +22,7 @@ import {
   IconWarning,
   PathIcon,
 } from '@/components/ui/Icons';
+import { formatVnContactPhone } from '@viecpro/shared';
 import { getEmployerProfile, getProfileJobs } from '@/lib/server-api';
 import { apiJobToView, apiRecruiterToPoster } from '@/lib/api-mappers';
 import { toApplyJob } from '@/lib/data';
@@ -58,7 +59,7 @@ export default async function EmployerPage({ params }: { params: Promise<Params>
     slug: profile.slug,
     name: profile.name,
     shortName: profile.shortName ?? profile.name,
-    phone: profile.phone ?? '',
+    phone: profile.phone ? formatVnContactPhone(profile.phone) : '',
     intro: profile.intro ?? '',
     stats: [...rows('stats'), [String(jobPage?.total ?? 0), 'Đơn đang tuyển'], [String(profile.followerCount), 'Người theo dõi']],
     values: objects('values').map((item) => ({ title: String(item.title ?? ''), desc: String(item.desc ?? ''), icon: 'M4 12l5 5L20 6' })),
@@ -67,7 +68,7 @@ export default async function EmployerPage({ params }: { params: Promise<Params>
     jobTotals: profile.jobCounts,
     team: profile.team.map((member) => ({ name: member.name, role: member.title, photo: member.photoUrl ?? '', rating: member.rating.toFixed(1), jobs: 0, online: false, href: `/tu-van-vien/${member.slug}` })),
     contacts: [
-      ...(profile.phone ? [{ label: 'Điện thoại', value: profile.phone, icon: 'phone' as ContactIcon }] : []),
+      ...(profile.phone ? [{ label: 'Điện thoại', value: formatVnContactPhone(profile.phone), icon: 'phone' as ContactIcon }] : []),
       ...(profile.email ? [{ label: 'Email', value: profile.email, icon: 'mail' as ContactIcon }] : []),
       ...(profile.website ? [{ label: 'Website', value: profile.website, icon: 'web' as ContactIcon }] : []),
       ...(profile.address ? [{ label: 'Địa chỉ', value: profile.address, icon: 'pin' as ContactIcon }] : []),
@@ -87,7 +88,7 @@ export default async function EmployerPage({ params }: { params: Promise<Params>
       {/* ẢNH BÌA + HỒ SƠ */}
       <section className="profile-hero">
         <div className="profile-cover employer-cover">
-          <img className="employer-cover__img" src="/images/banners/employer-cover.jpg" alt="" />
+          <img className="employer-cover__img" src={profile.coverUrl ?? '/images/banners/employer-cover.jpg'} alt="" />
           <span className="employer-cover__shade" />
           <nav className="container breadcrumb breadcrumb--light profile-cover__crumb" aria-label="Breadcrumb">
             <Link href="/">Trang chủ</Link>

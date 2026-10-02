@@ -30,7 +30,7 @@ export class EmployerAccountService {
           photoUrl: true,
           reviewCount: true,
           cccdVerifiedAt: true,
-          employer: { select: { id: true, slug: true, name: true, shortName: true, logoUrl: true, verified: true, _count: { select: { recruiters: true } } } },
+          employer: { select: { id: true, slug: true, name: true, shortName: true, logoUrl: true, verified: true, _count: { select: { recruiters: { where: { leftAt: null } } } } } },
         },
       }),
       this.planOf(actor),

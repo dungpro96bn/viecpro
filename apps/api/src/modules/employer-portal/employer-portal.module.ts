@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module.js';
 import { JobsModule } from '../jobs/jobs.module.js';
 import { EmployerAccountController } from './employer-account.controller.js';
 import { EmployerApplicantsController } from './employer-applicants.controller.js';
@@ -16,10 +17,15 @@ import { EmployerJobsService } from './employer-jobs.service.js';
 import { EmployerPartnersService } from './employer-partners.service.js';
 import { EmployerPortalController } from './employer-portal.controller.js';
 import { EmployerPortalService } from './employer-portal.service.js';
+import { EmployerMembersController, MemberInvitesController } from './employer-members.controller.js';
+import { EmployerMembersService } from './employer-members.service.js';
+import { EmployerProfileController } from './employer-profile.controller.js';
+import { EmployerProfileService } from './employer-profile.service.js';
+import { MemberInvitesService } from './member-invites.service.js';
 
 @Module({
-  imports: [JobsModule],
-  controllers: [EmployerAccountController, EmployerJobsController, EmployerApplicantsController, EmployerInterviewsController, EmployerPortalController],
-  providers: [EmployerContext, EmployerAccountService, EmployerDashboardService, EmployerJobsService, EmployerJobFormService, EmployerApplicantsService, EmployerIntakeService, EmployerInterviewCreateService, EmployerInterviewsService, EmployerPartnersService, EmployerPortalService],
+  imports: [JobsModule, AuthModule],
+  controllers: [EmployerAccountController, EmployerJobsController, EmployerApplicantsController, EmployerInterviewsController, EmployerPortalController, EmployerProfileController, EmployerMembersController, MemberInvitesController],
+  providers: [EmployerContext, EmployerAccountService, EmployerDashboardService, EmployerJobsService, EmployerJobFormService, EmployerApplicantsService, EmployerIntakeService, EmployerInterviewCreateService, EmployerInterviewsService, EmployerPartnersService, EmployerPortalService, EmployerProfileService, EmployerMembersService, MemberInvitesService],
 })
 export class EmployerPortalModule {}

@@ -20,6 +20,14 @@ export class ConsoleOtpSender extends OtpSender {
   }
 }
 
+const PURPOSE_LABEL: Record<OtpPurpose, string> = {
+  register: 'đăng ký',
+  login: 'đăng nhập',
+  reset_password: 'đặt lại mật khẩu',
+  change_phone: 'đổi số điện thoại',
+  join_company: 'nhận lời mời doanh nghiệp',
+};
+
 /** Production SMS sender backed by Twilio Programmable Messaging. */
 @Injectable()
 export class TwilioOtpSender extends OtpSender {
@@ -30,7 +38,7 @@ export class TwilioOtpSender extends OtpSender {
     const token = this.env.SMS_TWILIO_AUTH_TOKEN;
     const from = this.env.SMS_TWILIO_FROM;
     if (!account || !token || !from) throw new Error('Twilio OTP provider is missing credentials');
-    const purposeLabel = purpose === 'register' ? 'đăng ký' : purpose === 'login' ? 'đăng nhập' : 'đặt lại mật khẩu';
+    const purposeLabel = PURPOSE_LABEL[purpose];
     const authorization = Buffer.from(`${account}:${token}`).toString('base64');
     const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${account}/Messages.json`, {
       method: 'POST',

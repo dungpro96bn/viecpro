@@ -208,7 +208,8 @@ async function main() {
         online: r.key !== 'lan' && r.key !== 'vinh',
         // Thu Hà là NTD cá nhân: không thuộc doanh nghiệp nào, đăng tin qua doanh nghiệp phái cử
         employerId: r.camcom && !isHa ? camcom.id : null,
-        ...(r.key === 'minhanh' && { userId: minhAnhUser.id }),
+        // Minh Anh là quản trị viên doanh nghiệp CAMCOM: sửa hồ sơ công ty, quản lý thành viên
+        ...(r.key === 'minhanh' && { userId: minhAnhUser.id, companyAdmin: true }),
         ...(isHa && {
           userId: haUser.id,
           cccdVerifiedAt: new Date(now - 200 * 86400_000),

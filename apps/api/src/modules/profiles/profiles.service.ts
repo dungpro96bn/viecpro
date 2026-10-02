@@ -36,7 +36,7 @@ export class ProfilesService {
   async employer(slug: string, userId?: string): Promise<EmployerProfile> {
     const e = await this.prisma.employer.findUnique({
       where: { slug },
-      include: { recruiters: { select: recruiterSummarySelect, orderBy: { rating: 'desc' } }, _count: { select: { followers: true } } },
+      include: { recruiters: { where: { leftAt: null }, select: recruiterSummarySelect, orderBy: { rating: 'desc' } }, _count: { select: { followers: true } } },
     });
     if (!e) throw ApiException.notFound('Không tìm thấy nhà tuyển dụng');
     return {

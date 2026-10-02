@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../generated/prisma/client.js';
 import { ApiException } from '../../core/http/api-exception.js';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
+import { memberRemoved } from '../auth/login-guard.js';
 
 /** Cán bộ tuyển dụng đang thao tác trong khu quản lý */
 export interface EmployerActor {
@@ -28,12 +29,14 @@ export class EmployerContext {
       select: {
         id: true,
         employerId: true,
+        leftAt: true,
         cccdVerifiedAt: true,
         employer: { select: { verified: true } },
         verifications: { where: { status: 'approved' }, select: { id: true }, take: 1 },
       },
     });
     if (!r) throw ApiException.forbidden('Tài khoản chưa được gắn với nhà tuyển dụng');
+    if (r.leftAt) throw memberRemoved();
     return {
       userId,
       recruiterId: r.id,
@@ -56,6 +59,6 @@ export class EmployerContext {
 
   /** Cán bộ cùng doanh nghiệp (chọn người phụ trách / người phỏng vấn); NTD cá nhân chỉ có chính mình */
   teamScope(actor: EmployerActor): Prisma.RecruiterWhereInput {
-    return actor.employerId ? { employerId: actor.employerId } : { id: actor.recruiterId };
+    return actor.employerId ? { employerId: actor.employerId, leftAt: null } : { id: actor.recruiterId };
   }
 }

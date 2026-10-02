@@ -80,3 +80,33 @@ ${button(d.manageUrl, 'Xem tất cả & cài đặt')}`;
     text: [`${d.total} việc mới: ${d.alertName}`, ...d.jobs.map((j) => `- ${j.title} (${j.pref}): ${j.url}`), `Cài đặt: ${d.manageUrl}`].join('\n'),
   };
 }
+
+export interface MemberInviteEmailData {
+  to: string;
+  name: string;
+  companyName: string;
+  inviterName: string;
+  title: string;
+  acceptUrl: string;
+  expiresDays: number;
+  webBaseUrl: string;
+}
+
+/** Lời mời làm thành viên doanh nghiệp – link mở trang nhận lời, xác thực OTP tới số được mời */
+export function memberInviteEmail(d: MemberInviteEmailData): Omit<EmailMessage, 'to'> {
+  const body = `
+<div style="font-size:13px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:${C.brand};">Lời mời thành viên</div>
+<h1 style="margin:8px 0 0;font-size:24px;line-height:31px;font-weight:800;letter-spacing:-0.4px;color:${C.ink};">${esc(d.companyName)} mời bạn tham gia viecpro Business</h1>
+<p style="margin:12px 0 0;font-size:15px;line-height:24px;">Chào ${esc(d.name)}, <b>${esc(d.inviterName)}</b> mời bạn làm <b>${esc(d.title)}</b> trong khu quản lý tuyển dụng của ${esc(d.companyName)}.</p>
+${spacer(22)}
+${button(d.acceptUrl, 'Nhận lời mời')}
+<p style="margin:14px 0 0;font-size:13px;line-height:20px;color:${C.muted};">Link có hiệu lực trong <b style="color:${C.ink};">${d.expiresDays} ngày</b>. Khi nhận lời, bạn xác thực bằng mã gửi tới số điện thoại được mời và đặt mật khẩu.</p>
+${spacer(20)}
+${callout('Nếu bạn không quen người mời, hãy bỏ qua email này – không có tài khoản nào được tạo.', 'orange')}`;
+  return {
+    subject: `${d.companyName} mời bạn tham gia viecpro Business`,
+    tag: 'member-invite',
+    html: layout({ preheader: `${d.inviterName} mời bạn làm ${d.title}.`, body, webBaseUrl: d.webBaseUrl, reason: `Bạn nhận email này vì ${d.companyName} nhập địa chỉ ${d.to} khi mời thành viên.` }),
+    text: [`${d.companyName} mời bạn làm ${d.title} trên viecpro Business.`, `Nhận lời mời: ${d.acceptUrl}`, `Link có hiệu lực ${d.expiresDays} ngày.`].join('\n'),
+  };
+}

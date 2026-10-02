@@ -237,14 +237,14 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
     ? [
         { href: '#', label: 'Báo cáo', icon: IconBarChart },
         { href: publicHref(account), label: 'Trang công ty', icon: IconBuilding },
-        { href: '#', label: 'Thành viên', icon: IconMembers },
-        { href: '#', label: 'Cài đặt', icon: IconSettings },
+        { href: `${EMPLOYER_BASE}/thanh-vien`, label: 'Thành viên', icon: IconMembers },
+        { href: `${EMPLOYER_BASE}/cai-dat`, label: 'Cài đặt', icon: IconSettings },
       ]
     : [
         { href: `${EMPLOYER_BASE}#doanh-nghiep-phai-cu`, label: 'Đơn vị hợp tác', icon: IconBuilding, count: account.counts.partners },
         { href: publicHref(account), label: 'Hồ sơ cá nhân', icon: IconUserRound },
         { href: '#', label: 'Đánh giá', icon: IconStarLine, count: account.counts.reviews },
-        { href: '#', label: 'Cài đặt', icon: IconSettings },
+        { href: `${EMPLOYER_BASE}/cai-dat`, label: 'Cài đặt', icon: IconSettings },
       ];
 
   const isActive = (item: NavItem) => item.href !== '#' && (item.exact ? pathname === item.href : pathname.startsWith(item.href));

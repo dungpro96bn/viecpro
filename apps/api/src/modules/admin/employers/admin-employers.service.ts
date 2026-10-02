@@ -217,8 +217,8 @@ export class AdminEmployersService {
         : this.prisma.recruiter.findUniqueOrThrow({ where: { id }, select: { phone: true, city: true, createdAt: true, user: { select: { email: true, lockedAt: true, lockReason: true } } } }),
       this.prisma.recruiter.findMany({
         where: company ? { employerId: id } : { id },
-        select: { id: true, name: true, title: true, user: { select: { lockedAt: true } } },
-        orderBy: { createdAt: 'asc' },
+        select: { id: true, name: true, title: true, leftAt: true, user: { select: { lockedAt: true } } },
+        orderBy: [{ leftAt: { sort: 'asc', nulls: 'first' } }, { createdAt: 'asc' }],
       }),
       this.prisma.recruiterPartner.findMany({
         where: company ? { employerId: id } : { recruiterId: id },
@@ -253,7 +253,7 @@ export class AdminEmployersService {
       suspendedAt: suspendedAt?.toISOString() ?? null,
       suspendReason,
       contact,
-      members: members.map((m) => ({ id: m.id, name: m.name, title: m.title, locked: !!m.user?.lockedAt })),
+      members: members.map((m) => ({ id: m.id, name: m.name, title: m.title, locked: !!m.user?.lockedAt, leftAt: m.leftAt?.toISOString() ?? null })),
       partners: partners.map((p) => ({ id: p.id, name: company ? p.recruiter.name : p.employer.name, expiresAt: p.expiresAt?.toISOString() ?? null })),
       jobs: jobs.map((j) => ({ id: j.id, code: j.code, title: j.title, status: j.status, applicants: j._count.applications, suspended: !!j.suspendedAt, createdAt: j.createdAt.toISOString() })),
       violations: violations.map((v) => ({ code: reportCode(v.number), reason: REPORT_REASON_LABEL[v.reason as ReportReason] ?? v.reason, status: v.status, decision: v.decision, createdAt: v.createdAt.toISOString() })),

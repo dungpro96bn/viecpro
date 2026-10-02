@@ -14,6 +14,10 @@ function formatPhone(raw: string) {
 
 interface OtpStepProps {
   phone: string;
+  /** Hiển thị thay cho số đã định dạng (vd. số đã che "0911 xxx 333" ở trang nhận lời mời) */
+  phoneLabel?: string;
+  /** Nhãn nút quay lại (mặc định "Quay lại sửa thông tin") */
+  backLabel?: string;
   resendAfter: number;
   onBack: () => void;
   onVerified: (code: string) => Promise<void>;
@@ -22,7 +26,7 @@ interface OtpStepProps {
 }
 
 /** Bước 2: nhập mã OTP 6 số gửi qua Zalo / SMS */
-export default function OtpStep({ phone, resendAfter, onBack, onVerified, onResend, onError }: OtpStepProps) {
+export default function OtpStep({ phone, phoneLabel, backLabel = 'Quay lại sửa thông tin', resendAfter, onBack, onVerified, onResend, onError }: OtpStepProps) {
   const [code, setCode] = useState<string[]>(Array(LENGTH).fill(''));
   const [seconds, setSeconds] = useState(resendAfter || RESEND_AFTER);
   const [submitting, setSubmitting] = useState(false);
@@ -108,10 +112,12 @@ export default function OtpStep({ phone, resendAfter, onBack, onVerified, onRese
       <div className="auth-form__head">
         <h1 className="auth-form__title reg-form__title">Xác thực số điện thoại</h1>
         <p className="auth-form__lead">
-          Nhập mã gồm {LENGTH} chữ số viecpro vừa gửi qua Zalo / SMS tới <b className="reg-otp__phone">{formatPhone(phone)}</b>.{' '}
-          <button type="button" className="reg-otp__link" onClick={onBack}>
-            Đổi số
-          </button>
+          Nhập mã gồm {LENGTH} chữ số viecpro vừa gửi qua Zalo / SMS tới <b className="reg-otp__phone">{phoneLabel ?? formatPhone(phone)}</b>.{' '}
+          {!phoneLabel && (
+            <button type="button" className="reg-otp__link" onClick={onBack}>
+              Đổi số
+            </button>
+          )}
         </p>
       </div>
 
@@ -157,7 +163,7 @@ export default function OtpStep({ phone, resendAfter, onBack, onVerified, onRese
 
       <button type="button" className="reg-otp__back" onClick={onBack}>
         <IconArrowLeft size={16} className="icon--w2" />
-        Quay lại sửa thông tin
+        {backLabel}
       </button>
     </form>
   );

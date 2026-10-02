@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PASSWORD_RULES, normalizeVnPhone } from '../utils.js';
+import { PASSWORD_RULES, normalizeVnContactPhone, normalizeVnPhone } from '../utils.js';
 
 /** Số điện thoại VN, tự chuẩn hoá về "+84xxxxxxxxx" */
 export const phoneSchema = z
@@ -10,6 +10,20 @@ export const phoneSchema = z
     const phone = normalizeVnPhone(v);
     if (!phone) {
       ctx.addIssue({ code: 'custom', message: 'Số điện thoại chưa đúng' });
+      return z.NEVER;
+    }
+    return phone;
+  });
+
+/** Số liên hệ công khai của doanh nghiệp: di động, máy bàn hoặc hotline 1800 / 1900 */
+export const contactPhoneSchema = z
+  .string()
+  .trim()
+  .max(20, 'Số điện thoại quá dài')
+  .transform((v, ctx) => {
+    const phone = normalizeVnContactPhone(v);
+    if (!phone) {
+      ctx.addIssue({ code: 'custom', message: 'Số điện thoại chưa đúng (di động, máy bàn hoặc 1800 / 1900)' });
       return z.NEVER;
     }
     return phone;
