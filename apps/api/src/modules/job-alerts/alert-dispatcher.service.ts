@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger, type OnApplicationBootstrap, type OnModuleDestroy } from '@nestjs/common';
-import { maskEmail, WEB_LINKS } from '@viecpro/shared';
+import { maskEmail, maskPhoneTail, WEB_LINKS } from '@viecpro/shared';
 import { ENV, type Env } from '../../config/env.js';
 import { AssetUrlService } from '../../core/assets/asset-url.service.js';
 import { EmailSender } from '../../core/mail/email-sender.js';
@@ -7,6 +7,7 @@ import { jobAlertEmail } from '../../core/mail/templates/account.js';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { resolvePrefs } from '../notifications/notification-prefs.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
+import { SmsSender } from '../notifications/sms-sender.js';
 import { criteriaWhere, isDue, parseCriteria } from './alert-criteria.js';
 
 /** Chu kỳ quét: 5 phút → tin duyệt xong được gửi trong ≤ 10 phút với tần suất "ngay khi có" (Phase 6) */
@@ -28,6 +29,7 @@ export class AlertDispatcherService implements OnApplicationBootstrap, OnModuleD
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
     private readonly mail: EmailSender,
+    private readonly sms: SmsSender,
     private readonly assets: AssetUrlService,
     @Inject(ENV) private readonly env: Env,
   ) {}
@@ -105,8 +107,17 @@ export class AlertDispatcherService implements OnApplicationBootstrap, OnModuleD
       await this.notifications.notify(alert.userId, 'alert.digest', { title, body: jobs.slice(0, 3).map((j) => j.title).join(' · '), link });
     }
     if (alert.channels.includes('email')) await this.sendEmail(alert.userId, alert.name, total, jobs);
-    // TODO(decision): kênh SMS cho thông báo việc làm cần nhà cung cấp SMS brandname (hiện OtpSender chỉ gửi mã) – tạm chưa gửi
+    if (alert.channels.includes('sms')) await this.sendSms(alert.userId, alert.name, total);
     return true;
+  }
+
+  private async sendSms(userId: string, alertName: string, total: number) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { phone: true, settings: { select: { notifyPrefs: true } } } });
+    // Người dùng đã chọn SMS cho thông báo này → gửi, trừ khi đã chủ động tắt SMS nhóm "Việc mới phù hợp" trong Cài đặt
+    if (!user?.phone || smsTurnedOff(user.settings?.notifyPrefs)) return;
+    const name = alertName.length > 40 ? `${alertName.slice(0, 39)}…` : alertName;
+    const text = `viecpro: ${total} viec moi cho "${name}". Xem: ${this.env.WEB_BASE_URL.replace(/\/$/, '')}${WEB_LINKS.seekerAlerts}`;
+    await this.sms.send(user.phone, text).catch((e: unknown) => this.logger.warn(`Gửi SMS thông báo việc làm tới ${maskPhoneTail(user.phone!)} lỗi: ${String(e)}`));
   }
 
   private async sendEmail(userId: string, alertName: string, total: number, jobs: Array<{ title: string; slug: string; pref: string; salary: number; imageUrl: string; employer: { name: string } | null }>) {
@@ -125,4 +136,10 @@ export class AlertDispatcherService implements OnApplicationBootstrap, OnModuleD
     // Lỗi dịch vụ email không làm hỏng vòng gửi (RULE-BE.md mục 11)
     await this.mail.send({ to: user.email, ...message }).catch((e: unknown) => this.logger.warn(`Gửi email thông báo việc làm tới ${maskEmail(user.email!)} lỗi: ${String(e)}`));
   }
+}
+
+/** Tắt SMS nhóm "Việc mới phù hợp" một cách tường minh (mặc định của nhóm là tắt nên không dùng resolvePrefs) */
+function smsTurnedOff(stored: unknown): boolean {
+  const group = stored && typeof stored === 'object' ? (stored as Record<string, unknown>).job_match : undefined;
+  return !!group && typeof group === 'object' && (group as Record<string, unknown>).sms === false;
 }

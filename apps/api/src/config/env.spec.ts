@@ -10,11 +10,17 @@ const base = {
   SMS_TWILIO_FROM: '+15005550006',
 };
 /** Cấu hình production hợp lệ tối thiểu */
-const prod = { ...base, NODE_ENV: 'production', OTP_PROVIDER: 'sms', EMAIL_PROVIDER: 'resend', RESEND_API_KEY: 're_test_key', WEB_BASE_URL: 'https://viecpro.vn' };
+const prod = { ...base, NODE_ENV: 'production', OTP_PROVIDER: 'sms', EMAIL_PROVIDER: 'resend', RESEND_API_KEY: 're_test_key', WEB_BASE_URL: 'https://viecpro.vn', STORAGE_PROVIDER: 's3', S3_BUCKET: 'viecpro-test' };
 
 describe('loadEnv', () => {
   it('dev chấp nhận cấu hình mặc định', () => {
     expect(loadEnv({ ...base, JWT_SECRET: 'change-me-to-a-long-random-string-at-least-32-chars' }).PORT).toBe(4000);
+  });
+
+  it('coi biến để trống trong .env là chưa cấu hình', () => {
+    const env = loadEnv({ ...base, S3_ENDPOINT: '', REDIS_URL: '', FCM_CLIENT_EMAIL: '', GOOGLE_CLIENT_ID: '' });
+    expect(env.S3_ENDPOINT).toBeUndefined();
+    expect(env.REDIS_URL).toBeUndefined();
   });
 
   it('production từ chối secret mẫu, OTP console, CORS localhost', () => {
@@ -37,6 +43,10 @@ describe('loadEnv', () => {
     expect(() =>
       loadEnv({ ...prod, OTP_SECRET: base.JWT_SECRET, CORS_ORIGINS: 'https://viecpro.vn' }),
     ).toThrow(/phải khác nhau/);
+  });
+
+  it('production từ chối lưu tệp cục bộ', () => {
+    expect(() => loadEnv({ ...prod, STORAGE_PROVIDER: 'local', CORS_ORIGINS: 'https://viecpro.vn' })).toThrow(/STORAGE_PROVIDER=local/);
   });
 
   it('production từ chối bỏ qua 2FA', () => {

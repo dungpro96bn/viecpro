@@ -2,9 +2,11 @@ import { Controller, Get, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/c
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import {
+  adminChangePasswordSchema,
   adminLoginSchema,
   adminMfaSchema,
   adminMfaSetupSchema,
+  type AdminChangePasswordInput,
   type AdminLoginInput,
   type AdminLoginResult,
   type AdminMe,
@@ -102,6 +104,15 @@ export class AdminMeController {
   @ApiOperation({ summary: 'Admin đang đăng nhập: vai trò và danh sách quyền' })
   me(@CurrentAdmin() admin: AdminContext): Promise<AdminMe> {
     return this.auth.me(admin.id);
+  }
+
+  @AnyAdmin()
+  @Throttle(STRICT)
+  @Post('password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Tự đổi mật khẩu (bắt buộc khi đang dùng mật khẩu tạm); đăng xuất các thiết bị khác' })
+  changePassword(@CurrentUser() user: AuthPayload, @ZodBody(adminChangePasswordSchema) body: AdminChangePasswordInput, @Req() req: Request): Promise<AdminMe> {
+    return this.auth.changePassword(user.sub, user.sid, body, req);
   }
 
   @AnyAdmin()

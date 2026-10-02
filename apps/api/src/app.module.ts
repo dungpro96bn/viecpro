@@ -24,6 +24,7 @@ import { ProfilesModule } from './modules/profiles/profiles.module.js';
 import { ReportsModule } from './modules/reports/reports.module.js';
 import { SavedJobsModule } from './modules/saved-jobs/saved-jobs.module.js';
 import { SystemController } from './modules/system/system.controller.js';
+import { UploadsModule } from './modules/uploads/uploads.module.js';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { SystemController } from './modules/system/system.controller.js';
     EmployerPortalModule,
     LeadsModule,
     ReportsModule,
+    UploadsModule,
 
     // Quản trị
     AdminModule,

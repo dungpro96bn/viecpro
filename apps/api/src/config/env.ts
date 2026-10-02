@@ -10,7 +10,12 @@ const envSchema = z.object({
     .default('http://localhost:3100,http://localhost:3001')
     .transform((v) => v.split(',').map((s) => s.trim()).filter(Boolean)),
   ASSET_BASE_URL: z.url().default('http://localhost:3100'),
+  /** local = lưu tệp vào LOCAL_STORAGE_DIR trên máy chạy API (dev) · s3 = S3 / R2 qua presigned URL */
   STORAGE_PROVIDER: z.enum(['local', 's3']).default('local'),
+  /** Thư mục lưu tệp khi STORAGE_PROVIDER=local (tương đối với thư mục chạy API) */
+  LOCAL_STORAGE_DIR: z.string().trim().min(1).default('storage'),
+  /** URL gốc trình duyệt gọi tới API – dùng cho link tải lên / xem tệp lưu cục bộ */
+  API_PUBLIC_URL: z.url().default('http://localhost:4000'),
   S3_BUCKET: z.string().optional(),
   S3_REGION: z.string().default('ap-southeast-1'),
   S3_ENDPOINT: z.url().optional(),
@@ -87,6 +92,7 @@ export function productionProblems(env: Env): string[] {
   if (new Set([env.JWT_SECRET, env.OTP_SECRET, env.ADMIN_MFA_KEY]).size < 3) problems.push('JWT_SECRET, OTP_SECRET, ADMIN_MFA_KEY phải khác nhau');
   if (env.OTP_PROVIDER === 'console') problems.push('OTP_PROVIDER=console chỉ dùng cho dev');
   if (env.EMAIL_PROVIDER === 'console') problems.push('EMAIL_PROVIDER=console chỉ dùng cho dev (mã OTP email sẽ không tới người dùng)');
+  if (env.STORAGE_PROVIDER === 'local') problems.push('STORAGE_PROVIDER=local chỉ dùng cho dev, production dùng s3');
   if (!env.WEB_BASE_URL.startsWith('https://')) problems.push('WEB_BASE_URL phải dùng https');
   if (env.ADMIN_MFA_BYPASS) problems.push('ADMIN_MFA_BYPASS chỉ được dùng khi phát triển hoặc kiểm thử');
   if (env.CORS_ORIGINS.some((o) => /localhost|127\.0\.0\.1/.test(o))) problems.push('CORS_ORIGINS không được chứa localhost');
@@ -95,7 +101,8 @@ export function productionProblems(env: Env): string[] {
 }
 
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
-  const parsed = envSchema.safeParse(source);
+  // Dòng để trống trong .env (vd. "S3_ENDPOINT=") nghĩa là chưa cấu hình, không phải giá trị rỗng
+  const parsed = envSchema.safeParse(Object.fromEntries(Object.entries(source).filter(([, value]) => value !== '')));
   if (!parsed.success) {
     const lines = parsed.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`).join('\n');
     throw new Error(`Cấu hình môi trường không hợp lệ:\n${lines}`);

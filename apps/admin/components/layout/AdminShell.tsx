@@ -3,6 +3,7 @@
 import type { AdminBadges } from '@viecpro/shared';
 import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import ForcedPasswordChange from '@/components/account/ForcedPasswordChange';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import Sidebar from './Sidebar';
@@ -19,7 +20,7 @@ export const useShell = () => useContext(ShellContext);
 
 /** Khung khu quản trị: chặn khi chưa đăng nhập, sidebar + vùng nội dung */
 export default function AdminShell({ children }: { children: ReactNode }) {
-  const { status } = useAuth();
+  const { status, admin } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [badges, setBadges] = useState<AdminBadges | null>(null);
@@ -38,11 +39,11 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   }, [status, router, pathname]);
 
   useEffect(() => {
-    if (status !== 'signed-in') return;
+    if (status !== 'signed-in' || admin?.mustChangePassword) return;
     void refreshBadges();
     const t = setInterval(() => void refreshBadges(), 60_000);
     return () => clearInterval(t);
-  }, [status, refreshBadges]);
+  }, [status, admin?.mustChangePassword, refreshBadges]);
 
   useEffect(() => setMenuOpen(false), [pathname]);
 
@@ -54,6 +55,9 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       </div>
     );
   }
+
+  // Mật khẩu tạm: API chặn mọi màn hình nghiệp vụ cho tới khi đổi
+  if (admin?.mustChangePassword) return <ForcedPasswordChange />;
 
   return (
     <ShellContext.Provider value={{ badges, refreshBadges }}>

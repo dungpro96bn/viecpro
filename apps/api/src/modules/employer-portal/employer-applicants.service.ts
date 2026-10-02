@@ -187,7 +187,8 @@ export class EmployerApplicantsService {
       app.assigneeId ? this.prisma.recruiter.findUnique({ where: { id: app.assigneeId }, select: { id: true, name: true } }) : null,
     ]);
     const { reasons } = scoreApplicant(app, app.job);
-    const docs = Array.isArray(app.documents) ? (app.documents as EmployerApplicantDetail['documents']) : [];
+    const stored = Array.isArray(app.documents) ? (app.documents as Array<{ name: string; kind: 'pdf' | 'image'; sizeKb: number; path?: string }>) : [];
+    const docs = stored.map((d) => ({ name: d.name, kind: d.kind, sizeKb: d.sizeKb, url: this.assets.url(d.path) }));
     return {
       ...this.toItem({ ...app, job: app.job }),
       email: app.email,

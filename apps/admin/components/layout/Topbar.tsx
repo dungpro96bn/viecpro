@@ -3,9 +3,10 @@
 import type { AdminBadges } from '@viecpro/shared';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import ChangePasswordDialog from '@/components/account/ChangePasswordDialog';
 import { useAuth } from '@/lib/auth';
 import { cx, formatNumber, initials } from '@/lib/format';
-import { IconBell, IconFlag, IconLogoMark, IconLogout, IconMenu, IconModeration, IconShieldCheck } from '../ui/Icons';
+import { IconBell, IconFlag, IconKey, IconLogoMark, IconLogout, IconMenu, IconModeration, IconShieldCheck } from '../ui/Icons';
 
 /** Đóng menu khi bấm ra ngoài / phím Esc */
 function usePopover() {
@@ -39,6 +40,7 @@ export default function Topbar({ badges, onMenu }: { badges: AdminBadges | null;
   const { admin, can, logout } = useAuth();
   const bell = usePopover();
   const me = usePopover();
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const items = PENDING.filter((p) => can(p.permission));
   const total = badges ? items.reduce((s, p) => s + badges[p.key], 0) : 0;
 
@@ -90,6 +92,18 @@ export default function Topbar({ badges, onMenu }: { badges: AdminBadges | null;
                     {admin.role.name} · {admin.mfaEnabled ? '2FA bật' : '2FA tắt'}
                   </span>
                 </span>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="topbar__item"
+                  onClick={() => {
+                    me.setOpen(false);
+                    setPasswordOpen(true);
+                  }}
+                >
+                  <IconKey size={17} />
+                  <span>Đổi mật khẩu</span>
+                </button>
                 <button type="button" role="menuitem" className="topbar__item topbar__item--danger" onClick={() => void logout()}>
                   <IconLogout size={17} />
                   <span>Đăng xuất</span>
@@ -99,6 +113,7 @@ export default function Topbar({ badges, onMenu }: { badges: AdminBadges | null;
           </div>
         )}
       </div>
+      <ChangePasswordDialog open={passwordOpen} onClose={() => setPasswordOpen(false)} />
     </header>
   );
 }

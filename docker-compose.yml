@@ -70,6 +70,8 @@ services:
       REDIS_URL: redis://redis:6379
       CORS_ORIGINS: http://localhost:${WEB_PORT:-3100},http://localhost:${ADMIN_PORT:-3001}
       ASSET_BASE_URL: http://localhost:${WEB_PORT:-3100}
+      # Tệp tải lên lưu trong apps/api/storage (STORAGE_PROVIDER=local), trình duyệt xem / tải qua cổng API
+      API_PUBLIC_URL: http://localhost:${API_PORT:-4000}
       WEB_BASE_URL: http://localhost:${WEB_PORT:-3100}
       # Secret dev mặc định khi chưa có apps/api/.env – KHÔNG dùng cho production
       JWT_SECRET: ${JWT_SECRET:-docker-dev-jwt-secret-change-me-0123456789abcdef}
@@ -80,6 +82,8 @@ services:
     volumes:
       # Email xem trước (EMAIL_PROVIDER=console) ghi ra máy: apps/api/tmp/mail
       - ./apps/api/tmp:/app/apps/api/tmp
+      # Ảnh / video người dùng tải lên (kho cục bộ khi chưa có S3)
+      - ./apps/api/storage:/app/apps/api/storage
     depends_on:
       postgres:
         condition: service_healthy

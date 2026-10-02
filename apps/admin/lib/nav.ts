@@ -58,8 +58,8 @@ export const NAV: Array<{ title: string; items: NavItem[] }> = [
     title: 'Hệ thống',
     items: [
       { href: '/noi-dung', label: 'Nội dung & cẩm nang', icon: IconBook, permission: 'content.manage' },
-      { href: '/phan-quyen', label: 'Phân quyền', icon: IconKey, permission: 'admins.manage' },
-      { href: '/nhat-ky', label: 'Nhật ký hệ thống', icon: IconList, permission: 'audit.read' },
+      { href: '/phan-quyen', label: 'Phân quyền', icon: IconKey, permission: 'admins.manage', ready: true },
+      { href: '/nhat-ky', label: 'Nhật ký hệ thống', icon: IconList, permission: 'audit.read', ready: true },
       { href: '/cai-dat', label: 'Cài đặt', icon: IconSettings, permission: 'settings.manage' },
     ],
   },

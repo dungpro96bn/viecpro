@@ -6,6 +6,8 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
 import { ENV, type Env } from './config/env.js';
+import { LOCAL_FILES_ROUTE } from './core/assets/asset-url.service.js';
+import { UploadService } from './core/assets/upload.service.js';
 
 // Nạp file .env khi chạy local (production dùng biến môi trường của server)
 try {
@@ -22,6 +24,19 @@ async function bootstrap() {
   app.use(helmet());
   app.use(cookieParser());
   app.enableCors({ origin: env.CORS_ORIGINS, credentials: true });
+
+  // Kho tệp cục bộ (dev): ảnh / video tải lên được web, admin, mobile ở origin khác hiển thị
+  if (env.STORAGE_PROVIDER === 'local') {
+    app.useStaticAssets(app.get(UploadService).localRoot, {
+      prefix: LOCAL_FILES_ROUTE,
+      index: false,
+      dotfiles: 'deny',
+      setHeaders: (res) => {
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+      },
+    });
+  }
 
   // Mọi API dưới /api/v1/... – đổi API không tương thích thì thêm v2, app mobile cũ vẫn chạy
   app.setGlobalPrefix('api');

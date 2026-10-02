@@ -25,8 +25,6 @@ import { cx, formatYen } from '@/lib/format';
 
 /** Mốc "Lương từ" (spec 12.1) */
 const SALARY_STEPS = [170_000, 190_000, 210_000, 250_000] as const;
-/** SMS cho thông báo việc làm chưa có nhà cung cấp – tạm khoá trên giao diện */
-const DISABLED_CHANNELS: AlertChannel[] = ['sms'];
 
 export const EMPTY_CRITERIA: JobAlertCriteria = { industries: [], prefs: [], regions: [], programs: [], salaryMin: null, freeOnly: false, gender: null };
 
@@ -170,14 +168,12 @@ export default function AlertEditor({ initial, submitLabel, busy, errors, onSubm
         </legend>
         <div className="ja-chips" aria-describedby={channelError ? 'ja-channel-error' : undefined}>
           {ALERT_CHANNELS.map((ch) => {
-            const disabled = DISABLED_CHANNELS.includes(ch);
             const on = draft.channels.includes(ch);
             return (
               <button
                 key={ch}
                 type="button"
                 aria-pressed={on}
-                disabled={disabled}
                 className={cx('ja-chip', on && 'ja-chip--on')}
                 onClick={() => {
                   setLocalError('');
@@ -185,7 +181,6 @@ export default function AlertEditor({ initial, submitLabel, busy, errors, onSubm
                 }}
               >
                 {ALERT_CHANNEL_LABEL[ch]}
-                {disabled && ' (sắp có)'}
               </button>
             );
           })}

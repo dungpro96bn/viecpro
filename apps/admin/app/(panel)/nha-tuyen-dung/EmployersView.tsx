@@ -21,6 +21,7 @@ import { useDebounced } from '@/components/list/useDebounced';
 import Dialog from '@/components/ui/Dialog';
 import { IconAlert, IconArrowRight, IconBriefcase, IconHistory, IconLock, IconSearch, IconShieldCheck, IconUnlock } from '@/components/ui/Icons';
 import { api, post } from '@/lib/api';
+import { auditActionLabel } from '@/lib/audit';
 import { useAuth } from '@/lib/auth';
 import { cx, formatNumber, initials } from '@/lib/format';
 
@@ -59,15 +60,6 @@ const SORT_OPTIONS: Array<{ value: AdminEmployerListQuery['sort']; label: string
 const DETAIL_TABS = ['overview', 'jobs', 'plan', 'violations', 'history'] as const;
 type DetailTab = (typeof DETAIL_TABS)[number];
 const DETAIL_TAB_LABEL: Record<DetailTab, string> = { overview: 'Tổng quan', jobs: 'Tin đăng', plan: 'Gói & thanh toán', violations: 'Vi phạm', history: 'Lịch sử' };
-/** Tên hành động trong nhật ký */
-const ACTION_LABEL: Record<string, string> = {
-  'employer.warn': 'Cảnh cáo',
-  'employer.suspend': 'Tạm khoá',
-  'employer.unsuspend': 'Mở khoá',
-  'verification.approve': 'Xác minh',
-  'verification.reject': 'Từ chối xác minh',
-  'verification.request_info': 'Yêu cầu bổ sung giấy tờ',
-};
 
 const rateLevel = (r: number) => (r >= 80 ? 'good' : r >= 60 ? 'mid' : 'low');
 
@@ -438,7 +430,7 @@ function EmployerDrawer({ item, onClose, onChanged }: { item: AdminEmployerItem 
                   detail.history.map((h) => (
                     <li key={h.id}>
                       <span className="dlist__text">
-                        <b>{ACTION_LABEL[h.action] ?? h.action}</b>
+                        <b>{auditActionLabel(h.action)}</b>
                         <small>
                           {h.actor.name} · {dateTime(h.createdAt)}
                           {typeof (h.after as { reason?: unknown } | null)?.reason === 'string' && ` · ${(h.after as { reason: string }).reason}`}

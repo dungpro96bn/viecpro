@@ -20,3 +20,4 @@ apps/api/src/generated
 
 # Email xem trước ở dev (EMAIL_PROVIDER=console)
 apps/api/tmp
+apps/api/storage

@@ -1,0 +1,139 @@
+/* Phân quyền (A-11) */
+.pq-tabs {
+  margin-bottom: 16px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+.pq-search {
+  min-width: 220px;
+}
+.pq-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pq-danger {
+  color: var(--danger-strong);
+}
+.pq-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.pq-hint {
+  color: var(--text-3);
+  font-size: 13px;
+}
+.pq-roles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+}
+.pq-role-skeleton {
+  height: 150px;
+  border-radius: var(--radius-lg);
+}
+.pq-role {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+}
+.pq-role__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.pq-role__name {
+  display: block;
+  font-size: 15px;
+}
+.pq-role__meta {
+  color: var(--text-3);
+  font-size: 12px;
+}
+.pq-role__desc {
+  color: var(--text-2);
+  font-size: 13px;
+}
+.pq-perms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pq-secret {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-muted);
+}
+.pq-secret code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  overflow-wrap: anywhere;
+}
+
+/* Trình sửa vai trò */
+.dialog--wide {
+  width: 680px;
+}
+.pq-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+.pq-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px 18px;
+  max-height: 46vh;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  border: 0;
+}
+.pq-groups legend {
+  margin-bottom: 6px;
+}
+.pq-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pq-group__title {
+  color: var(--text-3);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.pq-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.pq-check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+}
+.pq-check--off {
+  color: var(--text-3);
+  cursor: not-allowed;
+}

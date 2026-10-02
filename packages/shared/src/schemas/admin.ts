@@ -14,7 +14,8 @@ import {
   REPORT_TARGETS,
   VERIFICATION_TABS,
 } from '../enums.js';
-import { emailSchema, paginationSchema } from './common.js';
+import { ADMIN_PERMISSIONS } from '../admin.js';
+import { emailSchema, nameSchema, paginationSchema, passwordSchema } from './common.js';
 
 /** Danh sách admin cho phép tối đa 100 dòng / trang (RULE-BE.md mục 2) */
 const adminPagination = paginationSchema.extend({ limit: z.coerce.number().int().min(1).max(100).default(20) });
@@ -46,6 +47,15 @@ export const adminMfaSetupSchema = z.object({
   code: totpCode,
 });
 export type AdminMfaSetupInput = z.infer<typeof adminMfaSetupSchema>;
+
+/** Admin tự đổi mật khẩu (bắt buộc khi đang dùng mật khẩu tạm) */
+export const adminChangePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Nhập mật khẩu hiện tại').max(200),
+    newPassword: passwordSchema,
+  })
+  .refine((v) => v.currentPassword !== v.newPassword, { message: 'Mật khẩu mới phải khác mật khẩu hiện tại', path: ['newPassword'] });
+export type AdminChangePasswordInput = z.infer<typeof adminChangePasswordSchema>;
 
 export const dashboardQuerySchema = z.object({
   range: z.enum(DASHBOARD_RANGES).default('30d'),
@@ -163,3 +173,55 @@ export const auditLogListSchema = adminPagination.extend({
 });
 export type AuditLogListQuery = z.infer<typeof auditLogListSchema>;
 export type VerificationDecisionInput = z.infer<typeof verificationDecisionSchema>;
+
+/* ---------- Phân quyền: quản trị viên & vai trò (A-11) ---------- */
+export const ADMIN_ACCOUNT_STATUSES = ['all', 'active', 'locked', 'mfa_pending'] as const;
+export type AdminAccountStatus = (typeof ADMIN_ACCOUNT_STATUSES)[number];
+
+export const adminAccountListSchema = adminPagination.extend({
+  status: z.enum(ADMIN_ACCOUNT_STATUSES).default('all'),
+  roleId: z.string().trim().max(40).optional(),
+  q: search,
+});
+export type AdminAccountListQuery = z.infer<typeof adminAccountListSchema>;
+
+/** Mã 2FA xác nhận lại cho thao tác nhạy cảm (RULE-BE.md mục 7) */
+const stepUp = { otp: totpCode.optional() };
+const roleId = z.string().trim().min(1, 'Chọn vai trò').max(40);
+
+export const createAdminSchema = z.object({
+  name: nameSchema,
+  email: emailSchema,
+  roleId,
+  ...stepUp,
+});
+export type CreateAdminInput = z.infer<typeof createAdminSchema>;
+
+export const changeAdminRoleSchema = z.object({ roleId, ...stepUp });
+export type ChangeAdminRoleInput = z.infer<typeof changeAdminRoleSchema>;
+
+export const lockAdminSchema = z.object({
+  reason: z.string().trim().min(5, 'Ghi lý do khoá (tối thiểu 5 ký tự)').max(300),
+  ...stepUp,
+});
+export type LockAdminInput = z.infer<typeof lockAdminSchema>;
+
+/** Đặt lại 2FA / mật khẩu: chỉ cần mã xác nhận */
+export const adminStepUpSchema = z.object(stepUp);
+export type AdminStepUpInput = z.infer<typeof adminStepUpSchema>;
+
+const roleFields = {
+  name: z.string().trim().min(2, 'Nhập tên vai trò').max(60),
+  description: z.string().trim().max(200).optional(),
+  permissions: z.array(z.enum(ADMIN_PERMISSIONS)).min(1, 'Chọn ít nhất 1 quyền').max(ADMIN_PERMISSIONS.length),
+};
+
+export const createAdminRoleSchema = z.object({
+  key: z.string().trim().regex(/^[a-z][a-z0-9_]{2,39}$/, 'Mã gồm 3–40 ký tự a-z, 0-9, _ và bắt đầu bằng chữ'),
+  ...roleFields,
+  ...stepUp,
+});
+export type CreateAdminRoleInput = z.infer<typeof createAdminRoleSchema>;
+
+export const updateAdminRoleSchema = z.object({ ...roleFields, ...stepUp });
+export type UpdateAdminRoleInput = z.infer<typeof updateAdminRoleSchema>;

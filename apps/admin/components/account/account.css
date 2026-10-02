@@ -1,0 +1,72 @@
+/* Đổi mật khẩu admin */
+.cpw {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cpw__rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: -4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.cpw__rule {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-3);
+  font-size: 12.5px;
+}
+.cpw__rule svg {
+  opacity: 0.35;
+}
+.cpw__rule--ok {
+  color: var(--success-text);
+}
+.cpw__rule--ok svg {
+  opacity: 1;
+}
+.cpw__error {
+  color: var(--danger-strong);
+}
+.cpw__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cpw-page {
+  display: grid;
+  min-height: 100vh;
+  padding: 24px 16px;
+  place-items: center;
+  background: var(--bg);
+}
+.cpw-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 440px;
+  padding: 28px;
+}
+.cpw-card__title {
+  font-size: 20px;
+  font-weight: 800;
+}
+.cpw-card__lead {
+  color: var(--text-2);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.cpw-card__logout {
+  align-self: center;
+  border: 0;
+  background: none;
+  color: var(--text-3);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}

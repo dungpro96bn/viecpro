@@ -8,6 +8,7 @@
 !**/.env.example
 apps/api/src/generated
 apps/api/tmp
+apps/api/storage
 .git
 .idea
 .playwright-mcp
