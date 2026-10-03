@@ -59,6 +59,8 @@ Môi trường dev in mã OTP SMS ra log API và trả thêm `devCode` trong res
 | `/tai-khoan-ung-vien/thong-bao-viec-lam` | Thông báo việc làm (design-new 04): tạo / sửa / bật tắt, việc mới cho bạn, gợi ý từ hồ sơ |
 | `/tai-khoan-ung-vien/cai-dat` | Cài đặt (design-new 05): email / SĐT / mật khẩu, thiết bị, thông báo theo kênh + giờ yên lặng, quyền riêng tư, ngôn ngữ, tải dữ liệu, xoá tài khoản |
 | `/quan-ly-tuyen-dung` | Tổng quan NTD doanh nghiệp / cá nhân (design 10, 11) |
+| `/quan-ly-tuyen-dung/bao-cao` | Báo cáo lượt xem, hồ sơ, nguồn ứng tuyển, hiệu quả tin và phễu tuyển dụng (7 / 30 / 90 ngày) |
+| `/quan-ly-tuyen-dung/danh-gia` | Đánh giá người lao động đã xuất cảnh và phản hồi của NTD |
 | `/quan-ly-tuyen-dung/don-hang` | Quản lý tin tuyển dụng (design 12); `/dang-tin`, `/[id]/sua`: đăng / sửa tin (design 15) |
 | `/quan-ly-tuyen-dung/ung-vien` | Quản lý ứng viên (design 13); `/them`: thêm ứng viên thủ công / Excel (design 16) |
 | `/quan-ly-tuyen-dung/lich-phong-van` | Lịch phỏng vấn tuần (design 14); `/tao`: tạo lịch hẹn (design 17) |
