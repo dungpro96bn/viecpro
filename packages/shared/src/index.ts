@@ -19,3 +19,4 @@ export * from './schemas/employer-profile.js';
 export * from './admin.js';
 export * from './schemas/admin.js';
 export * from './plans.js';
+export * from './schemas/conversations.js';

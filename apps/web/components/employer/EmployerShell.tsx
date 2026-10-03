@@ -11,6 +11,7 @@ import {
   IconBriefcaseLine,
   IconBuilding,
   IconCalendar,
+  IconChat,
   IconCheck,
   IconCheckMark,
   IconChevronDown,
@@ -234,6 +235,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
     { href: `${EMPLOYER_BASE}/ung-vien`, label: 'Ứng viên', icon: IconTeam, count: account.counts.newApplicants, hot: true },
     { href: `${EMPLOYER_BASE}/lich-phong-van`, label: 'Lịch phỏng vấn', icon: IconCalendar, count: account.counts.upcomingInterviews },
     { href: `${EMPLOYER_BASE}/khach-tu-van`, label: 'Khách cần tư vấn', icon: IconPhone, count: account.counts.leads, hot: true },
+    { href: `${EMPLOYER_BASE}/tin-nhan`, label: 'Tin nhắn', icon: IconChat, count: account.counts.unreadMessages, hot: true },
     ...(!company || account.companyAdmin ? [{ href: `${EMPLOYER_BASE}/goi-dich-vu`, label: 'Gói dịch vụ', icon: IconWallet }] : []),
     ...(company && account.companyAdmin && account.counts.partnerRecruiters > 0 ? [{ href: `${EMPLOYER_BASE}/tin-doi-tac`, label: 'Tin đối tác', icon: IconBriefcaseLine, count: account.counts.partnerJobs }] : []),
   ];

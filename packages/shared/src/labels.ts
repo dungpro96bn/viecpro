@@ -224,6 +224,7 @@ export const NOTIFICATION_GROUP_LABEL: Record<NotificationGroup, { title: string
   application: { title: 'Trạng thái ứng tuyển', desc: 'Hồ sơ được xem, đổi bước, kết quả' },
   lead: { title: 'Khách cần tư vấn', desc: 'Khi có người gửi yêu cầu tư vấn tới bạn hoặc công ty' },
   billing: { title: 'Gói dịch vụ & thanh toán', desc: 'Đơn thanh toán và thay đổi gói dịch vụ' },
+  message: { title: 'Tin nhắn', desc: 'Tin nhắn mới từ nhà tuyển dụng hoặc ứng viên' },
   system: { title: 'Tài khoản & hệ thống', desc: 'Bảo mật, kết quả báo cáo vi phạm' },
 };
 

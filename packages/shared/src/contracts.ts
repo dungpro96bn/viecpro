@@ -446,6 +446,9 @@ export interface ApplicationEventItem {
 
 export interface ApplicationItem {
   id: string;
+  /** Cuộc trò chuyện được mở trước bởi NTD; null khi NTD chưa mở */
+  conversationId?: string | null;
+  unreadMessages?: number;
   status: ApplicationStatus;
   interviewAt: string | null;
   createdAt: string;
@@ -903,7 +906,7 @@ export interface EmployerAccount {
   /** Quản trị viên doanh nghiệp: quản lý thành viên, hồ sơ công ty, Thùng rác */
   companyAdmin: boolean;
   /** Số trên menu trái (trash: số mục trong Thùng rác – chỉ tính cho quản trị viên doanh nghiệp) */
-  counts: { jobs: number; visibleJobs: number; newApplicants: number; upcomingInterviews: number; partners: number; partnerJobs: number; partnerRecruiters: number; reviews: number; trash: number; /** Khách cần tư vấn chưa xử lý */ leads: number };
+  counts: { jobs: number; visibleJobs: number; unreadMessages: number; newApplicants: number; upcomingInterviews: number; partners: number; partnerJobs: number; partnerRecruiters: number; reviews: number; trash: number; /** Khách cần tư vấn chưa xử lý */ leads: number };
 }
 
 export interface PartnerJobItem {
@@ -937,6 +940,31 @@ export type PartnerApplicantList = Paginated<PartnerApplicantItem>;
 export interface PartnerViewItem {
   employerName: string;
   viewedAt: string;
+}
+
+export interface ConversationMessageItem {
+  id: string;
+  senderSide: 'employer' | 'seeker';
+  senderUserId: string | null;
+  body: string;
+  flagged: boolean;
+  createdAt: string;
+}
+
+export interface ConversationItem {
+  id: string;
+  applicationId: string;
+  participantName: string;
+  jobTitle: string;
+  lastMessage: ConversationMessageItem | null;
+  unread: number;
+  lastMessageAt: string;
+}
+
+export interface ConversationMessages {
+  items: ConversationMessageItem[];
+  before: string | null;
+  after: string | null;
 }
 
 /** Một chỉ số có đường xu hướng theo ngày */

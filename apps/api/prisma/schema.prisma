@@ -249,6 +249,7 @@ model User {
   settings              UserSetting?
   jobAlerts             JobAlert[]
   employerReviews       EmployerReview[]
+  sentMessages          Message[]
 
   @@index([role])
 }
@@ -753,6 +754,7 @@ model Application {
   attendees InterviewAttendee[]
   employerReview EmployerReview?
   partnerViews  PartnerView[]
+  conversation Conversation?
 
   @@index([jobId, status])
   @@index([userId])
@@ -785,6 +787,31 @@ model PartnerView {
 
   @@index([applicationId, createdAt])
   @@index([viewerRecruiterId, applicationId, createdAt])
+}
+
+model Conversation {
+  id              String        @id @default(cuid())
+  applicationId   String        @unique
+  application     Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  lastMessageAt   DateTime      @default(now())
+  employerReadAt  DateTime?
+  seekerReadAt    DateTime?
+  createdAt       DateTime      @default(now())
+  messages        Message[]
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id              String       @id @default(cuid())
+  conversationId  String
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderUserId    String?
+  sender          User?        @relation(fields: [senderUserId], references: [id], onDelete: SetNull)
+  senderSide      String
+  body            String       @db.VarChar(2000)
+  flagged         Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  @@index([conversationId, createdAt, id])
 }
 
 /// Lịch phỏng vấn / thi tay nghề – một lịch có thể gồm nhiều ứng viên

@@ -201,7 +201,7 @@ export const MAX_JOB_ALERTS = 10;
 
 /* ---------------- Cài đặt (design 05) ---------------- */
 /** Nhóm thông báo người dùng bật / tắt theo kênh */
-export const NOTIFICATION_GROUPS = ['interview', 'profile_view', 'job_match', 'application', 'lead', 'billing', 'system'] as const;
+export const NOTIFICATION_GROUPS = ['interview', 'profile_view', 'job_match', 'application', 'lead', 'billing', 'message', 'system'] as const;
 export type NotificationGroup = (typeof NOTIFICATION_GROUPS)[number];
 
 /** Kênh nhận thông báo trong Cài đặt (trùng ALERT_CHANNELS) */

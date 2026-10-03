@@ -128,7 +128,7 @@ _(để trống – điền khi review)_
 
 ## 2. Tin nhắn NTD ↔ ứng viên (MVP)
 
-**Trạng thái:** chưa làm
+**Trạng thái:** ✅ hoàn thành – nhánh `feat/conversations` (commit sẽ ghi sau khi chốt)
 
 ### Bối cảnh
 - Menu khu NTD có mục "Tin nhắn" trỏ `#` (link chết). Việc 5 sẽ ẩn tạm.

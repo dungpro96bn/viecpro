@@ -706,7 +706,8 @@
 .ap-foot__note--green { color: var(--success-dark); }
 .ap-foot__note--link { color: var(--primary); }
 .ap-foot__withdraw,
-.ap-foot__toggle {
+.ap-foot__toggle,
+.ap-foot__message {
   flex-shrink: 0;
   padding: 0;
   border: 0;
@@ -715,6 +716,8 @@
   font-size: 12px;
   cursor: pointer;
 }
+.ap-foot__message { display:inline-flex;align-items:center;gap:5px;color:var(--primary);text-decoration:none; }
+.ap-foot__message:hover { text-decoration:underline; }
 .ap-foot__withdraw {
   color: var(--text-3);
 }

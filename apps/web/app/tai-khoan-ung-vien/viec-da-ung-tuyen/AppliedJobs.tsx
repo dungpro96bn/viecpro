@@ -15,7 +15,7 @@ import {
 } from '@viecpro/shared';
 import { useSeekerAccount } from '@/components/seeker/SeekerAccountProvider';
 import Select from '@/components/ui/Select';
-import { IconArrowRight, IconCalendar, IconCheck, IconChevronDown, IconChevronUp, IconClock, IconPhone, IconSearch, IconTrendUp, IconZaloApp } from '@/components/ui/Icons';
+import { IconArrowRight, IconCalendar, IconChat, IconCheck, IconChevronDown, IconChevronUp, IconClock, IconPhone, IconSearch, IconTrendUp, IconZaloApp } from '@/components/ui/Icons';
 import { apiMessage, apiRequest } from '@/lib/api';
 import { dayMonth, hourMinute, telHref, weekdayShort, zaloHref } from '@/lib/employer';
 import { cx } from '@/lib/format';
@@ -317,6 +317,7 @@ function ApplicationCard({ a, expanded, onToggle, onWithdraw, avgHours }: { a: A
             Rút hồ sơ
           </button>
         )}
+        {a.conversationId && <Link className="ap-foot__message" href={`/tai-khoan-ung-vien/tin-nhan?id=${encodeURIComponent(a.conversationId)}`}><IconChat size={14} />Tin nhắn ({a.unreadMessages ?? 0})</Link>}
         <button type="button" className="ap-foot__toggle" aria-expanded={expanded} onClick={onToggle}>
           {expanded ? 'Thu gọn' : 'Chi tiết'}
           {expanded ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}

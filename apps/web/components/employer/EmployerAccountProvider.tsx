@@ -45,6 +45,13 @@ export default function EmployerAccountProvider({ children, fallback }: { childr
     void refresh();
   }, [loading, user, router, refresh]);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void refresh();
+    }, 30_000);
+    return () => window.clearInterval(timer);
+  }, [refresh]);
+
   if (removed) {
     return (
       <div className="emp-state emp-state--error" role="alert">

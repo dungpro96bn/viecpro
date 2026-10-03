@@ -57,6 +57,8 @@ export class EmployerAccountService {
       companyAdmin || !actor.employerId ? this.prisma.job.count({ where: trashedJobs(this.ctx.ownerScope(actor)) }) : 0,
       companyAdmin ? this.prisma.recruiter.count({ where: trashedMembers(actor.employerId!) }) : 0,
     ]);
+    const conversationRows = await this.prisma.conversation.findMany({ where: { application: { is: this.ctx.applicationScope(actor) } }, select: { id: true, employerReadAt: true } });
+    const unreadMessages = (await Promise.all(conversationRows.map((c) => this.prisma.message.count({ where: { conversationId: c.id, senderSide: 'seeker', ...(c.employerReadAt && { createdAt: { gt: c.employerReadAt } }) } })))).reduce((a, b) => a + b, 0);
     const trash = trashedJobCount + trashedMemberCount;
     const leads = await this.portal.countUnhandled(actor);
     const e = recruiter.employer;
@@ -69,7 +71,7 @@ export class EmployerAccountService {
         : null,
       plan: plan && { name: plan.name, expiresAt: plan.expiresAt.toISOString(), jobQuota: plan.jobQuota, jobsVisible, boostQuota: plan.boostQuota, boostsUsed: plan.boostsUsed },
       companyAdmin,
-      counts: { jobs, visibleJobs: jobsVisible, newApplicants, upcomingInterviews, partners, partnerJobs, partnerRecruiters, reviews: recruiter.reviewCount, trash, leads },
+      counts: { jobs, visibleJobs: jobsVisible, unreadMessages, newApplicants, upcomingInterviews, partners, partnerJobs, partnerRecruiters, reviews: recruiter.reviewCount, trash, leads },
     };
   }
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   APPLICANT_STAGE_LABEL,
   APPLICANT_STAGES,
@@ -302,11 +303,22 @@ function StagePill({ stage }: { stage: ApplicantStage }) {
 
 /* ---------- Bảng chi tiết hồ sơ ---------- */
 function ApplicantPanel({ id, onPatch, onChanged }: { id: string; onPatch: (id: string, patch: Partial<EmployerApplicantItem>) => void; onChanged: () => Promise<void> }) {
+  const router = useRouter();
   const [d, setD] = useState<EmployerApplicantDetail | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
   const [noteError, setNoteError] = useState('');
+  const [messageBusy, setMessageBusy] = useState(false);
+
+  const openConversation = async () => {
+    setMessageBusy(true);
+    try {
+      const conversation = await apiRequest<{ id: string }>(`/employer/applications/${encodeURIComponent(id)}/conversation`, { method: 'POST' });
+      router.push(`${EMPLOYER_BASE}/tin-nhan?id=${encodeURIComponent(conversation.id)}`);
+    } catch (e) { setError(apiMessage(e, 'Không thể mở tin nhắn cho hồ sơ này.')); }
+    finally { setMessageBusy(false); }
+  };
 
   useEffect(() => {
     let active = true;
@@ -407,6 +419,10 @@ function ApplicantPanel({ id, onPatch, onChanged }: { id: string; onPatch: (id: 
           <IconCalendar size={14} />
           Hẹn lịch
         </Link>
+        <button type="button" className="emp-btn appl-panel__btn" disabled={messageBusy} onClick={() => void openConversation()}>
+          <IconChatSquare size={14} />
+          {messageBusy ? 'Đang mở…' : 'Nhắn tin'}
+        </button>
       </div>
 
       <div className="appl-panel__body">

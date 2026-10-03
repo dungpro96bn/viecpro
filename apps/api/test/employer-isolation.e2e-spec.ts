@@ -13,6 +13,7 @@ import { PrismaService } from '../src/core/prisma/prisma.service.js';
 import { EmployerPortalModule } from '../src/modules/employer-portal/employer-portal.module.js';
 import { NotificationsModule } from '../src/modules/notifications/notifications.module.js';
 import { ReportsModule } from '../src/modules/reports/reports.module.js';
+import { ConversationsModule } from '../src/modules/conversations/conversations.module.js';
 
 /**
  * Cách ly dữ liệu giữa các NTD (RULE-BE.md mục 6 lớp 2, mục 14) – chạy service + Postgres thật, không mock truy vấn.
@@ -116,8 +117,8 @@ async function seed(prisma: PrismaService) {
   });
   await prisma.job.createMany({ data: [job(ID.jA, 1, ID.rA, ID.eA), { ...job(ID.jA2, 4, ID.rA, ID.eA), status: 'paused' as const }, job(ID.jB, 2, ID.rB, ID.eB), job(ID.jSolo, 3, ID.rSolo, ID.eA)] });
   await prisma.businessPlan.create({ data: { employerId: ID.eA, name: 'Gói kiểm thử', jobQuota: 1, boostQuota: 0, expiresAt: future } });
-  const app = (id: string, jobId: string, phone: string) => ({ id, jobId, fullName: `Ứng viên ${id}`, phone, birthYear: 2000, gender: 'nam' as const, status: 'submitted' as const });
-  await prisma.application.createMany({ data: [app(ID.aA, ID.jA, '+84911000001'), app(ID.aB, ID.jB, '+84911000002'), app(ID.aSolo, ID.jSolo, '+84911000003')] });
+  const app = (id: string, jobId: string, phone: string, userId?: string) => ({ id, jobId, fullName: `Ứng viên ${id}`, phone, birthYear: 2000, gender: 'nam' as const, status: 'submitted' as const, userId });
+  await prisma.application.createMany({ data: [app(ID.aA, ID.jA, '+84911000001', ID.uSeeker), app(ID.aB, ID.jB, '+84911000002'), app(ID.aSolo, ID.jSolo, '+84911000003')] });
   const interview = (id: string, ownerId: string, employerId: string | null, applicationId: string) =>
     prisma.interview.create({
       data: { id, kind: 'online', startAt: past, endAt: new Date(past.getTime() + 3600_000), ownerId, employerId, interviewers: { connect: [{ id: ownerId }] }, attendees: { create: [{ applicationId }] } },
@@ -164,7 +165,7 @@ describe.skipIf(!DB_URL)('Cách ly dữ liệu giữa các NTD – Postgres th�
       REDIS_URL: '',
     });
     const module = await Test.createTestingModule({
-      imports: [ConfigModule, PrismaModule, AssetsModule, MailModule, AuditModule, NotificationsModule, ReportsModule, JwtModule.register({ global: true, secret: JWT_SECRET }), EmployerPortalModule],
+      imports: [ConfigModule, PrismaModule, AssetsModule, MailModule, AuditModule, NotificationsModule, ReportsModule, ConversationsModule, JwtModule.register({ global: true, secret: JWT_SECRET }), EmployerPortalModule],
       providers: [AuthGuard],
     }).compile();
     app = module.createNestApplication();
@@ -354,6 +355,42 @@ describe.skipIf(!DB_URL)('Cách ly dữ liệu giữa các NTD – Postgres th�
     expect(response.status).toBe(400);
     expect(response.body.code).toBe('PLAN_LIMIT');
     expect((await prisma.job.findUniqueOrThrow({ where: { id: ID.jA2 } })).status).toBe('paused');
+  });
+
+  it('hội thoại chỉ thuộc NTD của hồ sơ và ứng viên được chỉ định; cursor phân biệt cùng thời điểm', async () => {
+    const admin = await bearer(ID.uA);
+    const companyB = await bearer(ID.uB);
+    const seeker = await bearer(ID.uSeeker, 'seeker');
+    const opened = await http().post(`/api/v1/employer/applications/${ID.aA}/conversation`).set('Authorization', admin).expect(201);
+    const conversationId = (opened.body as { id: string }).id;
+    await http().post(`/api/v1/employer/applications/${ID.aA}/conversation`).expect(401);
+    await http().get(`/api/v1/employer/conversations/${conversationId}/messages`).set('Authorization', seeker).expect(403);
+    await http().get(`/api/v1/me/conversations/${conversationId}/messages`).expect(401);
+    await http().get(`/api/v1/me/conversations/${conversationId}/messages`).set('Authorization', admin).expect(403);
+    await http().get(`/api/v1/employer/conversations/${conversationId}/messages`).set('Authorization', companyB).expect(404);
+    await http().get(`/api/v1/me/conversations/${conversationId}/messages`).set('Authorization', await bearer(ID.uB, 'seeker')).expect(404);
+    await http().post(`/api/v1/employer/applications/${ID.aSolo}/conversation`).set('Authorization', await bearer(ID.uSolo)).expect(409);
+    await http().post(`/api/v1/me/conversations/${conversationId}`).set('Authorization', seeker).expect(404);
+
+    const tiedAt = new Date();
+    await prisma.message.createMany({ data: [
+      { conversationId, senderUserId: ID.uA, senderSide: 'employer', body: 'Tin thứ nhất', createdAt: tiedAt },
+      { conversationId, senderUserId: ID.uA, senderSide: 'employer', body: 'Tin thứ hai', createdAt: tiedAt },
+    ] });
+    const initial = await http().get(`/api/v1/me/conversations/${conversationId}/messages`).set('Authorization', seeker).expect(200);
+    expect((initial.body as { items: Array<{ body: string }> }).items.slice(-2).map((m) => m.body)).toEqual(['Tin thứ nhất', 'Tin thứ hai']);
+    const afterCursor = (initial.body as { items: Array<{ id: string }>; before: string }).before;
+    const next = await http().get(`/api/v1/me/conversations/${conversationId}/messages?after=${encodeURIComponent(afterCursor)}`).set('Authorization', seeker).expect(200);
+    expect((next.body as { items: Array<{ body: string }> }).items.map((m) => m.body)).toEqual(['Tin thứ hai']);
+    const noDuplicates = await http().get(`/api/v1/me/conversations/${conversationId}/messages?after=${encodeURIComponent((next.body as { after: string }).after)}`).set('Authorization', seeker).expect(200);
+    expect((noDuplicates.body as { items: unknown[] }).items).toEqual([]);
+
+    const sent = await http().post(`/api/v1/me/conversations/${conversationId}/messages`).set('Authorization', seeker).send({ body: 'Chuyển khoản 123456789012' }).expect(201);
+    expect(sent.body.flagged).toBe(true);
+    const unread = await http().get('/api/v1/employer/conversations/unread-count').set('Authorization', admin).expect(200);
+    expect(unread.body.unread).toBe(1);
+    await http().post(`/api/v1/employer/conversations/${conversationId}/read`).set('Authorization', admin).expect(204);
+    expect((await http().get('/api/v1/employer/conversations/unread-count').set('Authorization', admin).expect(200)).body.unread).toBe(0);
   });
 
   it('quản trị A chỉ đọc được hồ sơ đối tác, che liên hệ và ghi lượt xem; thành viên/B bị chặn', async () => {

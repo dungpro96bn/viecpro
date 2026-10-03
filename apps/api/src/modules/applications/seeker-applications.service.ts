@@ -53,6 +53,7 @@ const include = {
     },
   },
   employerReview: { select: { id: true, rating: true } },
+  conversation: { select: { id: true, seekerReadAt: true, messages: { orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: 1, select: { senderSide: true, createdAt: true } } } },
 } satisfies Prisma.ApplicationInclude;
 
 type Row = Prisma.ApplicationGetPayload<{ include: typeof include }>;
@@ -74,6 +75,8 @@ export class SeekerApplicationsService {
     const noted = [...a.events].reverse().find((e) => e.note);
     return {
       id: a.id,
+      conversationId: a.conversation?.id ?? null,
+      unreadMessages: a.conversation?.messages[0]?.senderSide === 'employer' && (!a.conversation.seekerReadAt || a.conversation.messages[0].createdAt > a.conversation.seekerReadAt) ? 1 : 0,
       status: a.status,
       interviewAt: a.interviewAt?.toISOString() ?? null,
       createdAt: a.createdAt.toISOString(),

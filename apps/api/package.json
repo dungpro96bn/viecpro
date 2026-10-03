@@ -18,7 +18,7 @@
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
-    "test:e2e:db": "export E2E_DATABASE_URL=${E2E_DATABASE_URL:-postgresql://viecpro:viecpro@localhost:5433/viecpro_e2e?schema=public} && DATABASE_URL=$E2E_DATABASE_URL prisma migrate deploy && vitest run --config ./vitest.config.e2e.ts",
+    "test:e2e:db": "export E2E_DATABASE_URL=${E2E_DATABASE_URL:-postgresql://viecpro:viecpro@localhost:5433/viecpro_e2e?schema=public} && DATABASE_URL=$E2E_DATABASE_URL prisma migrate deploy && vitest run --config ./vitest.config.e2e.ts --maxWorkers=1",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
