@@ -244,6 +244,12 @@ export default function JobPostForm({ jobId }: { jobId?: string }) {
   }, [d.industry, d.program, d.pref, d.gender, d.ageFrom, d.ageTo, d.quantity]);
 
   const submit = async (publish: boolean) => {
+    const expiry = account.plan ? new Date(account.plan.expiresAt).getTime() : 0;
+    const quota = account.plan && expiry > Date.now() ? account.plan.jobQuota : 3;
+    if (publish && current?.status !== 'open' && account.counts.visibleJobs >= quota) {
+      setFormError(account.plan && expiry <= Date.now() ? 'Gói đã hết hạn. Gia hạn gói để đăng tin mới.' : 'Bạn đã đạt giới hạn tin của gói. Nâng cấp để đăng tin mới.');
+      return;
+    }
     const found = validateDraft(d, publish);
     setErrors(found);
     setFormError('');
@@ -367,6 +373,7 @@ export default function JobPostForm({ jobId }: { jobId?: string }) {
               {formError ? (
                 <span className="ef-footer__error" role="alert">
                   {formError}
+                  {(formError.includes('giới hạn tin') || formError.includes('hết hạn')) && <> <Link href={`${EMPLOYER_BASE}/goi-dich-vu`}>Xem gói dịch vụ</Link></>}
                 </span>
               ) : (
                 <>

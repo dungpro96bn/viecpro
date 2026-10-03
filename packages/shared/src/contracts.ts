@@ -92,6 +92,8 @@ export const ERROR_CODES = [
   'EMAIL_TAKEN',
   /** Vượt số thông báo việc làm tối đa */
   'ALERT_LIMIT',
+  'PLAN_LIMIT',
+  'PLAN_EXPIRED',
   /** Đã báo cáo đối tượng này và báo cáo còn đang xử lý */
   'ALREADY_REPORTED',
   /** Đối tượng đang bị tạm khoá / tạm ẩn bởi quản trị */
@@ -901,7 +903,7 @@ export interface EmployerAccount {
   /** Quản trị viên doanh nghiệp: quản lý thành viên, hồ sơ công ty, Thùng rác */
   companyAdmin: boolean;
   /** Số trên menu trái (trash: số mục trong Thùng rác – chỉ tính cho quản trị viên doanh nghiệp) */
-  counts: { jobs: number; newApplicants: number; upcomingInterviews: number; partners: number; partnerJobs: number; partnerRecruiters: number; reviews: number; trash: number; /** Khách cần tư vấn chưa xử lý */ leads: number };
+  counts: { jobs: number; visibleJobs: number; newApplicants: number; upcomingInterviews: number; partners: number; partnerJobs: number; partnerRecruiters: number; reviews: number; trash: number; /** Khách cần tư vấn chưa xử lý */ leads: number };
 }
 
 export interface PartnerJobItem {

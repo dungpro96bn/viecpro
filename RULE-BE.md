@@ -159,6 +159,7 @@ Có **3 lớp**. Request phải qua đủ các lớp liên quan.
 | `admins.manage` | Tạo / khoá admin, gán vai trò quản trị |
 | `audit.read` | Xem nhật ký thao tác |
 | `settings.manage` | Cấu hình hệ thống, phiên bản app |
+| `billing.read` | Xem giao dịch thanh toán |
 | `data.export` | Xuất dữ liệu ra file |
 
 **Vai trò quản trị mặc định** (chốt khi dựng admin, có thể chỉnh):
@@ -167,7 +168,7 @@ Có **3 lớp**. Request phải qua đủ các lớp liên quan.
 | --- | --- |
 | `super_admin` | Tất cả |
 | `moderator` (kiểm duyệt) | dashboard.read, jobs.read, jobs.moderate, employers.read, employers.verify, users.read, users.lock, audit.read |
-| `support` (CSKH) | dashboard.read, users.read, users.pii, applications.read, leads.read, leads.manage, employers.read, jobs.read |
+| `support` (CSKH) | dashboard.read, users.read, users.pii, applications.read, leads.read, leads.manage, employers.read, jobs.read, billing.read |
 | `content` (nội dung) | dashboard.read, content.manage, jobs.read |
 
 ---

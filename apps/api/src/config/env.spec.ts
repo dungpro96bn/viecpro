@@ -10,7 +10,7 @@ const base = {
   SMS_TWILIO_FROM: '+15005550006',
 };
 /** Cấu hình production hợp lệ tối thiểu */
-const prod = { ...base, NODE_ENV: 'production', OTP_PROVIDER: 'sms', EMAIL_PROVIDER: 'resend', RESEND_API_KEY: 're_test_key', WEB_BASE_URL: 'https://viecpro.vn', STORAGE_PROVIDER: 's3', S3_BUCKET: 'viecpro-test' };
+const prod = { ...base, NODE_ENV: 'production', PAYMENT_PROVIDER: 'payos', OTP_PROVIDER: 'sms', EMAIL_PROVIDER: 'resend', RESEND_API_KEY: 're_test_key', WEB_BASE_URL: 'https://viecpro.vn', STORAGE_PROVIDER: 's3', S3_BUCKET: 'viecpro-test' };
 
 describe('loadEnv', () => {
   it('dev chấp nhận cấu hình mặc định', () => {

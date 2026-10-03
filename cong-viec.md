@@ -230,7 +230,7 @@ _(để trống)_
 
 ## 3. Gói dịch vụ, thanh toán và lịch sử giao dịch
 
-**Trạng thái:** chưa làm
+**Trạng thái:** ✅ hoàn thành – nhánh `feat/service-billing` (thanh toán mock; PayOS thật và bảng giá production còn cần quyết định/tích hợp trước khi thu tiền thật)
 
 ### Bối cảnh (hiện trạng trong code)
 - `BusinessPlan` (mỗi công ty / NTD cá nhân một bản ghi) có `name`, `jobQuota`, `boostQuota`, `boostsUsed`, `expiresAt`. Hiện **chỉ được tạo bằng seed**.

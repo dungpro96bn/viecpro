@@ -173,6 +173,8 @@ describe.skipIf(!DB_URL)('Ma trận quyền mọi route /admin/* – AdminGuard 
       'POST /admin/tools/exports': 'data.export',
       'GET /admin/leads': 'leads.read',
       'POST /admin/leads/e2e-khong-ton-tai/handle': 'leads.manage',
+      'GET /admin/billing/orders': 'billing.read',
+      'GET /admin/billing/orders/export': 'data.export',
     };
     const actual = Object.fromEntries(routes.map((r) => [`${r.method.toUpperCase()} ${r.path}`, r.permission]));
     expect(Object.fromEntries(Object.keys(expected).map((k) => [k, actual[k]]))).toEqual(expected);

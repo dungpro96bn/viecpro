@@ -223,6 +223,7 @@ export const NOTIFICATION_GROUP_LABEL: Record<NotificationGroup, { title: string
   job_match: { title: 'Việc mới phù hợp', desc: 'Theo các thông báo việc làm đã tạo' },
   application: { title: 'Trạng thái ứng tuyển', desc: 'Hồ sơ được xem, đổi bước, kết quả' },
   lead: { title: 'Khách cần tư vấn', desc: 'Khi có người gửi yêu cầu tư vấn tới bạn hoặc công ty' },
+  billing: { title: 'Gói dịch vụ & thanh toán', desc: 'Đơn thanh toán và thay đổi gói dịch vụ' },
   system: { title: 'Tài khoản & hệ thống', desc: 'Bảo mật, kết quả báo cáo vi phạm' },
 };
 

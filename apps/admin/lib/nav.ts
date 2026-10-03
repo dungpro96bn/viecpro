@@ -55,7 +55,7 @@ export const NAV: Array<{ title: string; items: NavItem[] }> = [
     title: 'Tài chính',
     items: [
       { href: '/goi-doanh-thu', label: 'Gói & doanh thu', icon: IconWallet, permission: 'settings.manage' },
-      { href: '/giao-dich', label: 'Giao dịch', icon: IconReceipt, permission: 'settings.manage' },
+      { href: '/giao-dich', label: 'Giao dịch', icon: IconReceipt, permission: 'billing.read', ready: true },
     ],
   },
   {

@@ -37,6 +37,7 @@ const ID = {
   rB: 'iso-rec-b',
   rSolo: 'iso-rec-solo',
   jA: 'iso-job-a',
+  jA2: 'iso-job-a2',
   jB: 'iso-job-b',
   jSolo: 'iso-job-solo',
   aA: 'iso-app-a',
@@ -113,7 +114,8 @@ async function seed(prisma: PrismaService) {
     recruiterId,
     employerId,
   });
-  await prisma.job.createMany({ data: [job(ID.jA, 1, ID.rA, ID.eA), job(ID.jB, 2, ID.rB, ID.eB), job(ID.jSolo, 3, ID.rSolo, ID.eA)] });
+  await prisma.job.createMany({ data: [job(ID.jA, 1, ID.rA, ID.eA), { ...job(ID.jA2, 4, ID.rA, ID.eA), status: 'paused' as const }, job(ID.jB, 2, ID.rB, ID.eB), job(ID.jSolo, 3, ID.rSolo, ID.eA)] });
+  await prisma.businessPlan.create({ data: { employerId: ID.eA, name: 'Gói kiểm thử', jobQuota: 1, boostQuota: 0, expiresAt: future } });
   const app = (id: string, jobId: string, phone: string) => ({ id, jobId, fullName: `Ứng viên ${id}`, phone, birthYear: 2000, gender: 'nam' as const, status: 'submitted' as const });
   await prisma.application.createMany({ data: [app(ID.aA, ID.jA, '+84911000001'), app(ID.aB, ID.jB, '+84911000002'), app(ID.aSolo, ID.jSolo, '+84911000003')] });
   const interview = (id: string, ownerId: string, employerId: string | null, applicationId: string) =>
@@ -306,7 +308,7 @@ describe.skipIf(!DB_URL)('Cách ly dữ liệu giữa các NTD – Postgres th�
     expect(ids(filtered.body)).toEqual([]);
 
     const jobs = await http().get('/api/v1/employer/jobs?tab=visible').set('Authorization', a).expect(200);
-    expect(ids(jobs.body)).toEqual([ID.jA]);
+    expect(ids(jobs.body).sort()).toEqual([ID.jA, ID.jA2].sort());
 
     const reviews = await http().get('/api/v1/employer/reviews').set('Authorization', a).expect(200);
     expect(ids(reviews.body)).toEqual([ID.revA]);
@@ -344,6 +346,14 @@ describe.skipIf(!DB_URL)('Cách ly dữ liệu giữa các NTD – Postgres th�
     const member = await bearer(ID.uA2);
     await http().get(`/api/v1/employer/applications/${ID.aA}`).set('Authorization', member).expect(200);
     await http().get(`/api/v1/employer/applications/${ID.aSolo}`).set('Authorization', member).expect(404);
+  });
+
+  it('không mở lại tin vượt hạn mức gói', async () => {
+    const admin = await bearer(ID.uA);
+    const response = await http().post(`/api/v1/employer/jobs/${ID.jA2}/resume`).set('Authorization', admin);
+    expect(response.status).toBe(400);
+    expect(response.body.code).toBe('PLAN_LIMIT');
+    expect((await prisma.job.findUniqueOrThrow({ where: { id: ID.jA2 } })).status).toBe('paused');
   });
 
   it('quản trị A chỉ đọc được hồ sơ đối tác, che liên hệ và ghi lượt xem; thành viên/B bị chặn', async () => {

@@ -22,6 +22,7 @@ import { LeadsModule } from './modules/leads/leads.module.js';
 import { MeModule } from './modules/me/me.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { ProfilesModule } from './modules/profiles/profiles.module.js';
+import { PaymentsModule } from './modules/payments/payments.module.js';
 import { ReportsModule } from './modules/reports/reports.module.js';
 import { SavedJobsModule } from './modules/saved-jobs/saved-jobs.module.js';
 import { SystemController } from './modules/system/system.controller.js';
@@ -61,6 +62,7 @@ import { UploadsModule } from './modules/uploads/uploads.module.js';
     EmployerPortalModule,
     LeadsModule,
     ReportsModule,
+    PaymentsModule,
     UploadsModule,
 
     // Quản trị

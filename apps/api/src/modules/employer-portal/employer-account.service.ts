@@ -69,7 +69,7 @@ export class EmployerAccountService {
         : null,
       plan: plan && { name: plan.name, expiresAt: plan.expiresAt.toISOString(), jobQuota: plan.jobQuota, jobsVisible, boostQuota: plan.boostQuota, boostsUsed: plan.boostsUsed },
       companyAdmin,
-      counts: { jobs, newApplicants, upcomingInterviews, partners, partnerJobs, partnerRecruiters, reviews: recruiter.reviewCount, trash, leads },
+      counts: { jobs, visibleJobs: jobsVisible, newApplicants, upcomingInterviews, partners, partnerJobs, partnerRecruiters, reviews: recruiter.reviewCount, trash, leads },
     };
   }
 

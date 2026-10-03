@@ -66,6 +66,14 @@ enum JobStatus {
   closed
 }
 
+enum PaymentStatus {
+  pending
+  paid
+  failed
+  expired
+  refunded
+}
+
 /// Gói hiển thị tin: tiêu chuẩn / nổi bật (lên đầu ngành 7 ngày) / tuyển gấp
 enum JobVisibility {
   standard
@@ -535,6 +543,29 @@ model BusinessPlan {
   expiresAt   DateTime
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+}
+
+model PaymentOrder {
+  id           String        @id @default(cuid())
+  code         String        @unique
+  number       Int           @unique @default(autoincrement())
+  employerId   String?
+  recruiterId  String?
+  createdById  String
+  planKey      String
+  amountVnd    Int
+  status       PaymentStatus @default(pending)
+  provider     String
+  providerRef  String?       @unique
+  paidAt       DateTime?
+  expiresAt    DateTime
+  planBefore   Json?
+  planAfter    Json?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  @@index([employerId, createdAt])
+  @@index([recruiterId, createdAt])
+  @@index([status, createdAt])
 }
 
 /// Doanh nghiệp phái cử mà NTD cá nhân được phép đăng tin thay

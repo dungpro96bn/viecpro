@@ -22,6 +22,7 @@ export const ADMIN_PERMISSIONS = [
   'admins.manage',
   'audit.read',
   'settings.manage',
+  'billing.read',
   'data.export',
 ] as const;
 export type AdminPermission = (typeof ADMIN_PERMISSIONS)[number];
@@ -45,6 +46,7 @@ export const ADMIN_PERMISSION_LABEL: Record<AdminPermission, string> = {
   'admins.manage': 'Quản lý quản trị viên',
   'audit.read': 'Xem nhật ký hệ thống',
   'settings.manage': 'Cài đặt hệ thống',
+  'billing.read': 'Xem giao dịch',
   'data.export': 'Xuất dữ liệu',
 };
 
@@ -61,7 +63,7 @@ export const DEFAULT_ADMIN_ROLES: ReadonlyArray<{ key: string; name: string; des
     key: 'support',
     name: 'Chăm sóc khách hàng',
     description: 'Hỗ trợ người dùng, xử lý khách cần tư vấn',
-    permissions: ['dashboard.read', 'users.read', 'users.pii', 'applications.read', 'leads.read', 'leads.manage', 'employers.read', 'jobs.read'],
+    permissions: ['dashboard.read', 'users.read', 'users.pii', 'applications.read', 'leads.read', 'leads.manage', 'employers.read', 'jobs.read', 'billing.read'],
   },
   { key: 'content', name: 'Biên tập nội dung', description: 'Banner, cẩm nang, danh mục', permissions: ['dashboard.read', 'content.manage', 'jobs.read'] },
 ];

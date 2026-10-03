@@ -27,10 +27,12 @@ import { AdminToolsService } from './admin-tools.service.js';
 import { SiteController } from './site.controller.js';
 import { VerificationsController } from './verifications/verifications.controller.js';
 import { VerificationsService } from './verifications/verifications.service.js';
+import { PaymentsModule } from '../payments/payments.module.js';
+import { AdminPaymentsController } from '../payments/admin-payments.controller.js';
 
 /** Toàn bộ API quản trị – tách khỏi module người dùng (RULE-BE.md mục 7) */
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, PaymentsModule],
   controllers: [
     AdminAuthController,
     AdminMeController,
@@ -47,6 +49,7 @@ import { VerificationsService } from './verifications/verifications.service.js';
     AuditLogsController,
     AdminAccountsController,
     AdminRolesController,
+    AdminPaymentsController,
   ],
   providers: [
     AdminGuard,

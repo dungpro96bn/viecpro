@@ -128,8 +128,9 @@ Tích hợp thật được bật bằng cấu hình môi trường: Twilio SMS 
 ### Việc còn lại (TODO)
 
 - Cấu hình thông tin thật cho Twilio, Resend (xác minh tên miền gửi `viecpro.vn`: SPF, DKIM), Google, FCM và S3/R2 trước khi bật các provider production. Production từ chối khởi động nếu `EMAIL_PROVIDER=console`.
+- Thanh toán hiện chỉ có `PAYMENT_PROVIDER=mock` cho môi trường local; production từ chối provider này. Adapter PayOS và đối soát/cấu hình kinh doanh phải hoàn thiện trước khi nhận tiền thật. Danh mục giá và hạn mức hiện nằm trong `packages/shared/src/plans.ts`.
 - `POST /applications` nay bắt buộc `email` + `emailCode` – app mobile bản cũ (chưa có bước OTP email) cần cập nhật; cân nhắc tách `/api/v2/applications` nếu đã phát hành app.
-- Chưa có tích hợp: kho giấy tờ riêng tư mã hoá (CCCD, hộ chiếu, CV – hiện chỉ nhận ảnh chân dung / ảnh 4×6), gửi Zalo OA / SMS lời mời phỏng vấn, tạo phòng Zoom / Meet tự động, nhận dạng CCCD (OCR), bài test tiếng Nhật, xuất CV PDF từ server, tin nhắn trong app, thanh toán gói dịch vụ, danh sách việc lưu tuỳ chỉnh.
+- Chưa có tích hợp: kho giấy tờ riêng tư mã hoá (CCCD, hộ chiếu, CV – hiện chỉ nhận ảnh chân dung / ảnh 4×6), gửi Zalo OA / SMS lời mời phỏng vấn, tạo phòng Zoom / Meet tự động, nhận dạng CCCD (OCR), bài test tiếng Nhật, xuất CV PDF từ server, tin nhắn trong app, danh sách việc lưu tuỳ chỉnh.
 - Mở rộng e2e 401/403/404 sang tất cả route có phân quyền và sở hữu dữ liệu.
 - Chạy `npm audit --omit=dev` và xử lý lỗ hổng runtime trước khi release.
 - Các chỗ `[SỐ GIẤY PHÉP]`, `[MÃ SỐ THUẾ]`, `[GIỜ LÀM VIỆC]` cần thay bằng thông tin thật trước khi đưa lên.
