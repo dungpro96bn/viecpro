@@ -46,7 +46,7 @@ function SeekerFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { signOut } = useAuth();
-  const { profile, dashboard } = useSeekerAccount();
+  const { profile, dashboard, unreadMessages } = useSeekerAccount();
   const consultant = dashboard.consultant;
   const contact = dashboard.consultantContact;
 
@@ -54,6 +54,7 @@ function SeekerFrame({ children }: { children: ReactNode }) {
     { href: SEEKER_BASE, label: 'Tổng quan', icon: IconHome, count: '' },
     { href: `${SEEKER_BASE}/ho-so`, label: 'Hồ sơ của tôi', icon: IconUser, count: `${profile.completion}%` },
     { href: WEB_LINKS.seekerApplications, label: 'Việc đã ứng tuyển', icon: IconSend, count: String(dashboard.applications.total) },
+    { href: `${SEEKER_BASE}/tin-nhan`, label: 'Tin nhắn', icon: IconChat, count: unreadMessages ? String(unreadMessages) : '' },
     { href: WEB_LINKS.seekerSaved, label: 'Việc đã lưu', icon: IconHeart, count: String(dashboard.saved.total) },
     { href: WEB_LINKS.seekerAlerts, label: 'Thông báo việc làm', icon: IconBellLine, count: '' },
     { href: WEB_LINKS.seekerSettings, label: 'Cài đặt', icon: IconSettings, count: '' },

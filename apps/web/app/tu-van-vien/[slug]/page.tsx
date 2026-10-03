@@ -45,6 +45,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 const TABS = [
   { id: 'gioi-thieu', label: 'Giới thiệu' },
   { id: 'don-hang', label: 'Đơn hàng đang đăng' },
+  { id: 'danh-gia', label: 'Đánh giá' },
   { id: 'kinh-nghiem', label: 'Kinh nghiệm' },
   { id: 'hop-tac', label: 'Đơn vị hợp tác' },
   { id: 'lien-he', label: 'Liên hệ' },
@@ -240,6 +241,24 @@ export default async function RecruiterPage({ params }: { params: Promise<Params
               caption="tin tuyển dụng đang mở"
               viewAllLabel={`Xem tất cả 12 đơn của ${name}`}
             />
+
+            <section id="danh-gia" className="content-card content-card--gap20 recruiter-reviews">
+              <div className="content-card__head">
+                <span className="content-card__icon"><IconStar size={19} /></span>
+                <div className="content-card__titles">
+                  <h2 className="content-card__title">Đánh giá người lao động</h2>
+                  <span className="content-card__subtitle">Chỉ người có hồ sơ xuất cảnh qua viecpro mới được gửi đánh giá</span>
+                </div>
+              </div>
+              {profile.reviews.length ? <div className="recruiter-reviews__list">{profile.reviews.map((review) => (
+                <article key={review.id} className="recruiter-review">
+                  <div className="recruiter-review__head"><span className="recruiter-review__stars" aria-label={`${review.rating} trên 5 sao`}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span><time dateTime={review.createdAt}>{new Date(review.createdAt).toLocaleDateString('vi-VN')}</time></div>
+                  <p>{review.comment}</p>
+                  {review.response && <div className="recruiter-review__response"><b>Phản hồi từ nhà tuyển dụng</b><p>{review.response}</p></div>}
+                  <small>Người lao động đã xuất cảnh · Ẩn danh</small>
+                </article>
+              ))}</div> : <p className="recruiter-reviews__empty">Chưa có đánh giá nào.</p>}
+            </section>
 
             <section id="kinh-nghiem" className="content-card content-card--gap20">
               <div className="content-card__head">

@@ -23,6 +23,8 @@ import { INDUSTRIES, type DepartureWithin, type Industry, type JobFacets, type J
 import { useAuth } from '@/components/auth/AuthProvider';
 import { apiMessage, apiRequest } from '@/lib/api';
 import { apiJobToView, apiRecruiterToPoster } from '@/lib/api-mappers';
+import ConsultationDialog from './ConsultationDialog';
+import './consult-dialog.css';
 
 /* ---------- Cấu hình bộ lọc ---------- */
 const PROGRAMS: Program[] = ['tts', 'tok', 'ks'];
@@ -98,6 +100,7 @@ export default function SearchView({ breadcrumb }: { breadcrumb: ReactNode }) {
   const [facets, setFacets] = useState<JobFacets | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [consultOpen, setConsultOpen] = useState(false);
 
   const salRange = SALARY.find((s) => s.key === salary) ?? SALARY[0];
   const programKeys = useMemo(() => Object.keys(progSel).filter((key) => progSel[key as Program]).join(','), [progSel]);
@@ -225,9 +228,9 @@ export default function SearchView({ breadcrumb }: { breadcrumb: ReactNode }) {
       <span className="consult-cta__bubble" />
       <span className="consult-cta__title">Chưa tìm thấy đơn phù hợp?</span>
       <span className="consult-cta__desc">Để lại thông tin, cán bộ tư vấn sẽ gợi ý đơn đúng tuổi, đúng ngành cho bạn.</span>
-      <Link href="#" className="btn btn--white consult-cta__btn">
+      <button type="button" className="btn btn--white consult-cta__btn" onClick={() => setConsultOpen(true)}>
         Nhờ tư vấn miễn phí
-      </Link>
+      </button>
     </div>
   );
 
@@ -240,6 +243,7 @@ export default function SearchView({ breadcrumb }: { breadcrumb: ReactNode }) {
 
   return (
     <>
+      <ConsultationDialog open={consultOpen} onClose={() => setConsultOpen(false)} />
       {/* FORM TÌM KIẾM MỞ RỘNG */}
       <section className="search-top">
         <span className="search-top__blob" />

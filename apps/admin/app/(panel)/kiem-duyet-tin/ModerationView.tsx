@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import type { ModerationFilter, ModerationItem, ModerationList, ModerationTab } from '@viecpro/shared';
+import { JOB_REMOVAL_LABEL, type ModerationFilter, type ModerationItem, type ModerationList, type ModerationTab } from '@viecpro/shared';
 import Pagination from '@/components/list/Pagination';
 import { errorText, relativeTime } from '@/components/list/list-utils';
 import { useDebounced } from '@/components/list/useDebounced';
@@ -334,6 +334,7 @@ function Row({ item, tab, cursor, canApprove, onFocus, onApprove, onOpen }: { it
           <span className={cx('mod-result', item.status === 'open' ? 'mod-result--ok' : item.changesRequested ? 'mod-result--warn' : item.status === 'rejected' ? 'mod-result--bad' : 'mod-result--muted')}>
             {item.changesRequested ? 'Yêu cầu sửa' : item.status === 'open' ? 'Đã duyệt' : item.status === 'rejected' ? 'Từ chối' : 'Đã đóng'}
           </span>
+          {item.removedByOwner && <span className="mod-result mod-result--muted">{JOB_REMOVAL_LABEL[item.removedByOwner]}</span>}
           <small>{[item.moderatorName, item.moderatedAt && relativeTime(item.moderatedAt)].filter(Boolean).join(' · ')}</small>
         </span>
       )}

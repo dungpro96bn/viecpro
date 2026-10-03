@@ -66,6 +66,14 @@ enum JobStatus {
   closed
 }
 
+enum PaymentStatus {
+  pending
+  paid
+  failed
+  expired
+  refunded
+}
+
 /// Gói hiển thị tin: tiêu chuẩn / nổi bật (lên đầu ngành 7 ngày) / tuyển gấp
 enum JobVisibility {
   standard
@@ -125,6 +133,8 @@ enum OtpPurpose {
   reset_password
   /// Xác thực số điện thoại mới khi đổi số trong Cài đặt
   change_phone
+  /// Nhận lời mời làm thành viên doanh nghiệp (số chưa có tài khoản)
+  join_company
 }
 
 enum Platform {
@@ -238,6 +248,8 @@ model User {
   reportedAs            Report[]              @relation("ReportedUser")
   settings              UserSetting?
   jobAlerts             JobAlert[]
+  employerReviews       EmployerReview[]
+  sentMessages          Message[]
 
   @@index([role])
 }
@@ -313,7 +325,7 @@ model SeekerProfile {
   skills        Json       @default("[]")
   /// [{ kind: work | education, title, org, from, to, desc, tags[] }]
   experiences   Json       @default("[]")
-  /// [{ key: cccd | photo | passport | criminal | health, status, note }]
+  /// [{ key: photo | passport | criminal | health, status, note }]
   documents     Json       @default("[]")
   /// Cán bộ tư vấn phụ trách
   consultantId  String?
@@ -427,37 +439,47 @@ model Employer {
   leads         Lead[]
   verifications VerificationRequest[]
   reports       Report[]
+  partnerViews  PartnerView[]
   plan          BusinessPlan?
   partners      RecruiterPartner[]
   interviews    Interview[]
+  invites       MemberInvite[]
+  reviews       EmployerReview[]
 }
 
 /// Cán bộ tuyển dụng / tư vấn viên (người đăng tin, trang /tu-van-vien/[slug])
 model Recruiter {
-  id             String    @id @default(cuid())
-  slug           String    @unique
+  id             String     @id @default(cuid())
+  slug           String     @unique
   /// Tài khoản đăng nhập (null nếu chỉ là hồ sơ hiển thị)
-  userId         String?   @unique
-  user           User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId         String?    @unique
+  user           User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
   employerId     String?
-  employer       Employer? @relation(fields: [employerId], references: [id], onDelete: SetNull)
+  employer       Employer?  @relation(fields: [employerId], references: [id], onDelete: SetNull)
+  /// Quản trị viên doanh nghiệp: sửa hồ sơ công ty, quản lý thành viên (chỉ có nghĩa khi employerId != null)
+  companyAdmin   Boolean    @default(false)
+  /// Xoá mềm khỏi doanh nghiệp (nằm trong Thùng rác, khôi phục được): giữ lịch sử, không vào khu quản lý được
+  leftAt         DateTime?
+  /// Người đã xoá thành viên này (hiện trong Thùng rác)
+  removedById    String?
+  removedBy      Recruiter? @relation("RemovedBy", fields: [removedById], references: [id], onDelete: SetNull)
+  /// Xoá vĩnh viễn từ Thùng rác: đã ẩn danh hồ sơ + tài khoản (RULE-BE.md mục 8 – không xoá cứng người dùng), không khôi phục được
+  purgedAt       DateTime?
   name           String
   title          String
   photoUrl       String?
-  rating         Float     @default(0)
+  rating         Float      @default(0)
   city           String?
   headline       String?
   intro          String?
   phone          String?
-  online         Boolean   @default(false)
+  online         Boolean    @default(false)
   /// Số lượt đánh giá (điểm trung bình ở `rating`)
-  reviewCount    Int       @default(0)
-  /// NTD cá nhân đã xác minh CCCD
-  cccdVerifiedAt DateTime?
+  reviewCount    Int        @default(0)
   /// stats, values, fields, timeline, certificates, partners, contacts, checks…
-  sections       Json      @default("{}")
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  sections       Json       @default("{}")
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
   jobs          Job[]
   followers     Follow[]
@@ -473,8 +495,38 @@ model Recruiter {
   notes         ApplicationNote[]
   ownInterviews Interview[]           @relation("InterviewOwner")
   interviewing  Interview[]           @relation("InterviewInterviewers")
+  invitesSent   MemberInvite[]        @relation("InviteSender")
+  removed       Recruiter[]           @relation("RemovedBy")
+  partnerViews  PartnerView[]         @relation("PartnerViewViewer")
+  reviews       EmployerReview[]
+  reviewResponses EmployerReview[]     @relation("ReviewResponseAuthor")
+  deletedJobs   Job[]                 @relation("JobDeletedBy")
 
   @@index([employerId])
+}
+
+/// Lời mời làm thành viên doanh nghiệp: người nhận mở link, xác thực OTP tới đúng số được mời rồi mới tạo tài khoản
+model MemberInvite {
+  id           String    @id @default(cuid())
+  employerId   String
+  employer     Employer  @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  invitedById  String
+  invitedBy    Recruiter @relation("InviteSender", fields: [invitedById], references: [id], onDelete: Cascade)
+  name         String
+  /// E.164
+  phone        String
+  email        String?
+  title        String
+  companyAdmin Boolean   @default(false)
+  /// SHA-256 của token trong link mời – không lưu token gốc
+  tokenHash    String    @unique
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  revokedAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([employerId, createdAt])
+  @@index([phone])
 }
 
 /// Gói dịch vụ của doanh nghiệp hoặc NTD cá nhân (giới hạn tin hiển thị, lượt đẩy tin)
@@ -492,6 +544,29 @@ model BusinessPlan {
   expiresAt   DateTime
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+}
+
+model PaymentOrder {
+  id           String        @id @default(cuid())
+  code         String        @unique
+  number       Int           @unique @default(autoincrement())
+  employerId   String?
+  recruiterId  String?
+  createdById  String
+  planKey      String
+  amountVnd    Int
+  status       PaymentStatus @default(pending)
+  provider     String
+  providerRef  String?       @unique
+  paidAt       DateTime?
+  expiresAt    DateTime
+  planBefore   Json?
+  planAfter    Json?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  @@index([employerId, createdAt])
+  @@index([recruiterId, createdAt])
+  @@index([status, createdAt])
 }
 
 /// Doanh nghiệp phái cử mà NTD cá nhân được phép đăng tin thay
@@ -570,6 +645,12 @@ model Job {
   /// Bị hệ thống / admin tạm ẩn (báo cáo thu phí, gỡ tin, khoá NTD) – NTD không tự mở lại được
   suspendedAt        DateTime?
   suspendReason      String?
+  /// NTD xoá mềm (nằm trong Thùng rác doanh nghiệp, khôi phục được trong 30 ngày). Chỉ xoá được tin nháp / bị từ chối / đã đóng
+  deletedAt          DateTime?
+  deletedById        String?
+  deletedBy          Recruiter?    @relation("JobDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
+  /// Xoá vĩnh viễn (tay hoặc tự động sau 30 ngày): giữ bản ghi để hồ sơ ứng tuyển còn lịch sử, không khôi phục được
+  purgedAt           DateTime?
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 
@@ -588,6 +669,7 @@ model Job {
   @@index([moderatedAt])
   @@index([recruiterId])
   @@index([employerId])
+  @@index([deletedAt])
 }
 
 /// Nhật ký thao tác trên tin (khối "Hoạt động gần đây" của NTD)
@@ -597,7 +679,7 @@ model JobEvent {
   job       Job        @relation(fields: [jobId], references: [id], onDelete: Cascade)
   actorId   String?
   actor     Recruiter? @relation(fields: [actorId], references: [id], onDelete: SetNull)
-  /// create | submit | update | boost | pause | resume | close | approve | reject
+  /// create | submit | update | boost | pause | resume | close | delete | restore | approve | reject
   action    String
   note      String?
   createdAt DateTime   @default(now())
@@ -670,6 +752,9 @@ model Application {
   events    ApplicationEvent[]
   notes     ApplicationNote[]
   attendees InterviewAttendee[]
+  employerReview EmployerReview?
+  partnerViews  PartnerView[]
+  conversation Conversation?
 
   @@index([jobId, status])
   @@index([userId])
@@ -687,6 +772,46 @@ model ApplicationNote {
   createdAt     DateTime    @default(now())
 
   @@index([applicationId, createdAt])
+}
+
+/// Nhật ký minh bạch khi công ty phái cử xem hồ sơ của NTD cá nhân liên kết
+model PartnerView {
+  id                String      @id @default(cuid())
+  employerId        String
+  employer          Employer    @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  viewerRecruiterId String
+  viewerRecruiter   Recruiter   @relation("PartnerViewViewer", fields: [viewerRecruiterId], references: [id], onDelete: Cascade)
+  applicationId     String
+  application       Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  createdAt         DateTime    @default(now())
+
+  @@index([applicationId, createdAt])
+  @@index([viewerRecruiterId, applicationId, createdAt])
+}
+
+model Conversation {
+  id              String        @id @default(cuid())
+  applicationId   String        @unique
+  application     Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  lastMessageAt   DateTime      @default(now())
+  employerReadAt  DateTime?
+  seekerReadAt    DateTime?
+  createdAt       DateTime      @default(now())
+  messages        Message[]
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id              String       @id @default(cuid())
+  conversationId  String
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderUserId    String?
+  sender          User?        @relation(fields: [senderUserId], references: [id], onDelete: SetNull)
+  senderSide      String
+  body            String       @db.VarChar(2000)
+  flagged         Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  @@index([conversationId, createdAt, id])
 }
 
 /// Lịch phỏng vấn / thi tay nghề – một lịch có thể gồm nhiều ứng viên
@@ -745,6 +870,30 @@ model ApplicationEvent {
   createdAt     DateTime          @default(now())
 
   @@index([applicationId, createdAt])
+}
+
+/// Đánh giá NTD do ứng viên đã có sự kiện xuất cảnh thực tế để lại
+model EmployerReview {
+  id            String      @id @default(cuid())
+  applicationId String      @unique
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  authorId      String?
+  author        User?       @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  recruiterId   String
+  recruiter     Recruiter   @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  employerId    String?
+  employer      Employer?   @relation(fields: [employerId], references: [id], onDelete: SetNull)
+  rating        Int
+  comment       String      @db.VarChar(1500)
+  response      String?     @db.VarChar(1500)
+  responseById  String?
+  responseBy    Recruiter?  @relation("ReviewResponseAuthor", fields: [responseById], references: [id], onDelete: SetNull)
+  respondedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([recruiterId, createdAt])
+  @@index([employerId, createdAt])
 }
 
 model SavedJob {
@@ -842,7 +991,7 @@ model VerificationRequest {
   employer     Employer?          @relation(fields: [employerId], references: [id], onDelete: Cascade)
   recruiterId  String?
   recruiter    Recruiter?         @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
-  /// Mã số thuế / số CCCD đã che (vd. 0109•••482)
+  /// Mã số thuế doanh nghiệp đã che (vd. 0109•••482)
   idMasked     String?
   location     String?
   /// [{ key: "dkkd", label: "ĐKKD", ok: true }, …]
@@ -945,4 +1094,27 @@ model JobAlert {
 
   @@index([userId])
   @@index([enabled, frequency])
+}
+
+/// Cài đặt hệ thống và nội dung trang chủ do admin quản lý (JSON đã được validate ở API)
+model SystemSetting {
+  key         String   @id
+  value       Json
+  updatedById String?
+  updatedAt   DateTime @updatedAt
+}
+
+/// Link CSV dùng một lần, lưu SHA-256 của token thay vì token gốc
+model AdminExportToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  adminId   String
+  dataset   String
+  rowCount  Int
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  consumedAt DateTime?
+
+  @@index([expiresAt])
+  @@index([adminId, createdAt])
 }

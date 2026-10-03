@@ -31,6 +31,28 @@ export function normalizeVnPhone(raw: string): string | null {
   return /^[35789]\d{8}$/.test(d) ? `+84${d}` : null;
 }
 
+/**
+ * Số liên hệ của doanh nghiệp (di động, máy bàn, hotline) – khác số đăng nhập chỉ nhận di động.
+ * Di động / máy bàn → E.164 ("+842471094510"); hotline 1800 / 1900 giữ nguyên vì không có dạng E.164.
+ */
+export function normalizeVnContactPhone(raw: string): string | null {
+  let d = raw.replace(/\D/g, '');
+  if (/^(1800|1900)\d{4,6}$/.test(d)) return d;
+  if (d.startsWith('84') && (d.length === 11 || d.length === 12)) d = d.slice(2);
+  if (d.startsWith('0')) d = d.slice(1);
+  return /^[35789]\d{8}$/.test(d) || /^2\d{9}$/.test(d) ? `+84${d}` : null;
+}
+
+/** "+842471094510" → "024 7109 4510" · "+84912345678" → "0912 345 678" · "19006699" → "1900 6699"; giá trị cũ không chuẩn giữ nguyên */
+export function formatVnContactPhone(value: string): string {
+  if (/^(1800|1900)\d+$/.test(value)) return `${value.slice(0, 4)} ${value.slice(4)}`;
+  if (/^\+842\d{9}$/.test(value)) {
+    const d = value.replace(/^\+84/, '0');
+    return `${d.slice(0, 3)} ${d.slice(3, 7)} ${d.slice(7)}`;
+  }
+  return /^\+84[35789]\d{8}$/.test(value) ? formatVnPhone(value) : value;
+}
+
 /** "+84912345678" → "0912 345 678" */
 export function formatVnPhone(e164: string): string {
   const d = e164.replace(/^\+84/, '0');
@@ -89,4 +111,12 @@ export function maskEmail(email: string): string {
 export function maskPhoneTail(e164: string): string {
   const d = e164.replace(/^\+84/, '0');
   return `•••• ${d.slice(4, 7)} ${d.slice(7)}`;
+}
+
+/**
+ * Chuỗi gõ lại để xác nhận xoá vĩnh viễn phải khớp đúng 100% (hoa / thường, dấu, dấu cách).
+ * Chỉ chuẩn hoá Unicode NFC: cùng một chữ có dấu, bộ gõ Telex / VNI có thể sinh mã khác nhau dù nhìn giống hệt.
+ */
+export function confirmTextMatches(typed: string, expected: string): boolean {
+  return typed.normalize('NFC') === expected.normalize('NFC');
 }

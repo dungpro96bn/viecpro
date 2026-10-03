@@ -9,6 +9,7 @@ import { MailModule } from './core/mail/mail.module.js';
 import { AuditModule } from './core/audit/audit.service.js';
 import { AuthGuard } from './core/auth/auth.guard.js';
 import { AllExceptionsFilter } from './core/http/all-exceptions.filter.js';
+import { MaintenanceGuard } from './core/http/maintenance.guard.js';
 import { PrismaModule } from './core/prisma/prisma.module.js';
 import { RedisThrottlerStorage } from './core/http/redis-throttler.storage.js';
 import { AdminModule } from './modules/admin/admin.module.js';
@@ -21,6 +22,8 @@ import { LeadsModule } from './modules/leads/leads.module.js';
 import { MeModule } from './modules/me/me.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { ProfilesModule } from './modules/profiles/profiles.module.js';
+import { PaymentsModule } from './modules/payments/payments.module.js';
+import { ConversationsModule } from './modules/conversations/conversations.module.js';
 import { ReportsModule } from './modules/reports/reports.module.js';
 import { SavedJobsModule } from './modules/saved-jobs/saved-jobs.module.js';
 import { SystemController } from './modules/system/system.controller.js';
@@ -60,6 +63,8 @@ import { UploadsModule } from './modules/uploads/uploads.module.js';
     EmployerPortalModule,
     LeadsModule,
     ReportsModule,
+    PaymentsModule,
+    ConversationsModule,
     UploadsModule,
 
     // Quản trị
@@ -69,6 +74,7 @@ import { UploadsModule } from './modules/uploads/uploads.module.js';
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
+    { provide: APP_GUARD, useClass: MaintenanceGuard },
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
   ],
 })

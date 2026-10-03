@@ -1,0 +1,100 @@
+/* Hộp thoại gõ để xác nhận (xoá vĩnh viễn) */
+.ctd {
+  width: 480px;
+  max-width: calc(100vw - 32px);
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 32px 64px -24px rgba(15, 37, 56, 0.45);
+}
+.ctd::backdrop {
+  background: rgba(11, 20, 36, 0.5);
+}
+.ctd__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+}
+.ctd__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--danger-soft);
+  color: var(--danger-text);
+}
+.ctd__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+.ctd__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.ctd__field {
+  margin-top: 4px;
+  color: var(--text-2);
+  font-size: 14px;
+}
+.ctd__key {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--danger-soft);
+  color: var(--danger-text);
+}
+.ctd__input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+}
+.ctd__input:focus {
+  border-color: var(--btn-primary);
+  outline: 0;
+  box-shadow: 0 0 0 4px rgba(56, 121, 255, 0.14);
+}
+.ctd__input[aria-invalid='true'] {
+  border-color: var(--danger-border);
+}
+.ctd__error {
+  margin: 0;
+  color: var(--danger-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.ctd__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+.ctd__danger {
+  border-color: var(--danger-text);
+  background: var(--danger-text);
+  color: #fff;
+}
+.ctd__danger:hover:not(:disabled) {
+  background: var(--danger);
+}
+.ctd__danger:disabled {
+  border-color: var(--border);
+  background: var(--bg-subtle);
+  color: var(--text-3);
+}

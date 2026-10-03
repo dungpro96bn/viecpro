@@ -80,6 +80,13 @@
   overflow: hidden;
 }
 
+.emp-filters{
+    display: grid;
+    gap: 15px;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    padding: 20px;
+}
+
 /* Tab */
 .jobs-tabs {
   display: flex;
@@ -521,6 +528,11 @@
 }
 .jobs-panel__pair .emp-btn {
   height: 38px;
+  font-size: 13px;
+}
+.jobs-panel__delete {
+  height: 38px;
+  color: var(--danger-text);
   font-size: 13px;
 }
 .jobs-panel__msg {

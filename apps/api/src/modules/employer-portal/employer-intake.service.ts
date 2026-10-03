@@ -81,9 +81,9 @@ export class EmployerIntakeService {
     if (files.some((d) => !d.path!.startsWith(`uploads/${userId}/`))) {
       throw new ApiException('VALIDATION_ERROR', 'Chỉ được đính kèm tệp đã tải lên', HttpStatus.BAD_REQUEST, { documents: 'Tải tệp lên trước khi đính kèm' });
     }
-    // Kho ảnh hiện tại là công khai: chỉ nhận 1 ảnh chân dung, không nhận ảnh CCCD / CV (RULE-BE.md mục 8)
+    // Kho ảnh hiện tại là công khai: chỉ nhận 1 ảnh chân dung, không nhận giấy tờ định danh hoặc CV.
     if (files.length > 1 || files.some((d) => d.kind !== 'image' || !d.name.startsWith('Ảnh chân dung'))) {
-      throw new ApiException('VALIDATION_ERROR', 'Chỉ đính kèm ảnh chân dung; CCCD, CV kiểm tra bản gốc', HttpStatus.BAD_REQUEST, { documents: 'Chỉ đính kèm ảnh chân dung' });
+      throw new ApiException('VALIDATION_ERROR', 'Chỉ đính kèm ảnh chân dung; ViecPro không nhận giấy tờ định danh hoặc CV', HttpStatus.BAD_REQUEST, { documents: 'Chỉ đính kèm ảnh chân dung' });
     }
     const assigneeId = input.assigneeId && input.assigneeId !== actor.recruiterId ? (await this.prisma.recruiter.findFirst({ where: { id: input.assigneeId, ...this.ctx.teamScope(actor) }, select: { id: true } }))?.id : actor.recruiterId;
     if (!assigneeId) throw new ApiException('VALIDATION_ERROR', 'Cán bộ phụ trách không thuộc doanh nghiệp', HttpStatus.BAD_REQUEST, { assigneeId: 'Chọn cán bộ trong doanh nghiệp' });

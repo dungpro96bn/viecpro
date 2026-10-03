@@ -29,6 +29,7 @@ import type {
   ReportStatus,
   ReportTarget,
 } from './enums.js';
+import type { JobRemoval } from './contracts.js';
 
 export const PROGRAM_LABEL: Record<Program, string> = {
   tts: 'Thực tập sinh',
@@ -154,7 +155,6 @@ export const MARITAL_LABEL: Record<MaritalStatus, string> = {
 };
 
 export const SEEKER_DOCUMENT_LABEL: Record<SeekerDocumentKey, string> = {
-  cccd: 'CCCD',
   photo: 'Ảnh 4×6',
   passport: 'Hộ chiếu',
   criminal: 'Lý lịch tư pháp',
@@ -222,6 +222,9 @@ export const NOTIFICATION_GROUP_LABEL: Record<NotificationGroup, { title: string
   profile_view: { title: 'Nhà tuyển dụng xem hồ sơ', desc: 'Biết ai đang quan tâm đến bạn' },
   job_match: { title: 'Việc mới phù hợp', desc: 'Theo các thông báo việc làm đã tạo' },
   application: { title: 'Trạng thái ứng tuyển', desc: 'Hồ sơ được xem, đổi bước, kết quả' },
+  lead: { title: 'Khách cần tư vấn', desc: 'Khi có người gửi yêu cầu tư vấn tới bạn hoặc công ty' },
+  billing: { title: 'Gói dịch vụ & thanh toán', desc: 'Đơn thanh toán và thay đổi gói dịch vụ' },
+  message: { title: 'Tin nhắn', desc: 'Tin nhắn mới từ nhà tuyển dụng hoặc ứng viên' },
   system: { title: 'Tài khoản & hệ thống', desc: 'Bảo mật, kết quả báo cáo vi phạm' },
 };
 
@@ -238,6 +241,7 @@ export const REPORT_REASON_LABEL: Record<ReportReason, string> = {
   scam: 'Lừa đảo / giả mạo',
   harassment: 'Quấy rối / xúc phạm',
   no_response: 'Phản hồi chậm / không liên hệ',
+  partner_request: 'Đề nghị xem xét tạm ẩn từ doanh nghiệp phái cử',
   other: 'Khác',
 };
 
@@ -268,4 +272,10 @@ export const REPORT_DECISION_LABEL: Record<ReportDecision, string> = {
   remove_job: 'Gỡ tin',
   suspend: 'Tạm khoá',
   ban: 'Khoá vĩnh viễn',
+};
+
+/** Tin đã bị NTD xoá (hiện cho admin) */
+export const JOB_REMOVAL_LABEL: Record<JobRemoval, string> = {
+  trash: 'NTD đã xoá (trong thùng rác)',
+  purged: 'NTD đã xoá vĩnh viễn',
 };

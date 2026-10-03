@@ -17,6 +17,7 @@ import { pageArgs } from '../../core/http/pagination.js';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { type EmployerActor, EmployerContext } from './employer-context.service.js';
 import { countByDay, rate, windows } from './employer-stats.js';
+import { canPublish } from './plan-rules.js';
 
 const DAY = 86400_000;
 
@@ -266,10 +267,20 @@ export class EmployerJobsService {
     // Tin bị hệ thống / quản trị tạm ẩn chỉ mở lại được sau khi kiểm duyệt xử lý xong
     if (job.suspendedAt) throw new ApiException('SUSPENDED', job.suspendReason ?? 'Tin đang bị tạm ẩn để kiểm tra, vui lòng liên hệ 1900 66 99', HttpStatus.CONFLICT);
     const status = actor.verified ? 'open' : 'pending';
-    await this.prisma.$transaction([
-      this.prisma.job.update({ where: { id: jobId }, data: { status, ...(status === 'pending' && { submittedAt: new Date() }) } }),
-      this.prisma.jobEvent.create({ data: { jobId, actorId: actor.recruiterId, action: 'resume' } }),
-    ]);
+    await this.prisma.$transaction(async (tx) => {
+      const planWhere = actor.employerId ? { employerId: actor.employerId } : { recruiterId: actor.recruiterId };
+      const [plan, visibleJobs] = await Promise.all([
+        tx.businessPlan.findFirst({ where: planWhere, select: { jobQuota: true, expiresAt: true } }),
+        tx.job.count({ where: { ...this.ctx.jobScope(actor), status: 'open' } }),
+      ]);
+      const quota = canPublish(plan, visibleJobs);
+      if (!quota.allowed) {
+        const expired = quota.reason === 'expired';
+        throw new ApiException(expired ? 'PLAN_EXPIRED' : 'PLAN_LIMIT', expired ? 'Gói dịch vụ đã hết hạn. Gia hạn để đăng thêm tin.' : 'Đã đạt giới hạn tin hiển thị của gói. Nâng cấp để đăng thêm tin.');
+      }
+      await tx.job.update({ where: { id: jobId }, data: { status, ...(status === 'pending' && { submittedAt: new Date() }) } });
+      await tx.jobEvent.create({ data: { jobId, actorId: actor.recruiterId, action: 'resume' } });
+    });
     return this.item(jobId);
   }
 

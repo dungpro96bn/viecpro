@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { jobShortTitle, type EmployerDashboard, type EmployerPartnerItem, type EmployerRange } from '@viecpro/shared';
+import { jobShortTitle, type EmployerDashboard, type EmployerPartnerItem, type EmployerRange, type EmployerReport } from '@viecpro/shared';
 import { AssetUrlService } from '../../core/assets/asset-url.service.js';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { type EmployerActor, EmployerContext } from './employer-context.service.js';
 import { applicantBrief, applicantBriefSelect, interviewBrief, interviewBriefInclude } from './employer-mappers.js';
-import { averageByDay, countByDay, dayKey, isWeekend, startOfDay, trustScore, windows } from './employer-stats.js';
+import { averageByDay, countByDay, dayKey, isWeekend, rate, startOfDay, trustScore, windows } from './employer-stats.js';
 
 const DAY = 86400_000;
 /** Mục tiêu "phản hồi trong 30 phút" của gói dịch vụ (%) */
@@ -37,7 +37,7 @@ export class EmployerDashboardService {
         where: jobScope,
         select: { id: true, title: true, position: true, industry: true, pref: true, status: true, publishedAt: true, deadline: true, quantity: true, salary: true },
       }),
-      this.prisma.jobViewDay.findMany({ where: { job: jobScope, day: { gte: prevStart } }, select: { day: true, count: true } }),
+      this.prisma.jobViewDay.findMany({ where: { job: this.ctx.ownerScope(actor), day: { gte: prevStart } }, select: { day: true, count: true } }),
       this.prisma.applicationEvent.findMany({ where: { status: 'departed', application: appScope }, select: { createdAt: true } }),
       this.prisma.application.findMany({
         where: { ...appScope, status: { not: 'withdrawn' } },
@@ -120,6 +120,65 @@ export class EmployerDashboardService {
     };
   }
 
+  /** Báo cáo hiệu quả tuyển dụng: chỉ truy vấn tin thuộc doanh nghiệp / NTD hiện tại. */
+  async report(userId: string, range: '7' | '30' | '90'): Promise<EmployerReport> {
+    const actor = await this.ctx.resolve(userId);
+    const days = Number(range);
+    const now = new Date();
+    const { start, prevStart, keys } = windows(days, now);
+    const jobScope = this.ctx.jobScope(actor);
+    const appScope = this.ctx.applicationScope(actor);
+    const [applications, views, sources, appJobs, viewJobs] = await Promise.all([
+      this.prisma.application.findMany({ where: { ...appScope, createdAt: { gte: prevStart } }, select: { createdAt: true, status: true } }),
+      this.prisma.jobViewDay.findMany({ where: { job: this.ctx.ownerScope(actor), day: { gte: prevStart } }, select: { jobId: true, day: true, count: true } }),
+      this.prisma.application.groupBy({ by: ['source'], where: { ...appScope, createdAt: { gte: start } }, _count: { _all: true }, orderBy: { _count: { source: 'desc' } } }),
+      this.prisma.application.groupBy({ by: ['jobId'], where: { ...appScope, createdAt: { gte: start } }, _count: { _all: true }, orderBy: { _count: { jobId: 'desc' } }, take: 10 }),
+      this.prisma.jobViewDay.groupBy({ by: ['jobId'], where: { job: jobScope, day: { gte: start } }, _sum: { count: true } }),
+    ]);
+    const daily = keys.map((date) => {
+      const from = new Date(`${date}T00:00:00`);
+      const to = new Date(from.getTime() + DAY);
+      return {
+        date,
+        applications: applications.filter((a) => a.createdAt >= start && dayKey(a.createdAt) === date).length,
+        views: views.filter((v) => v.day >= from && v.day < to).reduce((sum, v) => sum + v.count, 0),
+      };
+    });
+    const totalApplications = applications.filter((a) => a.createdAt >= start).length;
+    const previousApplications = applications.filter((a) => a.createdAt < start).length;
+    const totalViews = views.filter((v) => v.day >= start).reduce((sum, v) => sum + v.count, 0);
+    const previousViews = views.filter((v) => v.day < start).reduce((sum, v) => sum + v.count, 0);
+    const currentApps = applications.filter((a) => a.createdAt >= start);
+    const jobIds = appJobs.map((j) => j.jobId);
+    const jobs = jobIds.length ? await this.prisma.job.findMany({ where: { id: { in: jobIds }, ...jobScope }, select: { id: true, title: true, code: true } }) : [];
+    const viewsByJob = new Map(viewJobs.map((v) => [v.jobId, v._sum.count ?? 0]));
+    const applicationsByJob = new Map(appJobs.map((a) => [a.jobId, a._count._all]));
+    return {
+      range,
+      totalApplications,
+      totalViews,
+      conversion: rate(totalApplications, totalViews),
+      previousApplications,
+      previousViews,
+      daily,
+      sources: sources.map((s) => ({ source: s.source, count: s._count._all })),
+      jobs: jobs
+        .map((job) => {
+          const applicationsCount = applicationsByJob.get(job.id) ?? 0;
+          const viewsCount = viewsByJob.get(job.id) ?? 0;
+          return { ...job, views: viewsCount, applications: applicationsCount, conversion: rate(applicationsCount, viewsCount) };
+        })
+        .sort((a, b) => b.applications - a.applications),
+      funnel: {
+        applied: currentApps.length,
+        contacted: currentApps.filter((a) => ['viewed', 'interview', 'passed', 'departed'].includes(a.status)).length,
+        interview: currentApps.filter((a) => ['interview', 'passed', 'departed'].includes(a.status)).length,
+        passed: currentApps.filter((a) => ['passed', 'departed'].includes(a.status)).length,
+        departed: currentApps.filter((a) => a.status === 'departed').length,
+      },
+    };
+  }
+
   /** Tin cần chú ý: ít hồ sơ, sắp hết hạn mà thiếu chỉ tiêu, đã gần đủ chỉ tiêu */
   private async attention(
     jobs: Array<{ id: string; title: string; position: string | null; industry: string; pref: string; status: string; deadline: Date | null; quantity: number; salary: number }>,
@@ -186,14 +245,13 @@ export class EmployerDashboardService {
 
   private async trust(actor: EmployerActor, rating: number): Promise<EmployerDashboard['trust']> {
     const [recruiter, licensed, violations, peers] = await Promise.all([
-      this.prisma.recruiter.findUniqueOrThrow({ where: { id: actor.recruiterId }, select: { cccdVerifiedAt: true, sections: true, user: { select: { phoneVerifiedAt: true } } } }),
+      this.prisma.recruiter.findUniqueOrThrow({ where: { id: actor.recruiterId }, select: { sections: true, user: { select: { phoneVerifiedAt: true } } } }),
       this.prisma.recruiterPartner.count({ where: { recruiterId: actor.recruiterId, employer: { verified: true } } }),
       this.prisma.report.count({ where: { job: { recruiterId: actor.recruiterId }, status: { not: 'dismissed' }, createdAt: { gte: new Date(Date.now() - 365 * DAY) } } }),
       this.prisma.recruiter.findMany({ where: { employerId: null, userId: { not: null } }, select: { rating: true } }),
     ]);
     const sections = (recruiter.sections ?? {}) as { video?: unknown };
     const { score, checks } = trustScore({
-      cccdVerified: !!recruiter.cccdVerifiedAt,
       phoneVerified: !!recruiter.user?.phoneVerifiedAt,
       licensedPartners: licensed,
       violations12m: violations,

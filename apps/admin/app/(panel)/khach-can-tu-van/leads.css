@@ -1,0 +1,38 @@
+/* Khách cần tư vấn – quản lý yêu cầu liên hệ gửi từ các trang công khai */
+
+.lead-table {
+  min-width: 820px;
+}
+.lead-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.lead-phone--masked {
+  color: var(--text-3);
+}
+.lead-job {
+  color: var(--primary-text);
+  text-decoration: none;
+}
+.lead-job:hover {
+  text-decoration: underline;
+}
+.lead-handle {
+  gap: 6px;
+  white-space: nowrap;
+}
+.lead-handle:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+@media (max-width: 767px) {
+  .lead-table {
+    min-width: 760px;
+  }
+}

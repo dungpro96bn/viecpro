@@ -3,6 +3,9 @@ import type { EmployerAccount } from '@viecpro/shared';
 import { AssetUrlService } from '../../core/assets/asset-url.service.js';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { type EmployerActor, EmployerContext } from './employer-context.service.js';
+import { trashedJobs } from './employer-job-trash.service.js';
+import { EmployerPortalService } from './employer-portal.service.js';
+import { trashedMembers } from './employer-trash.service.js';
 
 const WEEK = 7 * 86400_000;
 
@@ -13,6 +16,7 @@ export class EmployerAccountService {
     private readonly prisma: PrismaService,
     private readonly ctx: EmployerContext,
     private readonly assets: AssetUrlService,
+    private readonly portal: EmployerPortalService,
   ) {}
 
   async account(userId: string): Promise<EmployerAccount> {
@@ -29,8 +33,8 @@ export class EmployerAccountService {
           title: true,
           photoUrl: true,
           reviewCount: true,
-          cccdVerifiedAt: true,
-          employer: { select: { id: true, slug: true, name: true, shortName: true, logoUrl: true, verified: true, _count: { select: { recruiters: true } } } },
+          companyAdmin: true,
+          employer: { select: { id: true, slug: true, name: true, shortName: true, logoUrl: true, verified: true, _count: { select: { recruiters: { where: { leftAt: null } } } } } },
         },
       }),
       this.planOf(actor),
@@ -41,17 +45,33 @@ export class EmployerAccountService {
       actor.employerId ? Promise.resolve(0) : this.prisma.recruiterPartner.count({ where: { recruiterId: actor.recruiterId } }),
     ]);
 
+    const companyAdmin = !!actor.employerId && recruiter.companyAdmin;
+    const [partnerJobs, partnerRecruiters] = companyAdmin
+      ? await Promise.all([
+          this.prisma.job.count({ where: this.ctx.partnerJobScope(actor) }),
+          this.prisma.recruiterPartner.count({ where: { employerId: actor.employerId!, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] } }),
+        ])
+      : [0, 0];
+    // Thùng rác: quản trị viên doanh nghiệp (tin + thành viên) hoặc NTD cá nhân (tin của mình)
+    const [trashedJobCount, trashedMemberCount] = await Promise.all([
+      companyAdmin || !actor.employerId ? this.prisma.job.count({ where: trashedJobs(this.ctx.ownerScope(actor)) }) : 0,
+      companyAdmin ? this.prisma.recruiter.count({ where: trashedMembers(actor.employerId!) }) : 0,
+    ]);
+    const conversationRows = await this.prisma.conversation.findMany({ where: { application: { is: this.ctx.applicationScope(actor) } }, select: { id: true, employerReadAt: true } });
+    const unreadMessages = (await Promise.all(conversationRows.map((c) => this.prisma.message.count({ where: { conversationId: c.id, senderSide: 'seeker', ...(c.employerReadAt && { createdAt: { gt: c.employerReadAt } }) } })))).reduce((a, b) => a + b, 0);
+    const trash = trashedJobCount + trashedMemberCount;
+    const leads = await this.portal.countUnhandled(actor);
     const e = recruiter.employer;
     return {
       user: { id: user.id, name: user.name, avatarUrl: this.assets.url(user.avatarUrl ?? recruiter.photoUrl), title: recruiter.title },
-      recruiter: { id: actor.recruiterId, slug: recruiter.slug },
+      recruiter: { id: actor.recruiterId, slug: recruiter.slug, verified: actor.verified },
       kind: actor.employerId ? 'company' : 'individual',
       company: e
         ? { id: e.id, slug: e.slug, name: e.name, shortName: e.shortName, logoUrl: this.assets.url(e.logoUrl), verified: e.verified, memberCount: e._count.recruiters }
         : null,
-      cccdVerified: !!recruiter.cccdVerifiedAt,
       plan: plan && { name: plan.name, expiresAt: plan.expiresAt.toISOString(), jobQuota: plan.jobQuota, jobsVisible, boostQuota: plan.boostQuota, boostsUsed: plan.boostsUsed },
-      counts: { jobs, newApplicants, upcomingInterviews, partners, reviews: recruiter.reviewCount },
+      companyAdmin,
+      counts: { jobs, visibleJobs: jobsVisible, unreadMessages, newApplicants, upcomingInterviews, partners, partnerJobs, partnerRecruiters, reviews: recruiter.reviewCount, trash, leads },
     };
   }
 

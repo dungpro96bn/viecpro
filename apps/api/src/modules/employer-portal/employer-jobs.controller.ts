@@ -18,6 +18,7 @@ import {
 import { type AuthPayload, CurrentUser, Roles } from '../../core/auth/auth.decorators.js';
 import { ZodBody, ZodQuery } from '../../core/http/zod.js';
 import { EmployerJobFormService } from './employer-job-form.service.js';
+import { EmployerJobTrashService } from './employer-job-trash.service.js';
 import { EmployerJobsService } from './employer-jobs.service.js';
 
 @ApiTags('Nhà tuyển dụng – quản lý')
@@ -28,6 +29,7 @@ export class EmployerJobsController {
   constructor(
     private readonly jobs: EmployerJobsService,
     private readonly form: EmployerJobFormService,
+    private readonly trash: EmployerJobTrashService,
   ) {}
 
   @Get()
@@ -98,5 +100,12 @@ export class EmployerJobsController {
   @ApiOperation({ summary: 'Đóng tin (hết hạn / đủ chỉ tiêu)' })
   close(@CurrentUser() user: AuthPayload, @Param('id') id: string): Promise<EmployerJobItem> {
     return this.jobs.close(user.sub, id);
+  }
+
+  @Post(':id/delete')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Xoá tin vào Thùng rác (chỉ tin nháp / bị từ chối / đã đóng; khôi phục được trong 30 ngày)' })
+  async remove(@CurrentUser() user: AuthPayload, @Param('id') id: string) {
+    await this.trash.remove(user.sub, id);
   }
 }

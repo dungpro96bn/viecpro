@@ -83,7 +83,7 @@ export function DocumentsSection({ profile, onChange, preview, consultantPhone }
           <DocCard key={d.key} doc={d} preview={preview} onChange={onChange} consultantPhone={consultantPhone} />
         ))}
       </ul>
-      {!preview && <p className="sp-note">CCCD, hộ chiếu, lý lịch tư pháp và giấy khám sức khoẻ là giấy tờ riêng tư: bạn gửi bản gốc cho cán bộ tư vấn để xác minh, viecpro không đăng công khai.</p>}
+      {!preview && <p className="sp-note">ViecPro không nhận hoặc lưu CCCD. Với giấy tờ định danh khác, vui lòng xác minh trực tiếp cùng đơn vị phái cử.</p>}
     </SectionCard>
   );
 }

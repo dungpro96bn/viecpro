@@ -530,7 +530,7 @@ function Overview({ d }: { d: AdminEmployerDetail }) {
       </section>
 
       <section className="dsec">
-        <span className="dsec__title">{d.kind === 'company' ? `Thành viên (${d.members.length})` : 'Tài khoản'}</span>
+        <span className="dsec__title">{d.kind === 'company' ? `Thành viên (${d.members.filter((m) => !m.leftAt).length})` : 'Tài khoản'}</span>
         <ul className="dlist">
           {d.members.map((m) => (
             <li key={m.id}>
@@ -538,6 +538,7 @@ function Overview({ d }: { d: AdminEmployerDetail }) {
                 <b>{m.name}</b>
                 <small>{m.title}</small>
               </span>
+              {m.leftAt && <span className="mini-tag mini-tag--gray">Đã rời {new Date(m.leftAt).toLocaleDateString('vi-VN')}</span>}
               {m.locked && <span className="mini-tag mini-tag--danger">Đã khoá</span>}
             </li>
           ))}

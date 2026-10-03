@@ -7,9 +7,8 @@ import Select from '@/components/ui/Select';
 import { IconArrowRight, IconBriefcase, IconMap, IconPin, IconSearch } from '@/components/ui/Icons';
 import HomeJobList from './_components/HomeJobList';
 import RegionSlider from './_components/RegionSlider';
-import { MINI_ADS } from '@/lib/data';
 import { apiRecruiterToPoster } from '@/lib/api-mappers';
-import { getLatestJobs, getRegionDirectory } from '@/lib/server-api';
+import { getHomepageContent, getLatestJobs, getRegionDirectory } from '@/lib/server-api';
 import type { Poster } from '@/lib/types';
 import type { JobListItem } from '@viecpro/shared';
 import { cx, formatNumber } from '@/lib/format';
@@ -32,7 +31,7 @@ function featuredPosters(jobs: JobListItem[]) {
 }
 
 export default async function HomePage() {
-  const [directory, latest] = await Promise.all([getRegionDirectory(), getLatestJobs()]);
+  const [directory, latest, content] = await Promise.all([getRegionDirectory(), getLatestJobs(), getHomepageContent()]);
   const regions = (directory ?? []).filter((r) => r.total > 0).map((r) => ({ ...r, prefCount: r.prefs.length, prefs: r.prefs.slice(0, PREFS_PER_REGION) }));
   const prefTotal = regions.reduce((sum, r) => sum + r.total, 0);
   const prefMax = Math.max(1, ...regions.flatMap((r) => r.prefs.map((p) => p.count)));
@@ -153,26 +152,24 @@ export default async function HomePage() {
 
           {/* SIDEBAR / QUẢNG CÁO */}
           <aside className="home-aside" aria-label="Quảng cáo và hỗ trợ">
-            <Link href="#" className="ad-employer">
-              <img className="ad-employer__img" src="/images/ads/employer-ad.jpg" alt="" />
-              <span className="ad-employer__shade" />
-              <span className="ad-employer__top">
-                <span className="ad-employer__tag">Dành cho nhà tuyển dụng</span>
-                <span className="ad-label">Tài trợ</span>
-              </span>
-              <span className="ad-employer__body">
-                <span className="ad-employer__title">
-                  Đăng đơn hàng Nhật,
-                  <br />
-                  tiếp cận ứng viên đã sàng lọc
+            {content?.employerBanner.enabled && (
+              <Link href={content.employerBanner.href} className="ad-employer">
+                <img className="ad-employer__img" src={content.employerBanner.image} alt="" />
+                <span className="ad-employer__shade" />
+                <span className="ad-employer__top">
+                  <span className="ad-employer__tag">{content.employerBanner.tag}</span>
+                  <span className="ad-label">Tài trợ</span>
                 </span>
-                <span className="ad-employer__desc">Hồ sơ xí nghiệp được xác minh, hiển thị nổi bật trên toàn hệ thống.</span>
-                <span className="btn btn--primary btn--pill ad-employer__cta">
-                  Đăng tin ngay
-                  <IconArrowRight size={16} className="icon--w22" />
+                <span className="ad-employer__body">
+                  <span className="ad-employer__title">{content.employerBanner.title}</span>
+                  <span className="ad-employer__desc">{content.employerBanner.description}</span>
+                  <span className="btn btn--primary btn--pill ad-employer__cta">
+                    {content.employerBanner.cta}
+                    <IconArrowRight size={16} className="icon--w22" />
+                  </span>
                 </span>
-              </span>
-            </Link>
+              </Link>
+            )}
 
             <div className="featured-employers">
               <div className="featured-employers__head">
@@ -195,39 +192,43 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <Link href="#" className="ad-course">
-              <img className="ad-course__img" src="/images/ads/japanese-course.jpg" alt="" />
-              <span className="ad-course__shade" />
-              <span className="ad-label ad-course__label">Quảng cáo</span>
-              <span className="ad-course__body">
-                <span className="ad-course__eyebrow">Khóa tiếng Nhật trước xuất cảnh</span>
-                <span className="ad-course__title">Luyện N5 – N4 cùng giáo viên bản ngữ</span>
-                <span className="ad-course__cta">Đăng ký tư vấn</span>
-              </span>
-            </Link>
+            {content?.courseBanner.enabled && (
+              <Link href={content.courseBanner.href} className="ad-course">
+                <img className="ad-course__img" src={content.courseBanner.image} alt="" />
+                <span className="ad-course__shade" />
+                <span className="ad-label ad-course__label">Quảng cáo</span>
+                <span className="ad-course__body">
+                  <span className="ad-course__eyebrow">{content.courseBanner.tag}</span>
+                  <span className="ad-course__title">{content.courseBanner.title}</span>
+                  <span className="ad-course__cta">{content.courseBanner.cta}</span>
+                </span>
+              </Link>
+            )}
 
-            <div className="mini-ads">
-              <div className="mini-ads__head">
-                <span className="mini-ads__title">Dịch vụ hỗ trợ xuất cảnh</span>
-                <span className="ad-label ad-label--muted">Tài trợ</span>
-              </div>
-              {MINI_ADS.map((ad) => (
-                <Link key={ad.id} href="#" className="mini-ad">
-                  <img className="mini-ad__img" src={ad.img} alt="" loading="lazy" />
-                  <span className={cx('mini-ad__overlay', `mini-ad__overlay--${ad.id}`)} />
-                  <span className="mini-ad__body">
-                    <span className="mini-ad__tag">{ad.tag}</span>
-                    <span className="mini-ad__text">
-                      <span className="mini-ad__title">{ad.title}</span>
-                      <span className="mini-ad__cta">
-                        {ad.cta}
-                        <IconArrowRight size={13} className="icon--w24" />
+            {!!content?.miniAds.some((ad) => ad.enabled) && (
+              <div className="mini-ads">
+                <div className="mini-ads__head">
+                  <span className="mini-ads__title">{content.miniAdsTitle}</span>
+                  <span className="ad-label ad-label--muted">Tài trợ</span>
+                </div>
+                {content.miniAds.filter((ad) => ad.enabled).map((ad) => (
+                  <Link key={ad.id} href={ad.href} className="mini-ad">
+                    <img className="mini-ad__img" src={ad.image} alt="" loading="lazy" />
+                    <span className={cx('mini-ad__overlay', `mini-ad__overlay--${ad.id}`)} />
+                    <span className="mini-ad__body">
+                      <span className="mini-ad__tag">{ad.tag}</span>
+                      <span className="mini-ad__text">
+                        <span className="mini-ad__title">{ad.title}</span>
+                        <span className="mini-ad__cta">
+                          {ad.cta}
+                          <IconArrowRight size={13} className="icon--w24" />
+                        </span>
                       </span>
                     </span>
-                  </span>
-                </Link>
-              ))}
-            </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </aside>
         </div>
       </main>

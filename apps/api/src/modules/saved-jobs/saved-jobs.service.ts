@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { Gender, Industry, SavedJobItem, SavedJobList, SavedJobListQuery, SavedJobState } from '@viecpro/shared';
 import { ApiException } from '../../core/http/api-exception.js';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
-import { jobInclude, JobMapper, PUBLIC_JOB_STATUSES } from '../jobs/job.mapper.js';
+import { jobInclude, JobMapper, PUBLIC_JOB_WHERE } from '../jobs/job.mapper.js';
 import { matchJob } from '../jobs/job-match.js';
 import { daysLeft, savedJobInsight } from './saved-job-insight.js';
 
@@ -22,7 +22,7 @@ export class SavedJobsService {
     // Đơn bị gỡ / chuyển về chờ duyệt sau khi lưu thì không hiện nữa
     const [rows, p] = await Promise.all([
       this.prisma.savedJob.findMany({
-        where: { userId, job: { status: { in: PUBLIC_JOB_STATUSES } } },
+        where: { userId, job: PUBLIC_JOB_WHERE },
         include: { job: { include: jobInclude } },
         orderBy: { createdAt: 'desc' },
         take: MAX_SAVED,
@@ -113,7 +113,7 @@ export class SavedJobsService {
   }
 
   private async findJob(jobKey: string) {
-    const job = await this.prisma.job.findFirst({ where: { OR: [{ id: jobKey }, { slug: jobKey }], status: { in: PUBLIC_JOB_STATUSES } }, select: { id: true } });
+    const job = await this.prisma.job.findFirst({ where: { OR: [{ id: jobKey }, { slug: jobKey }], ...PUBLIC_JOB_WHERE }, select: { id: true } });
     if (!job) throw ApiException.notFound('Không tìm thấy đơn hàng');
     return job;
   }

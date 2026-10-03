@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { IconClock, IconFacebook, IconMail, IconPhone, IconPin, IconTiktok, IconYoutube } from '../ui/Icons';
 import Logo from './Logo';
 import NewsletterForm from './NewsletterForm';
@@ -12,6 +15,16 @@ const COLUMNS = [
 ];
 
 export default function Footer() {
+  const [contact, setContact] = useState({ phone: '19006688', email: 'hotro@viecpro.vn' });
+  useEffect(() => {
+    const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000/api/v1').replace(/\/$/, '');
+    void fetch(`${base}/site/system`, { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { supportPhone?: string; supportEmail?: string } | null) => {
+        if (data) setContact({ phone: data.supportPhone || '19006688', email: data.supportEmail || 'hotro@viecpro.vn' });
+      })
+      .catch(() => undefined);
+  }, []);
   return (
     <footer className="site-footer">
       <div className="container">
@@ -35,13 +48,13 @@ export default function Footer() {
                 <IconPin size={16} className="site-footer__contact-icon" />
                 <span>Số 21 Lê Đức Thọ, Từ Liêm, Hà Nội</span>
               </span>
-              <a href="tel:19006688" className="site-footer__contact">
+              <a href={`tel:${contact.phone.replace(/[^+\d]/g, '')}`} className="site-footer__contact">
                 <IconPhone size={16} />
-                <span>Hotline: 1900 66 88</span>
+                <span>Hotline: {contact.phone}</span>
               </a>
-              <a href="mailto:hotro@viecpro.vn" className="site-footer__contact">
+              <a href={`mailto:${contact.email}`} className="site-footer__contact">
                 <IconMail size={16} />
-                <span>hotro@viecpro.vn</span>
+                <span>{contact.email}</span>
               </a>
               <span className="site-footer__contact">
                 <IconClock size={16} />

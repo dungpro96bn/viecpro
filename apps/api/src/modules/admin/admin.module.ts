@@ -20,12 +20,19 @@ import { SanctionsService } from './sanctions/sanctions.service.js';
 import { StepUpService } from './sanctions/step-up.service.js';
 import { AdminUsersController } from './users/admin-users.controller.js';
 import { AdminUsersService } from './users/admin-users.service.js';
+import { AdminLeadsController } from './leads/admin-leads.controller.js';
+import { AdminLeadsService } from './leads/admin-leads.service.js';
+import { AdminToolsController, AdminExportDownloadController } from './admin-tools.controller.js';
+import { AdminToolsService } from './admin-tools.service.js';
+import { SiteController } from './site.controller.js';
 import { VerificationsController } from './verifications/verifications.controller.js';
 import { VerificationsService } from './verifications/verifications.service.js';
+import { PaymentsModule } from '../payments/payments.module.js';
+import { AdminPaymentsController } from '../payments/admin-payments.controller.js';
 
 /** Toàn bộ API quản trị – tách khỏi module người dùng (RULE-BE.md mục 7) */
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, PaymentsModule],
   controllers: [
     AdminAuthController,
     AdminMeController,
@@ -33,11 +40,16 @@ import { VerificationsService } from './verifications/verifications.service.js';
     ModerationController,
     VerificationsController,
     AdminUsersController,
+    AdminLeadsController,
+    AdminToolsController,
+    AdminExportDownloadController,
+    SiteController,
     AdminEmployersController,
     AdminReportsController,
     AuditLogsController,
     AdminAccountsController,
     AdminRolesController,
+    AdminPaymentsController,
   ],
   providers: [
     AdminGuard,
@@ -46,6 +58,8 @@ import { VerificationsService } from './verifications/verifications.service.js';
     ModerationService,
     VerificationsService,
     AdminUsersService,
+    AdminLeadsService,
+    AdminToolsService,
     AdminEmployersService,
     AdminReportsService,
     SanctionsService,

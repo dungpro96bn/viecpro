@@ -37,6 +37,7 @@ Môi trường dev in mã OTP SMS ra log API và trả thêm `devCode` trong res
 | `npm run typecheck` | Kiểm tra kiểu mọi workspace |
 | `npm run test` | Unit test API (Vitest) |
 | `npm run test:e2e -w @viecpro/api` | E2E phân quyền 401 / 403 / 404 |
+| `npm run test:e2e:db -w @viecpro/api` | E2E như trên + cách ly dữ liệu giữa các NTD trên Postgres thật (tự tạo / migrate database `viecpro_e2e`, cần `npm run db:up`) |
 | `npm run build` | Build shared → API → web |
 | `npm run db:studio` | Xem / sửa dữ liệu bằng Prisma Studio |
 
@@ -46,7 +47,7 @@ Môi trường dev in mã OTP SMS ra log API và trả thêm `devCode` trong res
 | --- | --- |
 | `/` | Trang chủ (hero tìm kiếm, danh bạ tỉnh thành, 20 việc làm mới, sidebar quảng cáo) |
 | `/tim-kiem` | Tìm kiếm việc làm (form mở rộng, bộ lọc trái, danh sách + phân trang 20 đơn/trang) |
-| `/viec-lam/[slug]` | Chi tiết đơn hàng (2 slider đơn liên quan) |
+| `/viec-lam/[slug]` | Chi tiết đơn hàng (2 slider đơn liên quan, form nhờ tư vấn gắn với tin) |
 | `/nha-tuyen-dung/viet-nam-camcom` | Hồ sơ nhà tuyển dụng doanh nghiệp |
 | `/tu-van-vien/nguyen-thu-ha` | Hồ sơ nhà tuyển dụng cá nhân |
 | `/dang-nhap` | Đăng nhập bằng email hoặc số điện thoại và mật khẩu |
@@ -55,13 +56,19 @@ Môi trường dev in mã OTP SMS ra log API và trả thêm `devCode` trong res
 | `/tai-khoan-ung-vien` | Tổng quan tài khoản ứng viên, tiến độ hồ sơ, lịch phỏng vấn và việc phù hợp |
 | `/tai-khoan-ung-vien/ho-so` | Hồ sơ của tôi (design 18): % hoàn thiện, sửa từng khối, giấy tờ, video, NTD đã xem |
 | `/tai-khoan-ung-vien/viec-da-ung-tuyen` | Việc đã ứng tuyển (design 19): tiến trình 5 bước, phỏng vấn sắp tới, xác nhận / xin dời lịch |
+| `/tai-khoan-ung-vien/tin-nhan` | Hộp thư trao đổi với nhà tuyển dụng theo từng hồ sơ ứng tuyển |
 | `/tai-khoan-ung-vien/viec-da-luu` | Việc đã lưu (design 20): sắp xếp, lọc ngành, so sánh, ứng tuyển nhanh việc sắp hết hạn |
 | `/tai-khoan-ung-vien/thong-bao-viec-lam` | Thông báo việc làm (design-new 04): tạo / sửa / bật tắt, việc mới cho bạn, gợi ý từ hồ sơ |
 | `/tai-khoan-ung-vien/cai-dat` | Cài đặt (design-new 05): email / SĐT / mật khẩu, thiết bị, thông báo theo kênh + giờ yên lặng, quyền riêng tư, ngôn ngữ, tải dữ liệu, xoá tài khoản |
 | `/quan-ly-tuyen-dung` | Tổng quan NTD doanh nghiệp / cá nhân (design 10, 11) |
+| `/quan-ly-tuyen-dung/bao-cao` | Báo cáo lượt xem, hồ sơ, nguồn ứng tuyển, hiệu quả tin và phễu tuyển dụng (7 / 30 / 90 ngày) |
+| `/quan-ly-tuyen-dung/danh-gia` | Đánh giá người lao động đã xuất cảnh và phản hồi của NTD |
 | `/quan-ly-tuyen-dung/don-hang` | Quản lý tin tuyển dụng (design 12); `/dang-tin`, `/[id]/sua`: đăng / sửa tin (design 15) |
 | `/quan-ly-tuyen-dung/ung-vien` | Quản lý ứng viên (design 13); `/them`: thêm ứng viên thủ công / Excel (design 16) |
+| `/quan-ly-tuyen-dung/tin-nhan` | Hộp thư trao đổi với ứng viên, cập nhật bằng polling khi tab đang mở |
 | `/quan-ly-tuyen-dung/lich-phong-van` | Lịch phỏng vấn tuần (design 14); `/tao`: tạo lịch hẹn (design 17) |
+
+Khi admin bật bảo trì trong Cài đặt hệ thống, toàn bộ trang web người dùng hiển thị màn hình bảo trì cùng thông điệp và thông tin hỗ trợ; trạng thái được kiểm tra lại mỗi 30 giây. API admin và tài nguyên tĩnh không bị ảnh hưởng.
 
 **Ứng tuyển có xác nhận email:** popup ứng tuyển gồm 2 bước – điền thông tin (email bắt buộc) → nhập mã 6 số gửi tới email. Mã sống 5 phút, sai tối đa 5 lần, gửi lại sau 60 giây, tối đa 5 mã/giờ/email; API chỉ lưu HMAC của mã. Tài khoản ứng viên đã xác thực đúng email đó thì bỏ qua bước nhập mã. Gửi hồ sơ thành công → email "Đã nhận hồ sơ".
 
@@ -97,8 +104,9 @@ Danh sách đầy đủ, thử trực tiếp: http://localhost:4000/docs (OpenAP
 | Việc đã lưu | `GET /me/saved-jobs` (sắp xếp, lọc ngành, % phù hợp, điều kiện), `PUT/DELETE /me/saved-jobs/:jobId` | Nút lưu việc, trang việc đã lưu |
 | Hồ sơ NTD | `GET /employers/:slug`, `/recruiters/:slug`, `/recruiters/:slug/phone`, `PUT/DELETE …/follow` | Trang nhà tuyển dụng, tư vấn viên |
 | Cổng NTD | `/employer/me`, `/employer/dashboard`, `/employer/team`, `/employer/partners`, `/employer/jobs` (+ summary, market, form, stats, boost, pause, resume, close), `/employer/applications` (+ notes, status, duplicates, job-match, import), `/employer/interviews` (+ candidates, availability, dời lịch, kết quả, huỷ), `/employer/leads` | Khu quản lý tuyển dụng (design 10 – 17) |
-| Tư vấn & tin | `POST /leads/consultations`, `/leads/subscriptions` | Form đăng ký tư vấn, nhận đơn mới ở footer |
-| Thông báo | `GET /me/notifications`, `POST …/:id/read`, `…/read-all` – push tôn trọng Cài đặt + giờ yên lặng | Chuông thông báo |
+| Tin nhắn | `GET /employer/conversations`, `POST /employer/applications/:id/conversation`, `GET/POST /employer/conversations/:id/messages`, `POST /employer/conversations/:id/read`; phía ứng viên: `GET /me/conversations`, `GET/POST /me/conversations/:id/messages`, `POST /me/conversations/:id/read`, `GET /me/conversations/unread-count` | Hộp thư NTD và ứng viên; mỗi hồ sơ tối đa một hội thoại, chỉ văn bản |
+| Tư vấn & tin | `POST /leads/consultations` (báo cán bộ phụ trách; form trang công ty báo các quản trị viên công ty), `/leads/subscriptions` | Form đăng ký tư vấn, nhận đơn mới ở footer |
+| Thông báo | `GET /me/notifications`, `POST …/:id/read`, `…/read-all` – push tôn trọng Cài đặt + giờ yên lặng, có thể tắt riêng nhóm khách cần tư vấn | Chuông thông báo |
 | Thông báo việc làm | `GET/POST /me/alerts` (tối đa 10), `PATCH/DELETE /me/alerts/:id`, `GET /me/alerts/:id/jobs`, `POST …/:id/seen`, `/me/alerts/feed`, `/me/alerts/suggestions`; worker 5 phút / lần (`JOB_ALERT_WORKER`) gửi app + email theo tần suất | C-05 (design-new 04) |
 | Cài đặt | `GET/PATCH /me/settings`, `POST /me/email/otp` → `/me/email`, `POST /me/phone/otp` → `/me/phone`, `DELETE /me/sessions` (đăng xuất thiết bị khác), `GET /me/export` (tải dữ liệu JSON) | C-06 (design-new 05) |
 | Báo cáo vi phạm | `POST /reports` (khách gửi được), `GET /me/reports`; ≥ 3 người báo "thu phí" / 24 giờ → tin tự tạm ẩn | M18 |
@@ -123,8 +131,9 @@ Tích hợp thật được bật bằng cấu hình môi trường: Twilio SMS 
 ### Việc còn lại (TODO)
 
 - Cấu hình thông tin thật cho Twilio, Resend (xác minh tên miền gửi `viecpro.vn`: SPF, DKIM), Google, FCM và S3/R2 trước khi bật các provider production. Production từ chối khởi động nếu `EMAIL_PROVIDER=console`.
+- Thanh toán hiện chỉ có `PAYMENT_PROVIDER=mock` cho môi trường local; production từ chối provider này. Adapter PayOS và đối soát/cấu hình kinh doanh phải hoàn thiện trước khi nhận tiền thật. Danh mục giá và hạn mức hiện nằm trong `packages/shared/src/plans.ts`.
 - `POST /applications` nay bắt buộc `email` + `emailCode` – app mobile bản cũ (chưa có bước OTP email) cần cập nhật; cân nhắc tách `/api/v2/applications` nếu đã phát hành app.
-- Chưa có tích hợp: kho giấy tờ riêng tư mã hoá (CCCD, hộ chiếu, CV – hiện chỉ nhận ảnh chân dung / ảnh 4×6), gửi Zalo OA / SMS lời mời phỏng vấn, tạo phòng Zoom / Meet tự động, nhận dạng CCCD (OCR), bài test tiếng Nhật, xuất CV PDF từ server, tin nhắn trong app, thanh toán gói dịch vụ, danh sách việc lưu tuỳ chỉnh.
+- Chưa có tích hợp: kho giấy tờ riêng tư mã hoá (CCCD, hộ chiếu, CV – hiện chỉ nhận ảnh chân dung / ảnh 4×6), gửi Zalo OA / SMS lời mời phỏng vấn, tạo phòng Zoom / Meet tự động, nhận dạng CCCD (OCR), bài test tiếng Nhật, xuất CV PDF từ server, danh sách việc lưu tuỳ chỉnh.
 - Mở rộng e2e 401/403/404 sang tất cả route có phân quyền và sở hữu dữ liệu.
 - Chạy `npm audit --omit=dev` và xử lý lỗ hổng runtime trước khi release.
 - Các chỗ `[SỐ GIẤY PHÉP]`, `[MÃ SỐ THUẾ]`, `[GIỜ LÀM VIỆC]` cần thay bằng thông tin thật trước khi đưa lên.

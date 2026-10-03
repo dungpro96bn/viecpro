@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import ApplyProvider from '@/components/apply/ApplyProvider';
 import AuthProvider from '@/components/auth/AuthProvider';
+import MaintenanceGate from '@/components/layout/MaintenanceGate';
+import MaintenanceScreen from '@/components/layout/MaintenanceScreen';
+import { getSiteSystem } from '@/lib/server-api';
 import './globals.css';
 
 const inter = localFont({
@@ -19,13 +22,20 @@ export const metadata: Metadata = {
   description: 'Nền tảng việc làm Nhật Bản minh bạch cho người lao động Việt Nam: thực tập sinh, kỹ năng đặc định và kỹ sư.',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const system = await getSiteSystem();
   return (
     <html lang="vi" className={inter.variable} data-scroll-behavior="smooth">
       <body>
-        <AuthProvider>
-          <ApplyProvider>{children}</ApplyProvider>
-        </AuthProvider>
+        {system?.maintenanceMode ? (
+          <MaintenanceScreen system={system} />
+        ) : (
+          <MaintenanceGate initialSystem={system}>
+            <AuthProvider>
+              <ApplyProvider>{children}</ApplyProvider>
+            </AuthProvider>
+          </MaintenanceGate>
+        )}
       </body>
     </html>
   );

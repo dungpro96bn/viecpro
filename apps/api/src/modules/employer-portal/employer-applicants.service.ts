@@ -181,10 +181,11 @@ export class EmployerApplicantsService {
   async detail(userId: string, id: string): Promise<EmployerApplicantDetail> {
     const actor = await this.ctx.resolve(userId);
     const app = await this.own(actor, id);
-    const [events, notes, assignee] = await Promise.all([
+    const [events, notes, assignee, partnerViews] = await Promise.all([
       this.prisma.applicationEvent.findMany({ where: { applicationId: id }, orderBy: { createdAt: 'desc' } }),
       this.prisma.applicationNote.findMany({ where: { applicationId: id }, orderBy: { createdAt: 'desc' }, include: { author: { select: { name: true, photoUrl: true } } } }),
       app.assigneeId ? this.prisma.recruiter.findUnique({ where: { id: app.assigneeId }, select: { id: true, name: true } }) : null,
+      actor.employerId ? Promise.resolve([]) : this.prisma.partnerView.findMany({ where: { applicationId: id }, orderBy: { createdAt: 'desc' }, take: 5, include: { employer: { select: { name: true } } } }),
     ]);
     const { reasons } = scoreApplicant(app, app.job);
     const stored = Array.isArray(app.documents) ? (app.documents as Array<{ name: string; kind: 'pdf' | 'image'; sizeKb: number; path?: string }>) : [];
@@ -209,6 +210,7 @@ export class EmployerApplicantsService {
       events: events.map((e) => ({ status: e.status, note: e.note, createdAt: e.createdAt.toISOString() })),
       notes: notes.map((n) => this.toNote(n)),
       assignee,
+      ...(!actor.employerId && { partnerViews: partnerViews.map((view) => ({ employerName: view.employer.name, viewedAt: view.createdAt.toISOString() })) }),
     };
   }
 

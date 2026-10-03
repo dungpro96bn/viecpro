@@ -32,7 +32,7 @@ export class ApplyEmailOtpService {
 
   async send(input: ApplyEmailOtpInput, userId?: string): Promise<EmailOtpSentResponse> {
     const job = await this.prisma.job.findFirst({
-      where: { OR: [...(input.jobId ? [{ id: input.jobId }] : []), ...(input.jobSlug ? [{ slug: input.jobSlug }] : [])] },
+      where: { OR: [...(input.jobId ? [{ id: input.jobId }] : []), ...(input.jobSlug ? [{ slug: input.jobSlug }] : [])], deletedAt: null },
       select: { title: true, pref: true, salary: true, imageUrl: true, status: true, employer: { select: { name: true } } },
     });
     if (!job) throw ApiException.notFound('Không tìm thấy đơn hàng');

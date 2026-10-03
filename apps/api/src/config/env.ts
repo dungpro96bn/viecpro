@@ -24,6 +24,8 @@ const envSchema = z.object({
 
   DATABASE_URL: z.string().min(1),
   REDIS_URL: z.url().optional(),
+  PAYMENT_PROVIDER: z.enum(['mock', 'payos']).default('mock'),
+  PAYMENT_MOCK_SECRET: z.string().min(32).default('local-payment-mock-secret-change-me-32'),
 
   JWT_SECRET: z.string().min(32, 'JWT_SECRET cần tối thiểu 32 ký tự'),
   JWT_ACCESS_TTL: z.coerce.number().int().positive().default(900),
@@ -91,6 +93,7 @@ export function productionProblems(env: Env): string[] {
   }
   if (new Set([env.JWT_SECRET, env.OTP_SECRET, env.ADMIN_MFA_KEY]).size < 3) problems.push('JWT_SECRET, OTP_SECRET, ADMIN_MFA_KEY phải khác nhau');
   if (env.OTP_PROVIDER === 'console') problems.push('OTP_PROVIDER=console chỉ dùng cho dev');
+  if (env.PAYMENT_PROVIDER === 'mock') problems.push('PAYMENT_PROVIDER=mock chỉ dùng cho dev');
   if (env.EMAIL_PROVIDER === 'console') problems.push('EMAIL_PROVIDER=console chỉ dùng cho dev (mã OTP email sẽ không tới người dùng)');
   if (env.STORAGE_PROVIDER === 'local') problems.push('STORAGE_PROVIDER=local chỉ dùng cho dev, production dùng s3');
   if (!env.WEB_BASE_URL.startsWith('https://')) problems.push('WEB_BASE_URL phải dùng https');

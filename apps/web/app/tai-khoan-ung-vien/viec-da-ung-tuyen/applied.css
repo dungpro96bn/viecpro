@@ -474,6 +474,16 @@
   font-size: 15px;
   font-weight: 750;
 }
+.ap-card__removed {
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--bg-alt);
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
 .ap-card__title:hover {
   color: var(--primary);
 }
@@ -696,7 +706,8 @@
 .ap-foot__note--green { color: var(--success-dark); }
 .ap-foot__note--link { color: var(--primary); }
 .ap-foot__withdraw,
-.ap-foot__toggle {
+.ap-foot__toggle,
+.ap-foot__message {
   flex-shrink: 0;
   padding: 0;
   border: 0;
@@ -705,6 +716,8 @@
   font-size: 12px;
   cursor: pointer;
 }
+.ap-foot__message { display:inline-flex;align-items:center;gap:5px;color:var(--primary);text-decoration:none; }
+.ap-foot__message:hover { text-decoration:underline; }
 .ap-foot__withdraw {
   color: var(--text-3);
 }
@@ -804,4 +817,76 @@
   .ap-foot__note {
     flex-basis: 100%;
   }
+}
+
+/* ---------- Đánh giá sau xuất cảnh ---------- */
+.ap-review__saved {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--success-soft);
+  color: var(--success);
+  font-size: 13px;
+}
+
+.ap-review {
+  display: grid;
+  gap: 9px;
+  padding: 16px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.ap-review__hint {
+  color: var(--text-3);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.ap-review__stars {
+  display: flex;
+  width: fit-content;
+  gap: 5px;
+}
+
+.ap-review__star {
+  border: 0;
+  background: transparent;
+  color: var(--border);
+  cursor: pointer;
+  font-size: 25px;
+}
+
+.ap-review__star--on {
+  color: #e7a51d;
+}
+
+.ap-review__label {
+  color: var(--text-body);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ap-review textarea {
+  width: 100%;
+  min-height: 84px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+}
+
+.ap-review textarea:focus-visible {
+  outline: 0;
+  border-color: var(--btn-primary);
+  box-shadow: 0 0 0 4px rgba(56, 121, 255, 0.14);
+}
+
+.ap-review__error {
+  color: var(--danger);
+  font-size: 12px;
 }

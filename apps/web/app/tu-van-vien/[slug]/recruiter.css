@@ -368,3 +368,14 @@
     padding-left: 32px;
   }
 }
+/* ---------- Đánh giá từ người lao động ---------- */
+.recruiter-reviews__list { display: flex; flex-direction: column; gap: 14px; }
+.recruiter-review { padding: 16px; border: 1px solid var(--border-soft); border-radius: var(--radius); }
+.recruiter-review__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.recruiter-review__stars { color: #e7a51d; letter-spacing: 2px; }
+.recruiter-review__head time, .recruiter-review > small { color: var(--text-3); font-size: 11px; }
+.recruiter-review > p, .recruiter-review__response p { margin: 10px 0; color: var(--text-body); font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+.recruiter-review__response { margin: 0 0 10px 12px; padding: 10px 12px; border-left: 3px solid var(--primary); background: var(--bg-alt); }
+.recruiter-review__response b { color: var(--text); font-size: 12px; }
+.recruiter-review__response p { margin-bottom: 0; }
+.recruiter-reviews__empty { margin: 0; color: var(--text-3); font-size: 13px; }

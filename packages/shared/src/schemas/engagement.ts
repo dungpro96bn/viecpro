@@ -59,6 +59,9 @@ export const applicationListSchema = paginationSchema.extend({
   minMatch: z.coerce.number().int().min(0).max(100).optional(),
   quick: z.enum(APPLICANT_QUICK_FILTERS).optional(),
 });
+
+export const partnerJobListSchema = paginationSchema.extend({ recruiterId: z.string().trim().min(1).optional() });
+export type PartnerJobListQuery = z.infer<typeof partnerJobListSchema>;
 export type ApplicationListQuery = z.infer<typeof applicationListSchema>;
 
 /** Form "Đăng ký tư vấn" ở trang hồ sơ / chi tiết đơn */
@@ -70,6 +73,12 @@ export const consultSchema = z.object({
   jobId: z.string().trim().min(1).max(80).optional(),
 });
 export type ConsultInput = z.infer<typeof consultSchema>;
+
+/** Khách cần tư vấn ở khu NTD – không truyền tab thì trả tất cả (giữ nghĩa cũ cho app mobile) */
+export const employerLeadListSchema = paginationSchema.extend({
+  tab: z.enum(['unhandled', 'handled']).optional(),
+});
+export type EmployerLeadListQuery = z.infer<typeof employerLeadListSchema>;
 
 /** Form "Nhận đơn hàng mới" ở footer – email hoặc số điện thoại */
 export const subscribeSchema = z.object({
@@ -155,11 +164,21 @@ export const pushTokenSchema = z.object({
 });
 export type PushTokenInput = z.infer<typeof pushTokenSchema>;
 
-/** Dashboard NTD: khoảng 7 / 14 / 30 ngày */
+/** Dashboard NTD: khoảng 7 / 14 / 30 / 90 ngày */
 export const employerRangeSchema = z.object({
   range: z.enum(EMPLOYER_RANGES).default('14'),
 });
 export type EmployerRangeQuery = z.infer<typeof employerRangeSchema>;
+
+export const employerReportQuerySchema = z.object({ range: z.enum(['7', '30', '90']).default('30') });
+export type EmployerReportQuery = z.infer<typeof employerReportQuerySchema>;
+export const employerReviewCreateSchema = z.object({
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().trim().min(10, 'Đánh giá cần ít nhất 10 ký tự').max(1500),
+});
+export type EmployerReviewCreateInput = z.infer<typeof employerReviewCreateSchema>;
+export const employerReviewResponseSchema = z.object({ response: z.string().trim().min(3).max(1500) });
+export type EmployerReviewResponseInput = z.infer<typeof employerReviewResponseSchema>;
 
 /** Ghi chú nội bộ trên hồ sơ */
 export const applicantNoteSchema = z.object({

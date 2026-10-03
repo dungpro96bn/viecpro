@@ -6,6 +6,9 @@ export const DEFAULT_NOTIFY_PREFS: Record<NotificationGroup, ChannelToggles> = {
   profile_view: { app: true, email: false, sms: false },
   job_match: { app: true, email: true, sms: false },
   application: { app: true, email: true, sms: false },
+  lead: { app: true, email: true, sms: false },
+  billing: { app: true, email: true, sms: false },
+  message: { app: true, email: true, sms: false },
   system: { app: true, email: true, sms: false },
 };
 
@@ -31,6 +34,9 @@ export function groupOf(type: string): NotificationGroup {
   if (type.startsWith('profile.')) return 'profile_view';
   if (type.startsWith('alert.')) return 'job_match';
   if (type.startsWith('application.')) return 'application';
+  if (type.startsWith('lead.')) return 'lead';
+  if (type.startsWith('billing.')) return 'billing';
+  if (type.startsWith('message.')) return 'message';
   return 'system';
 }
 

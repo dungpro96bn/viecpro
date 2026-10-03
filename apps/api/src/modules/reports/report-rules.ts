@@ -9,6 +9,7 @@ export const REASON_SEVERITY: Record<ReportReason, ReportSeverity> = {
   fake_photo: 'medium',
   duplicate: 'low',
   no_response: 'low',
+  partner_request: 'medium',
   other: 'low',
 };
 

@@ -1,0 +1,269 @@
+/* Cài đặt hồ sơ NTD */
+.ps {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 960px;
+}
+.ps-skeleton {
+  height: 420px;
+}
+.ps-tabs {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--segment-bg);
+}
+.ps-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ps-tab--on {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+.ps-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ps-fieldset {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.ps-fieldset:disabled .ps-image__actions,
+.ps-fieldset:disabled .ps-add,
+.ps-fieldset:disabled .ps-remove,
+.ps-fieldset:disabled .ef-tag__remove {
+  display: none;
+}
+.ps-locked {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--orange-border);
+  border-radius: 12px;
+  background: var(--orange-soft);
+  color: var(--orange-text);
+  font-size: 13.5px;
+}
+.ps-saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--success-text);
+  font-weight: 600;
+}
+.ps-textarea {
+  height: auto;
+  min-height: 64px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  line-height: 1.5;
+  resize: vertical;
+}
+.ps-textarea--lg {
+  min-height: 140px;
+}
+
+/* Danh sách mục sửa được */
+.ps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ps-row--stat {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr) 36px;
+  gap: 10px;
+  align-items: center;
+}
+.ps-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 36px;
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: var(--bg-subtle);
+}
+.ps-item__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ps-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+}
+.ps-remove:hover {
+  background: var(--danger-soft);
+  color: var(--danger-text);
+}
+.ps-add {
+  align-self: flex-start;
+}
+
+/* Ảnh */
+.ps-images {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.ps-image {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.ps-images .ps-image {
+  margin-bottom: 0;
+}
+.ps-image__preview {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px dashed var(--border-strong);
+  background: var(--bg-subtle);
+  color: var(--text-3);
+}
+.ps-image__preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ps-image--round .ps-image__preview {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+}
+.ps-image--square .ps-image__preview {
+  width: 84px;
+  height: 84px;
+  border-radius: 16px;
+}
+.ps-image--square .ps-image__preview img {
+  object-fit: contain;
+  background: #fff;
+}
+.ps-image--wide .ps-image__preview {
+  width: 168px;
+  height: 84px;
+  border-radius: 12px;
+}
+.ps-image__side {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+.ps-image__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ps-image__actions label {
+  cursor: pointer;
+}
+.ps-busy {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Thông tin pháp lý chỉ đọc */
+.ps-legal {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 4px 18px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--bg-subtle);
+}
+.ps-legal span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+.ps-legal small {
+  color: var(--text-3);
+  font-size: 12px;
+}
+.ps-legal b {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+.ps-ok {
+  color: var(--success-text);
+}
+.ps-legal__note {
+  grid-column: 1 / -1;
+  margin-top: 6px;
+}
+
+@media (max-width: 767px) {
+  .ps-note {
+    display: none;
+  }
+  .ps-footer {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .ps-footer .ef-footer__note:empty,
+  .ps-footer .ef-footer__note:has(> .ps-note:only-child) {
+    display: none;
+  }
+  .ps-footer > .emp-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 10px;
+    font-size: 13.5px;
+    white-space: nowrap;
+  }
+  .ps-images,
+  .ps-legal {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ps-row--stat {
+    grid-template-columns: 96px minmax(0, 1fr) 36px;
+  }
+  .ps-image--wide .ps-image__preview {
+    width: 120px;
+    height: 60px;
+  }
+}

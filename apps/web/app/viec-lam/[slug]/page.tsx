@@ -7,6 +7,7 @@ import SectionTabs from '@/components/layout/SectionTabs';
 import ApplyButton from '@/components/apply/ApplyButton';
 import JobSlider from '@/components/jobs/JobSlider';
 import Avatar from '@/components/ui/Avatar';
+import ConsultForm from '@/components/profile/ConsultForm';
 import SaveButton from '@/components/ui/SaveButton';
 import ShareButton from '@/components/ui/ShareButton';
 import Stars from '@/components/ui/Stars';
@@ -446,6 +447,14 @@ export default async function JobDetailPage({ params }: { params: Promise<Params
                 </div>
               </div>
             </div>
+
+            <ConsultForm
+              title="Nhờ tư vấn về tin này"
+              description="Để lại số điện thoại, cán bộ phụ trách sẽ gọi lại cho bạn."
+              successTitle="Đã nhận yêu cầu"
+              successText="Cán bộ phụ trách tin sẽ sớm liên hệ tư vấn cho bạn."
+              jobId={record.id}
+            />
 
             <div className="officer-card">
               <span className="officer-card__eyebrow">Cán bộ phụ trách</span>

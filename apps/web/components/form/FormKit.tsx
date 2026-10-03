@@ -1,7 +1,8 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { Children, Fragment, cloneElement, isValidElement, useId, type ReactElement, type ReactNode } from 'react';
 import { IconCheck } from '@/components/ui/Icons';
+import Select from '@/components/ui/Select';
 import { cx } from '@/lib/format';
 import './form.css';
 
@@ -46,24 +47,76 @@ export function Field({
   className?: string;
   children: ReactNode;
 }) {
+  const labelId = useId();
+  const resolvedErrorId = errorId ?? `${labelId}-error`;
+  const labeledChildren = labelControl(children, labelId, error ? resolvedErrorId : undefined, !!error);
+
   return (
     <div className={cx('ef-field', className)}>
       <span className="ef-field__head">
-        <span className="ef-field__label">
+        <span className="ef-field__label" id={labelId}>
           {label}
-          {required && <span className="ef-field__req">*</span>}
+          {required && <span className="ef-field__req" aria-hidden="true">*</span>}
         </span>
         {extra && <span className="ef-field__extra">{extra}</span>}
       </span>
-      {children}
+      {labeledChildren}
       {hint && !error && <span className="ef-field__hint">{hint}</span>}
       {error && (
-        <span className="ef-field__error" id={errorId} role="alert">
+        <span className="ef-field__error" id={resolvedErrorId} role="alert">
           {error}
         </span>
       )}
     </div>
   );
+}
+
+/** Ghép danh sách id cho aria-describedby, bỏ trùng (input có thể đã tự trỏ tới errorId) */
+function joinIds(...ids: Array<string | undefined>): string | undefined {
+  return [...new Set(ids.flatMap((id) => id?.split(' ') ?? []).filter(Boolean))].join(' ') || undefined;
+}
+
+/** Gắn nhãn chung vào input nằm trực tiếp hoặc trong wrapper của Field. */
+function labelControl(child: ReactNode, labelId: string, errorId: string | undefined, invalid: boolean): ReactNode {
+  return Children.map(child, (node) => {
+    if (!isValidElement(node)) return node;
+    if (node.type === Select) {
+      const props = node.props as { 'aria-describedby'?: string };
+      const describedBy = joinIds(props['aria-describedby'], errorId);
+      return cloneElement(node as ReactElement<{ 'aria-labelledby'?: string; 'aria-describedby'?: string; 'aria-invalid'?: boolean }>, {
+        'aria-labelledby': labelId,
+        'aria-describedby': describedBy,
+        ...(invalid ? { 'aria-invalid': true } : {}),
+      });
+    }
+    if (node.type === Fragment) {
+      const props = node.props as { children?: ReactNode };
+      return cloneElement(node as ReactElement<{ children?: ReactNode }>, {}, labelControl(props.children, labelId, errorId, invalid));
+    }
+    if (typeof node.type !== 'string') return node;
+
+    const props = node.props as {
+      children?: ReactNode;
+      'aria-label'?: string;
+      'aria-labelledby'?: string;
+      'aria-describedby'?: string;
+      'aria-invalid'?: boolean;
+    };
+    // Checkbox / radio đã có nhãn riêng (label bao quanh) – không đè bằng nhãn của Field
+    const inputType = (node.props as { type?: string }).type;
+    const isTextControl = node.type === 'textarea' || node.type === 'select' || (node.type === 'input' && inputType !== 'checkbox' && inputType !== 'radio' && inputType !== 'hidden');
+    if (isTextControl) {
+      return cloneElement(node as ReactElement<Record<string, unknown>>, {
+        ...(!props['aria-label'] && !props['aria-labelledby'] ? { 'aria-labelledby': labelId } : {}),
+        ...(errorId ? { 'aria-describedby': joinIds(props['aria-describedby'], errorId) } : {}),
+        ...(invalid && props['aria-invalid'] === undefined ? { 'aria-invalid': true } : {}),
+      });
+    }
+    if (props.children !== undefined) {
+      return cloneElement(node as ReactElement<{ children?: ReactNode }>, {}, labelControl(props.children, labelId, errorId, invalid));
+    }
+    return node;
+  });
 }
 
 /** Nhóm nút chọn 1 trong n (radio) hoặc nhiều (toggle) dạng chip */

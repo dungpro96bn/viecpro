@@ -1,6 +1,6 @@
 import type { INestApplication } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { Test, type TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { ApiException } from '../src/core/http/api-exception.js';
 import { AuthGuard } from '../src/core/auth/auth.guard.js';

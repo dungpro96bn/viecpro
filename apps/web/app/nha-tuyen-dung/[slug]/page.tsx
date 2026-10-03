@@ -22,6 +22,7 @@ import {
   IconWarning,
   PathIcon,
 } from '@/components/ui/Icons';
+import { formatVnContactPhone } from '@viecpro/shared';
 import { getEmployerProfile, getProfileJobs } from '@/lib/server-api';
 import { apiJobToView, apiRecruiterToPoster } from '@/lib/api-mappers';
 import { toApplyJob } from '@/lib/data';
@@ -42,6 +43,7 @@ const TABS = [
   { id: 'gioi-thieu', label: 'Giới thiệu' },
   { id: 'don-hang', label: 'Đơn hàng đang tuyển' },
   { id: 'doi-ngu', label: 'Đội ngũ tư vấn' },
+  { id: 'danh-gia', label: 'Đánh giá' },
   { id: 'lien-he', label: 'Liên hệ' },
 ];
 
@@ -58,7 +60,7 @@ export default async function EmployerPage({ params }: { params: Promise<Params>
     slug: profile.slug,
     name: profile.name,
     shortName: profile.shortName ?? profile.name,
-    phone: profile.phone ?? '',
+    phone: profile.phone ? formatVnContactPhone(profile.phone) : '',
     intro: profile.intro ?? '',
     stats: [...rows('stats'), [String(jobPage?.total ?? 0), 'Đơn đang tuyển'], [String(profile.followerCount), 'Người theo dõi']],
     values: objects('values').map((item) => ({ title: String(item.title ?? ''), desc: String(item.desc ?? ''), icon: 'M4 12l5 5L20 6' })),
@@ -67,7 +69,7 @@ export default async function EmployerPage({ params }: { params: Promise<Params>
     jobTotals: profile.jobCounts,
     team: profile.team.map((member) => ({ name: member.name, role: member.title, photo: member.photoUrl ?? '', rating: member.rating.toFixed(1), jobs: 0, online: false, href: `/tu-van-vien/${member.slug}` })),
     contacts: [
-      ...(profile.phone ? [{ label: 'Điện thoại', value: profile.phone, icon: 'phone' as ContactIcon }] : []),
+      ...(profile.phone ? [{ label: 'Điện thoại', value: formatVnContactPhone(profile.phone), icon: 'phone' as ContactIcon }] : []),
       ...(profile.email ? [{ label: 'Email', value: profile.email, icon: 'mail' as ContactIcon }] : []),
       ...(profile.website ? [{ label: 'Website', value: profile.website, icon: 'web' as ContactIcon }] : []),
       ...(profile.address ? [{ label: 'Địa chỉ', value: profile.address, icon: 'pin' as ContactIcon }] : []),
@@ -87,7 +89,7 @@ export default async function EmployerPage({ params }: { params: Promise<Params>
       {/* ẢNH BÌA + HỒ SƠ */}
       <section className="profile-hero">
         <div className="profile-cover employer-cover">
-          <img className="employer-cover__img" src="/images/banners/employer-cover.jpg" alt="" />
+          <img className="employer-cover__img" src={profile.coverUrl ?? '/images/banners/employer-cover.jpg'} alt="" />
           <span className="employer-cover__shade" />
           <nav className="container breadcrumb breadcrumb--light profile-cover__crumb" aria-label="Breadcrumb">
             <Link href="/">Trang chủ</Link>
@@ -113,6 +115,7 @@ export default async function EmployerPage({ params }: { params: Promise<Params>
                 </div>
                 <h1 className="profile-card__name">{c.name}</h1>
                 <div className="profile-card__meta">
+                  {!!profile.reviewCount && <span><IconStar size={15} /><b>{profile.rating?.toFixed(1) ?? '0.0'}</b>/5 · {formatNumber(profile.reviewCount)} đánh giá</span>}
                   {profile.address && <span><IconPin size={15} />{profile.address}</span>}
                   {profile.website && <span><IconBuildingSimple size={15} />{profile.website}</span>}
                 </div>
@@ -246,6 +249,24 @@ export default async function EmployerPage({ params }: { params: Promise<Params>
                   </div>
                 ))}
               </div>
+            </section>
+
+            <section id="danh-gia" className="content-card content-card--gap20 company-reviews">
+              <div className="content-card__head">
+                <span className="content-card__icon"><IconStar size={19} /></span>
+                <div className="content-card__titles">
+                  <h2 className="content-card__title">Đánh giá từ người lao động</h2>
+                  <span className="content-card__subtitle">Chỉ hồ sơ có ghi nhận xuất cảnh qua viecpro mới được đánh giá</span>
+                </div>
+              </div>
+              {profile.reviews?.length ? <div className="company-reviews__list">{profile.reviews.map((review) => (
+                <article key={review.id} className="company-review">
+                  <div className="company-review__head"><span className="company-review__stars" aria-label={`${review.rating} trên 5 sao`}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span><time dateTime={review.createdAt}>{new Date(review.createdAt).toLocaleDateString('vi-VN')}</time></div>
+                  <p>{review.comment}</p>
+                  {review.response && <div className="company-review__response"><b>Phản hồi từ nhà tuyển dụng</b><p>{review.response}</p></div>}
+                  <small>Người lao động đã xuất cảnh · Ẩn danh</small>
+                </article>
+              ))}</div> : <p className="company-reviews__empty">Chưa có đánh giá nào.</p>}
             </section>
           </div>
 

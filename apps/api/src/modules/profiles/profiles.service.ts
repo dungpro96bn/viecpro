@@ -36,9 +36,14 @@ export class ProfilesService {
   async employer(slug: string, userId?: string): Promise<EmployerProfile> {
     const e = await this.prisma.employer.findUnique({
       where: { slug },
-      include: { recruiters: { select: recruiterSummarySelect, orderBy: { rating: 'desc' } }, _count: { select: { followers: true } } },
+      include: {
+        recruiters: { where: { leftAt: null }, select: recruiterSummarySelect, orderBy: { rating: 'desc' } },
+        reviews: { orderBy: { createdAt: 'desc' }, take: 10, select: { id: true, rating: true, comment: true, response: true, createdAt: true } },
+        _count: { select: { followers: true, reviews: true } },
+      },
     });
     if (!e) throw ApiException.notFound('Không tìm thấy nhà tuyển dụng');
+    const reviewAverage = await this.prisma.employerReview.aggregate({ where: { employerId: e.id }, _avg: { rating: true } });
     return {
       id: e.id,
       slug: e.slug,
@@ -57,15 +62,23 @@ export class ProfilesService {
       followerCount: e._count.followers,
       following: await this.following(userId, { employerId: e.id }),
       jobCounts: await this.jobCounts({ employerId: e.id }),
+      rating: reviewAverage._avg.rating ?? 0,
+      reviewCount: e._count.reviews,
+      reviews: e.reviews.map((review) => ({ ...review, createdAt: review.createdAt.toISOString() })),
     };
   }
 
   async recruiter(slug: string, userId?: string): Promise<RecruiterProfile> {
     const r = await this.prisma.recruiter.findUnique({
       where: { slug },
-      include: { employer: { select: employerSummarySelect }, _count: { select: { followers: true } } },
+      include: {
+        employer: { select: employerSummarySelect },
+        _count: { select: { followers: true } },
+        reviews: { orderBy: { createdAt: 'desc' }, take: 10, select: { id: true, rating: true, comment: true, response: true, createdAt: true } },
+      },
     });
-    if (!r) throw ApiException.notFound('Không tìm thấy tư vấn viên');
+    // Thành viên đã xoá vĩnh viễn: hồ sơ đã ẩn danh, không còn trang công khai
+    if (!r || r.purgedAt) throw ApiException.notFound('Không tìm thấy tư vấn viên');
     return {
       ...this.mapper.recruiter(r),
       headline: r.headline,
@@ -76,6 +89,7 @@ export class ProfilesService {
       followerCount: r._count.followers,
       following: await this.following(userId, { recruiterId: r.id }),
       jobCounts: await this.jobCounts({ recruiterId: r.id }),
+      reviews: r.reviews.map((review) => ({ ...review, createdAt: review.createdAt.toISOString() })),
     };
   }
 

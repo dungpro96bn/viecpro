@@ -66,7 +66,6 @@ export function isWeekend(key: string): boolean {
 }
 
 export interface TrustInput {
-  cccdVerified: boolean;
   phoneVerified: boolean;
   licensedPartners: number;
   violations12m: number;
@@ -77,16 +76,15 @@ export interface TrustInput {
 /** Điểm tin cậy NTD cá nhân (0–100) và các tiêu chí hiển thị trên hồ sơ công khai */
 export function trustScore(input: TrustInput) {
   const checks = [
-    { key: 'cccd', label: 'CCCD đã xác minh', ok: input.cccdVerified, weight: 25 },
-    { key: 'phone', label: 'SĐT đã xác minh', ok: input.phoneVerified, weight: 15 },
+    { key: 'phone', label: 'SĐT đã xác minh', ok: input.phoneVerified, weight: 20 },
     {
       key: 'partners',
       label: input.licensedPartners ? `${input.licensedPartners} DN phái cử có giấy phép` : 'Chưa liên kết DN phái cử',
       ok: input.licensedPartners > 0,
-      weight: 20,
+      weight: 27,
     },
-    { key: 'violation', label: 'Không vi phạm 12 tháng', ok: input.violations12m === 0, weight: 20 },
-    { key: 'rating', label: `Đánh giá ${input.rating.toFixed(1)}/5`, ok: input.rating >= 4.5, weight: 12 },
+    { key: 'violation', label: 'Không vi phạm 12 tháng', ok: input.violations12m === 0, weight: 27 },
+    { key: 'rating', label: `Đánh giá ${input.rating.toFixed(1)}/5`, ok: input.rating >= 4.5, weight: 18 },
     { key: 'video', label: input.hasVideo ? 'Có video giới thiệu' : 'Chưa có video giới thiệu', ok: input.hasVideo, weight: 8 },
   ];
   const score = checks.reduce((s, c) => s + (c.ok ? c.weight : 0), 0);

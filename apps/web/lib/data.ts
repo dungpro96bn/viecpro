@@ -112,13 +112,3 @@ export const REGION_LABEL: Record<RegionKey, string> = {
   cs: 'Chugoku – Shikoku',
   kyu: 'Kyushu – Okinawa',
 };
-
-/* ------------------------------------------------------------------ */
-/* Banner quảng cáo nhỏ ở sidebar (nội dung minh họa)                  */
-/* ------------------------------------------------------------------ */
-export const MINI_ADS = [
-  { id: 'lang', img: '/images/banners/banner-1.jpg', tag: 'Tiếng Nhật', title: 'Khóa N5 – N4 cấp tốc, học thử miễn phí', cta: 'Đăng ký học thử' },
-  { id: 'health', img: '/images/banners/banner-2.jpg', tag: 'Sức khỏe', title: 'Khám sức khỏe XKLĐ, có kết quả trong ngày', cta: 'Đặt lịch khám' },
-  { id: 'flight', img: '/images/banners/banner-3.jpg', tag: 'Vé máy bay', title: 'Vé Hà Nội – Tokyo ưu đãi cho lao động', cta: 'Xem giá vé' },
-  { id: 'guide', img: '/images/banners/banner-4.jpg', tag: 'Cẩm nang', title: 'Sổ tay sống & làm việc tại Nhật Bản', cta: 'Tải miễn phí' },
-] as const;

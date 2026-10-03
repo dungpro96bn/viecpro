@@ -40,7 +40,7 @@ export function readStoredDocuments(value: unknown): StoredDocument[] {
   return parseList(storedDocument, value);
 }
 
-/** Luôn đủ 5 mục theo thứ tự chuẩn – mục chưa có coi là "missing" */
+/** Luôn đủ 4 mục theo thứ tự chuẩn – mục chưa có coi là "missing" */
 export function readDocuments(value: unknown): SeekerDocument[] {
   const stored = readStoredDocuments(value);
   return SEEKER_DOCUMENT_KEYS.map((key) => {

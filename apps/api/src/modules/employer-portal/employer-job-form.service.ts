@@ -20,6 +20,7 @@ import { jobSearchText } from '../jobs/job-query.js';
 import { jobInclude, JobMapper } from '../jobs/job.mapper.js';
 import { type EmployerActor, EmployerContext } from './employer-context.service.js';
 import { buildJobContent, deriveTags } from './job-content.js';
+import { canPublish } from './plan-rules.js';
 
 const FIRST_JOB_NUMBER = 10231;
 /** Ảnh mẫu khi NTD không chọn ảnh */
@@ -37,6 +38,19 @@ export class EmployerJobFormService {
     private readonly mapper: JobMapper,
     private readonly assets: AssetUrlService,
   ) {}
+
+  private async assertPublishQuota(tx: Prisma.TransactionClient, actor: EmployerActor) {
+    const planWhere = actor.employerId ? { employerId: actor.employerId } : { recruiterId: actor.recruiterId };
+    const [plan, visibleJobs] = await Promise.all([
+      tx.businessPlan.findFirst({ where: planWhere, select: { jobQuota: true, expiresAt: true } }),
+      tx.job.count({ where: { ...this.ctx.jobScope(actor), status: 'open' } }),
+    ]);
+    const result = canPublish(plan, visibleJobs);
+    if (!result.allowed) {
+      const expired = result.reason === 'expired';
+      throw new ApiException(expired ? 'PLAN_EXPIRED' : 'PLAN_LIMIT', expired ? 'Gói dịch vụ đã hết hạn. Gia hạn để đăng thêm tin.' : 'Đã đạt giới hạn tin hiển thị của gói. Nâng cấp để đăng thêm tin.');
+    }
+  }
 
   /* ---------- Dữ liệu phụ trợ ---------- */
 
@@ -185,6 +199,7 @@ export class EmployerJobFormService {
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         const id = await this.prisma.$transaction(async (tx) => {
+          if (input.publish) await this.assertPublishQuota(tx, actor);
           if (input.publish) await this.chargeVisibility(tx, actor, 'standard', input.visibility);
           const number = (await this.nextJobNumber(tx)) + attempt;
           const code = `VP-${number}`;
@@ -237,6 +252,7 @@ export class EmployerJobFormService {
     const status = current.suspendedAt ? 'paused' : current.status === 'closed' ? 'closed' : !input.publish ? 'draft' : actor.verified ? 'open' : 'pending';
 
     await this.prisma.$transaction(async (tx) => {
+      if (input.publish && current.status !== 'open') await this.assertPublishQuota(tx, actor);
       if (input.publish) await this.chargeVisibility(tx, actor, current.visibility, input.visibility);
       await tx.job.update({
         where: { id: jobId },

@@ -20,7 +20,7 @@ import { pageArgs, paginated } from '../../core/http/pagination.js';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { matchJob } from './job-match.js';
 import { buildJobOrder, buildJobWhere } from './job-query.js';
-import { jobInclude, PUBLIC_JOB_STATUSES, JobMapper } from './job.mapper.js';
+import { jobInclude, PUBLIC_JOB_WHERE, JobMapper } from './job.mapper.js';
 
 @Injectable()
 export class JobsService {
@@ -87,7 +87,7 @@ export class JobsService {
 
   async getBySlug(slug: string, userId?: string): Promise<JobDetail> {
     // Chỉ tin đã duyệt mới công khai: nháp / chờ duyệt / bị từ chối trả 404 (RULE-BE.md mục 7)
-    const job = await this.prisma.job.findFirst({ where: { slug, status: { in: PUBLIC_JOB_STATUSES } }, include: jobInclude });
+    const job = await this.prisma.job.findFirst({ where: { slug, ...PUBLIC_JOB_WHERE }, include: jobInclude });
     if (!job) throw ApiException.notFound('Không tìm thấy đơn hàng');
 
     // Đếm lượt xem (chỉ tin đang tuyển) không chặn response
@@ -104,7 +104,7 @@ export class JobsService {
 
   /** "Đơn hàng tương tự": cùng chương trình hoặc ngành, ưu tiên cùng vùng */
   async similar(slug: string, limit = 8): Promise<JobListItem[]> {
-    const job = await this.prisma.job.findFirst({ where: { slug, status: { in: PUBLIC_JOB_STATUSES } }, select: { id: true, program: true, industry: true, region: true } });
+    const job = await this.prisma.job.findFirst({ where: { slug, ...PUBLIC_JOB_WHERE }, select: { id: true, program: true, industry: true, region: true } });
     if (!job) throw ApiException.notFound('Không tìm thấy đơn hàng');
     const rows = await this.prisma.job.findMany({
       where: { status: 'open', id: { not: job.id }, OR: [{ program: job.program }, { industry: job.industry }] },

@@ -11,6 +11,17 @@ type LoginUser = { id: string; failedLogins: number; loginLockedUntil: Date | nu
 export const invalidCredentials = () =>
   new ApiException('INVALID_CREDENTIALS', 'Email / số điện thoại hoặc mật khẩu không đúng', HttpStatus.UNAUTHORIZED);
 
+/** Cán bộ đã bị gỡ khỏi doanh nghiệp: không đăng nhập / vào khu quản lý được nữa */
+export const memberRemoved = () =>
+  new ApiException('MEMBER_REMOVED', 'Bạn đã được gỡ khỏi doanh nghiệp trên viecpro. Liên hệ quản trị viên doanh nghiệp nếu cần cấp lại quyền.', HttpStatus.FORBIDDEN);
+
+/** Tài khoản NTD được tạo cho doanh nghiệp – gỡ khỏi doanh nghiệp thì không cấp phiên mới (mật khẩu hay Google) */
+export async function assertStillMember(prisma: PrismaService, user: { id: string; role: string }) {
+  if (user.role !== 'employer') return;
+  const left = await prisma.recruiter.findFirst({ where: { userId: user.id, leftAt: { not: null } }, select: { id: true } });
+  if (left) throw memberRemoved();
+}
+
 export async function assertNotTemporarilyLocked(user: LoginUser | null) {
   if (user?.loginLockedUntil && user.loginLockedUntil.getTime() > Date.now()) {
     const minutes = Math.ceil((user.loginLockedUntil.getTime() - Date.now()) / 60_000);

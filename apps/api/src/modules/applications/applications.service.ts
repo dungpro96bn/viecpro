@@ -46,7 +46,7 @@ export class ApplicationsService {
   /** Ứng tuyển nhanh – khách (chưa đăng nhập) hoặc người tìm việc đã đăng nhập */
   async apply(input: ApplyInput, userId?: string): Promise<ApplicationItem> {
     const job = await this.prisma.job.findFirst({
-      where: { OR: [...(input.jobId ? [{ id: input.jobId }] : []), ...(input.jobSlug ? [{ slug: input.jobSlug }] : [])] },
+      where: { OR: [...(input.jobId ? [{ id: input.jobId }] : []), ...(input.jobSlug ? [{ slug: input.jobSlug }] : [])], deletedAt: null },
       include: { recruiter: { select: { userId: true } } },
     });
     if (!job) throw ApiException.notFound('Không tìm thấy đơn hàng');

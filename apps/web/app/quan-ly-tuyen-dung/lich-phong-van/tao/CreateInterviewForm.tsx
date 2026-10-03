@@ -419,7 +419,7 @@ export default function CreateInterviewForm() {
               </Field>
             )}
             <Field label="Ghi chú cho ứng viên">
-              <input className="ef-input" value={d.note} maxLength={500} placeholder={d.kind === 'online' ? 'VD: Chuẩn bị nơi yên tĩnh, camera rõ mặt' : 'VD: Mang CCCD, bằng tốt nghiệp bản gốc'} onChange={(e) => set('note', e.target.value)} />
+              <input className="ef-input" value={d.note} maxLength={500} placeholder={d.kind === 'online' ? 'VD: Chuẩn bị nơi yên tĩnh, camera rõ mặt' : 'VD: Mang giấy tờ và bằng cấp bản gốc'} onChange={(e) => set('note', e.target.value)} />
             </Field>
           </FormSection>
 
