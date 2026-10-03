@@ -128,7 +128,7 @@ _(để trống – điền khi review)_
 
 ## 2. Tin nhắn NTD ↔ ứng viên (MVP)
 
-**Trạng thái:** ✅ hoàn thành – nhánh `feat/conversations` (commit sẽ ghi sau khi chốt)
+**Trạng thái:** ✅ hoàn thành – nhánh `feat/conversations`, commit `8b923bd` (typecheck, build, API unit 137/137, E2E Postgres 91/91, oxlint đều qua)
 
 ### Bối cảnh
 - Menu khu NTD có mục "Tin nhắn" trỏ `#` (link chết). Việc 5 sẽ ẩn tạm.
