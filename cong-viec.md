@@ -45,7 +45,7 @@ Nhánh gốc: `feat/local-storage-rbac`.
 
 ## 1. Công ty phái cử chỉ xem tin & ứng viên của NTD cá nhân liên kết
 
-**Trạng thái:** ✅ hoàn thành – nhánh `feat/partner-readonly`, commit đang hoàn thiện
+**Trạng thái:** ✅ hoàn thành – nhánh `feat/partner-readonly`, commit `63a5bd3` · review 03/10: cần sửa (xem cuối mục)
 
 ### Bối cảnh
 - NTD cá nhân (tư vấn viên) đăng tin dưới giấy phép của doanh nghiệp phái cử: `RecruiterPartner`, và `Job.employerId` = công ty phái cử.
@@ -122,7 +122,13 @@ partnerJobScope(actor: EmployerActor): Prisma.JobWhereInput {
 - Mốc mở liên hệ là quyết định nghiệp vụ. Nên xác nhận lại với luật sư / công ty phái cử đối tác trước khi lên production.
 
 ### Kết quả review
-_(để trống – điền khi review)_
+**Review 03/10/2026** – nhánh `feat/partner-readonly` (`63a5bd3`). API đúng hướng: route riêng chỉ đọc, chỉ quản trị viên, scope có điều kiện liên kết còn hạn, e2e đủ 401 / 403 / 404.
+
+- [ ] 🟠 **R1.1 Che SĐT quá ít, vẫn dò được.** `maskVnPhone` để lộ 7/10 chữ số (`0912 xxx 678`), tức còn 1.000 khả năng. Kèm họ tên + quê quán đang hiển thị, công ty dò ra số thật qua tìm kiếm Zalo trong vài phút. Đây đúng là kiểu "cướp khách" mà việc này phải chặn. Sửa: trong ngữ cảnh đối tác dùng hàm che mạnh hơn, chỉ để 2 số cuối (`•••• ••• •78`), hoặc ẩn hẳn ("Hiện khi trúng tuyển"). Email cũng nên ẩn hẳn. Giữ `maskVnPhone` cho admin như cũ.
+- [ ] 🟡 **R1.2 Lý do `partner_request` lộ ra API báo cáo công khai.** Lý do này nằm trong `REPORT_REASONS`, mà `reportSchema` công khai dùng chung. Ai cũng `POST /reports` với lý do này được, tức giả làm "doanh nghiệp phái cử đề nghị", mức medium trong hàng chờ admin. Sửa: tách lý do nội bộ ra khỏi enum của schema công khai (ví dụ `PUBLIC_REPORT_REASONS`), service đối tác tạo báo cáo trực tiếp.
+- [ ] 🟡 **R1.3 Nhãn trạng thái sai** (`PartnerJobsView.tsx`). Bảng `STATUS` tự định nghĩa dùng key `rejected` cho cả tin lẫn hồ sơ, nên hồ sơ bị loại hiện "Bị từ chối". Key `rejected_application` không bao giờ khớp. Dùng `JOB_STATUS_LABEL` / `APPLICATION_STATUS_LABEL` từ shared.
+- [ ] 🟡 **R1.4 Không phân trang**, cố định `limit=50`, quá 50 tin / hồ sơ thì bị cắt mất mà không báo. Bấm chuyển tin nhanh thì response cũ có thể đè response mới: thêm `AbortController` hoặc kiểm tra id đang chọn trước khi `set`.
+- [ ] 🟡 **R1.5** Dòng Trạng thái ghi "commit đang hoàn thiện". Cập nhật thành `63a5bd3`.
 
 ---
 
@@ -224,7 +230,17 @@ model Message {
 - Số chưa đọc đúng sau khi `read`.
 
 ### Kết quả review
-_(để trống)_
+**Review 03/10/2026** – nhánh `feat/conversations` (`8b923bd`). Phân quyền đúng: điều kiện sở hữu nằm trong `where`, ứng viên không tự mở được cuộc trò chuyện, hồ sơ nhập tay bị chặn.
+
+- [ ] 🟠 **R2.1 Có thể mất tin khi polling.** Con trỏ `after` dựa trên `createdAt` do server tự gán (`createdAt: now`). Hai tin gửi gần như cùng lúc mà commit lệch thứ tự (tin A gán T1, tin B gán T2 > T1, B commit trước): client lấy B, con trỏ nhảy qua T2, A không bao giờ về qua polling cho tới khi tải lại trang. Sửa: khi poll, lùi con trỏ vài giây (ví dụ `after` − 5s) rồi lọc trùng theo `id` ở client. Hoặc thêm cột `seq` tự tăng, vẫn nên kèm khoảng chồng lấn.
+- [ ] 🟠 **R2.2 N+1 query khi đếm tin chưa đọc.** `unreadCount` lấy *mọi* cuộc trò chuyện rồi `message.count` từng cái. `list()` cũng đếm từng dòng. Route này được gọi định kỳ, nên công ty có hàng nghìn cuộc trò chuyện sẽ tốn hàng nghìn query mỗi lần. Sửa: một câu `$queryRaw` (tagged template) join `Message` với mốc đọc, `GROUP BY conversationId`, hoặc một `groupBy`.
+- [ ] 🟠 **R2.3 Polling tải lại toàn bộ tài khoản mỗi 30 giây** (`EmployerAccountProvider`, `SeekerAccountProvider`). Spec chỉ yêu cầu poll route đếm tin chưa đọc, nhưng code đang gọi lại cả `/employer/me` (khoảng 12 query + N+1 ở trên) và `/me/profile` + `/me/dashboard`. Thêm hai hệ quả:
+  - Một lần lỗi mạng thoáng qua sẽ `setError` và thay **cả khu tài khoản** bằng màn hình lỗi, người dùng đang sửa dở thì mất trang.
+  - Dữ liệu tải về có thể đè trạng thái lạc quan khi đang bật / tắt công tắc.
+
+  Sửa: poll riêng `GET .../conversations/unread-count`; lỗi khi poll nền thì bỏ qua, không đặt lỗi toàn trang.
+- [ ] 🟡 **R2.4** Danh sách cuộc trò chuyện thiếu `total` (RULE-BE §2 `Paginated<T>`). Nhiều route thiếu `@ApiOperation` (RULE-BE §2 – bắt buộc). Regex gắn cờ `\b\d{10,16}\b` bắt mọi số điện thoại 10 số nên rất nhiễu, nên bỏ khoảng 10–11 số đầu `0` khỏi điều kiện. `ConversationInbox.tsx` bị dồn thành ~21 dòng rất dài, khó review và bảo trì: chạy prettier.
+- [ ] 🟡 **R2.5** Ứng viên đã xoá tài khoản (`deletedAt`) hoặc hồ sơ đã rút vẫn nhận tin từ NTD. Nên chặn gửi (409 với mã rõ ràng) khi `application.user.deletedAt` có giá trị.
 
 ---
 
@@ -343,7 +359,28 @@ export abstract class PaymentProvider {
 - Chọn cổng thật (đề xuất PayOS).
 
 ### Kết quả review
-_(để trống)_
+**Review 03/10/2026** – nhánh `feat/service-billing` (`fbdf3ed`). Kiểm webhook bằng HMAC + `timingSafeEqual`, kích hoạt idempotent bằng `updateMany status: pending`, giá lấy từ catalog phía server: các phần này đúng.
+
+- [ ] 🔴 **R3.1 Ai cũng đánh dấu được đơn của người khác là đã trả tiền.** `POST /payments/mock/settle` là `@Public`, không kiểm người gọi có sở hữu đơn không. Mã đơn nằm ngay trên URL trang thanh toán và trong lịch sử. Đã thử: gọi không token vẫn vào tới logic xử lý (trả 404 "không tìm thấy đơn", không phải 401). Trên dev / staging công khai, kẻ xấu kích hoạt gói miễn phí, hoặc đánh "thất bại" đơn của người khác. Code còn đọc `process.env.NODE_ENV` trực tiếp, trái RULE-BE §13. Sửa: bắt đăng nhập + đơn thuộc phạm vi người gọi (giống `detail`), hoặc ký HMAC một token vào URL thanh toán giả lập; đọc môi trường qua `ENV`.
+- [ ] 🔴 **R3.2 API không khởi động được ở production.** `env.ts` từ chối `PAYMENT_PROVIDER=mock` ở production, còn `PaymentsModule` *throw* khi provider ≠ `mock`. Hai điều kiện cộng lại thì production không có cấu hình nào chạy được, tức merge nhánh này là chặn mọi lần deploy. Sửa: thêm `DisabledPaymentProvider` (tạo đơn trả 503 mã rõ ràng "Thanh toán chưa mở", webhook 404) để app vẫn chạy khi chưa tích hợp PayOS.
+- [ ] 🟠 **R3.3 Tiền đã trừ nhưng gói không kích hoạt** khi webhook tới sau 15 phút. Người dùng trả ở phút 14, cổng báo ở phút 16, hoặc worker đã chuyển đơn sang `expired`: webhook gặp đơn `expired` thì chỉ trả `ok`, gói không kích hoạt và không ai được cảnh báo. Với cổng thật, chuyện này chắc chắn xảy ra. Sửa: webhook `paid` cho đơn `expired` vẫn kích hoạt (cho phép `expired → paid`), hoặc chuyển sang trạng thái riêng + báo admin để hoàn tiền; và đặt hạn link thanh toán của cổng bằng hạn đơn.
+- [ ] 🟠 **R3.4 Mua gói khác khi gói cũ còn hạn cho kết quả sai.** Code lấy mốc *hết hạn của gói cũ* để cộng thời gian, nhưng *đổi hạn mức ngay* sang gói mới và reset `boostsUsed`. Ví dụ đang dùng "Doanh nghiệp" (100 tin, còn 300 ngày) mà mua "Pro": hạn mức tụt ngay xuống 30 tin, còn hạn lại kéo thêm 90 ngày sau 300 ngày. **Cần chốt nghiệp vụ.** Đề xuất: cùng gói thì cộng thêm hạn; gói cao hơn thì nâng cấp ngay, tính từ bây giờ; gói thấp hơn thì chặn khi gói hiện tại còn hạn, hoặc xếp hàng chờ áp dụng khi gói cũ hết.
+- [ ] 🟠 **R3.5 Xuất CSV giao dịch đi vòng qua cơ chế export chuẩn.** RULE-BE §7 yêu cầu ghi audit, link dùng một lần / 15 phút, giới hạn 10.000 dòng. `GET /admin/billing/orders/export` tải thẳng, không audit, không chặn chèn công thức Excel. Sửa: thêm dataset `orders` vào export của `AdminToolsService` (đã có `csvCell` chặn công thức).
+- [ ] 🟠 **R3.6 Vi phạm RULE-BE:**
+  - trả nguyên bản ghi Prisma ra API (`list`, `detail`, `adminList` lộ `createdById`, `planBefore`…), §8;
+  - danh sách không phân trang (`take: 100/200`), không trả `Paginated`, §2;
+  - schema zod viết ngay trong controller, `planKey` là `z.string` thay vì enum trong shared, §3;
+  - dùng `ForbiddenException` thay `ApiException`, §4;
+  - thiếu `@ApiOperation` và kiểu response trong `contracts.ts`, §2.
+- [ ] 🟡 **R3.7** Số tiền webhook lệch với đơn: chỉ đánh `failed` mà không log / cảnh báo. Đây là dấu hiệu gian lận hoặc lỗi tích hợp, nên `logger.warn` và ghi audit.
+- [ ] 🟡 **R3.8** Đếm tin rồi mới tạo trong cùng transaction ở mức READ COMMITTED, nên hai lần đăng đồng thời có thể vượt hạn mức 1 tin. Chấp nhận được, hoặc dùng `pg_advisory_xact_lock` theo chủ gói. `assertPublishQuota` bị lặp lại trong `resume()`: tách thành một hàm dùng chung. `renewalExpiry` có test nhưng service không dùng, mà viết lại logic inline, nên test không phủ code thật.
+- [ ] 🟡 **R3.9 Giao diện:**
+  - trang gói hiện cả gói không dành cho loại tài khoản (công ty thấy "Cá nhân Plus"), thành viên thường thấy nút mua rồi bị 403;
+  - trạng thái hiện thô `pending` / `paid`;
+  - chưa xử lý `?order=` khi quay về từ trang thanh toán (spec mục 4);
+  - code `page.tsx` / `plans.css` / `TransactionsView.tsx` bị dồn 1 dòng, màu viết cứng (`#172b4d`) thay vì token của RULE.md, trang giả lập dùng inline style;
+  - `JobPostForm` viết cứng `3` (dùng `PLAN_CATALOG.free.jobQuota`) và nhận diện lỗi bằng `formError.includes('giới hạn tin')`, phải dựa vào `code` `PLAN_LIMIT` / `PLAN_EXPIRED`.
+- [ ] 🟡 **R3.10** `PaymentExpiryWorker` vẫn chạy trong môi trường test và không dọn timer khi module huỷ (xem `TrashPurgeWorker` làm mẫu).
 
 ---
 
@@ -368,7 +405,12 @@ _(để trống)_
 - Unit test hàm nhận diện lỗi `MAINTENANCE` ở client (nếu tách thành hàm thuần).
 
 ### Kết quả review
-_(để trống)_
+**Review 03/10/2026** – nhánh `feat/maintenance-page` (`4d457dc`).
+
+- [ ] 🔴 **R4.1 Bật bảo trì thì cả web trả HTTP 500.** Đã chạy thật: trang chủ 500 với lỗi `Event handlers cannot be passed to Client Component props`. `MaintenanceScreen` có `onClick` (nút "Thử lại") nhưng thiếu `'use client'`, mà lại được render trực tiếp từ server `RootLayout`. Tính năng hỏng đúng lúc cần dùng. Sửa: thêm `'use client'` cho `MaintenanceScreen`, hoặc tách nút "Thử lại" thành component client riêng. Kiểm tra lại bằng cách bật bảo trì trong admin rồi mở vài trang.
+- [ ] 🟠 **R4.2 Mỗi lượt tải trang tốn thêm 1 lần gọi API.** `getSiteSystem()` dùng `cache: 'no-store'` và được gọi ở root layout, tức mọi trang. Spec yêu cầu cache khoảng 30 giây. Sửa: cho riêng lời gọi này dùng revalidate 30 giây (đọc docs Next 16 trong `node_modules/next/dist/docs/` để chọn đúng API).
+- [ ] 🟡 **R4.3** `MaintenanceGate` gọi `/site/system` mỗi 30 giây cho *mọi* khách, kể cả khi tab đang ẩn: nên bỏ qua khi `document.visibilityState !== 'visible'`. Số hotline / email dự phòng viết cứng trùng với `DEFAULT_SYSTEM_SETTINGS`. `apiMessage` trả câu cố định, bỏ mất thông điệp admin nhập: dùng `error.message`.
+- [ ] 🟡 **R4.4** Trang bảo trì trả HTTP 200, nên công cụ tìm kiếm có thể index trang bảo trì. Nếu Next 16 hỗ trợ đặt status cho layout thì trả 503, không thì chấp nhận được.
 
 ---
 
@@ -395,7 +437,10 @@ _(để trống)_
 - `.idea/` thêm vào `.gitignore`.
 
 ### Kết quả review
-_(để trống)_
+**Review 03/10/2026** – nhánh `feat/small-employer-tools` (`b68ad76`). Cả 3 ý đều làm đúng: form tư vấn ở trang tin, báo lead cho quản trị viên công ty (lỗi gửi thông báo không làm hỏng việc lưu lead), ẩn link chết. Có unit test + e2e. `settingsUpdateSchema` dùng `partialRecord` nên thêm nhóm `lead` không làm hỏng app cũ.
+
+- [ ] 🟡 **R5.1** Khách gửi qua trang công ty + `recruiterSlug` mà tư vấn viên đó chưa có tài khoản (`userId = null`) thì không ai được báo, vì nhánh quản trị viên chỉ chạy khi *không* có `recruiterSlug`. Nên chuyển sang báo quản trị viên công ty của tư vấn viên đó.
+- [ ] 🟡 **R5.2** Thêm nhóm thông báo `lead` (và `billing`, `message` ở việc 2 / 3), nhưng NTD chưa có trang cài đặt thông báo nên không tắt được. Ghi vào đợt sau.
 
 ---
 
