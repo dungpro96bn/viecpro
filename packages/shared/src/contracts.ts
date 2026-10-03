@@ -765,6 +765,9 @@ export interface DashboardInsight {
   action: { label: string; href: string };
 }
 
+/** Trạng thái xoá của tin phía NTD (thùng rác) – hiện cho admin */
+export type JobRemoval = 'trash' | 'purged';
+
 export interface ModerationItem {
   id: string;
   /** Mã tin VP-10231 */
@@ -789,6 +792,8 @@ export interface ModerationItem {
   moderatorName: string | null;
   rejectReason: string | null;
   changesRequested: boolean;
+  /** NTD đã xoá tin: 'trash' – còn trong thùng rác NTD (khôi phục được), 'purged' – đã xoá vĩnh viễn */
+  removedByOwner: JobRemoval | null;
 }
 
 export interface ModerationList extends Paginated<ModerationItem> {

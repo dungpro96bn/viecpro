@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import {
   homepageContentSchema,
   jobDetailContentSchema,
@@ -18,6 +18,7 @@ import { PrismaService } from '../../core/prisma/prisma.service.js';
 import type { Prisma } from '../../generated/prisma/client.js';
 import { jobSearchText } from '../jobs/job-query.js';
 import type { AdminContext } from './admin-access.js';
+import { jobRemoval } from './moderation/moderation.service.js';
 
 const EXPORT_LIMIT = 10_000;
 const EXPORT_TTL_MS = 15 * 60_000;
@@ -85,11 +86,11 @@ export class AdminToolsService {
         orderBy: { updatedAt: 'desc' },
         skip: (query.page - 1) * query.limit,
         take: query.limit,
-        select: { id: true, code: true, title: true, status: true, employer: { select: { name: true, shortName: true } }, recruiter: { select: { name: true } }, updatedAt: true },
+        select: { id: true, code: true, title: true, status: true, deletedAt: true, purgedAt: true, employer: { select: { name: true, shortName: true } }, recruiter: { select: { name: true } }, updatedAt: true },
       }),
     ]);
     return {
-      items: items.map((job) => ({ id: job.id, code: job.code, title: job.title, status: job.status, employer: job.employer?.shortName ?? job.employer?.name ?? job.recruiter.name, updatedAt: job.updatedAt.toISOString() })),
+      items: items.map((job) => ({ id: job.id, code: job.code, title: job.title, status: job.status, employer: job.employer?.shortName ?? job.employer?.name ?? job.recruiter.name, updatedAt: job.updatedAt.toISOString(), removedByOwner: jobRemoval(job) })),
       total,
       page: query.page,
       limit: query.limit,
@@ -100,7 +101,7 @@ export class AdminToolsService {
   async job(id: string) {
     const job = await this.prisma.job.findUnique({
       where: { id },
-      select: { id: true, code: true, title: true, industry: true, pref: true, salary: true, quantity: true, detail: true, status: true, employer: { select: { name: true, shortName: true } }, recruiter: { select: { name: true } } },
+      select: { id: true, code: true, title: true, industry: true, pref: true, salary: true, quantity: true, detail: true, status: true, deletedAt: true, purgedAt: true, employer: { select: { name: true, shortName: true } }, recruiter: { select: { name: true } } },
     });
     if (!job) throw ApiException.notFound('Không tìm thấy tin tuyển dụng');
     const detail = jobDetailContentSchema.parse(job.detail ?? {});
@@ -115,12 +116,17 @@ export class AdminToolsService {
       description: detail.overview || detail.posting?.description || '',
       status: job.status,
       employer: job.employer?.shortName ?? job.employer?.name ?? job.recruiter.name,
+      removedByOwner: jobRemoval(job),
     };
   }
 
   async updateJob(admin: AdminContext, id: string, input: AdminJobUpdateInput, req: Request) {
     const current = await this.prisma.job.findUnique({ where: { id } });
     if (!current) throw ApiException.notFound('Không tìm thấy tin tuyển dụng');
+    // Tin NTD đã xoá: sửa thay không còn ý nghĩa (không hiển thị), và NTD có thể khôi phục / đã xoá vĩnh viễn
+    if (current.deletedAt) {
+      throw new ApiException('CONFLICT', current.purgedAt ? 'Tin đã bị nhà tuyển dụng xoá vĩnh viễn' : 'Tin đang nằm trong thùng rác của nhà tuyển dụng', HttpStatus.CONFLICT);
+    }
     const detail = jobDetailContentSchema.parse(current.detail ?? {});
     const nextDetail = { ...detail, overview: input.description, ...(detail.posting ? { posting: { ...detail.posting, description: input.description } } : {}) };
     const before = { title: current.title, industry: current.industry, pref: current.pref, salary: current.salary, quantity: current.quantity, description: detail.overview || detail.posting?.description || '' };

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { JOB_GENDER_LABEL, JOB_STATUS_LABEL, PROGRAM_LABEL, REPORT_STATUS_LABEL, type ModerationDetail, type ModerationItem } from '@viecpro/shared';
+import { JOB_GENDER_LABEL, JOB_REMOVAL_LABEL, JOB_STATUS_LABEL, PROGRAM_LABEL, REPORT_STATUS_LABEL, type ModerationDetail, type ModerationItem } from '@viecpro/shared';
 import Drawer from '@/components/list/Drawer';
 import { dateTime, errorText } from '@/components/list/list-utils';
 import { IconAlert, IconCheck, IconClose, IconExternal, IconScanCheck } from '@/components/ui/Icons';
@@ -102,14 +102,18 @@ export default function ModerationDrawer({ id, canModerate, onClose, onApprove, 
               ) : (
                 <span className="mod-hero__sla">
                   {d.changesRequested ? 'Đã yêu cầu sửa' : JOB_STATUS_LABEL[d.status]}
+                  {d.removedByOwner && ` · ${JOB_REMOVAL_LABEL[d.removedByOwner]}`}
                   {d.moderatorName && ` · ${d.moderatorName}`}
                   {d.moderatedAt && ` · ${dateTime(d.moderatedAt)}`}
                 </span>
               )}
-              <a className="mod-hero__link" href={`${WEB_URL}/viec-lam/${d.slug}`} target="_blank" rel="noreferrer">
-                Xem trang tin
-                <IconExternal size={13} />
-              </a>
+              {/* Tin NTD đã xoá không còn trang công khai */}
+              {!d.removedByOwner && (
+                <a className="mod-hero__link" href={`${WEB_URL}/viec-lam/${d.slug}`} target="_blank" rel="noreferrer">
+                  Xem trang tin
+                  <IconExternal size={13} />
+                </a>
+              )}
             </span>
           </div>
           {d.rejectReason && !pending && <p className="dnote">Lý do: {d.rejectReason}</p>}

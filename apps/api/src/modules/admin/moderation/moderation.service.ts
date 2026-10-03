@@ -5,6 +5,7 @@ import {
   WEB_LINKS,
   jobDetailContentSchema,
   type Industry,
+  type JobRemoval,
   type ModerationDetail,
   type ModerationItem,
   type ModerationList,
@@ -52,6 +53,8 @@ const rowSelect = {
   moderatedAt: true,
   rejectReason: true,
   changesRequestedAt: true,
+  deletedAt: true,
+  purgedAt: true,
   moderatedBy: { select: { name: true } },
   recruiter: { select: { name: true } },
   employer: { select: { name: true, shortName: true, verified: true, createdAt: true } },
@@ -139,6 +142,7 @@ export class ModerationService {
       moderatorName: j.moderatedBy?.name ?? null,
       rejectReason: j.rejectReason,
       changesRequested: !!j.changesRequestedAt,
+      removedByOwner: jobRemoval(j),
     };
   }
 
@@ -162,11 +166,12 @@ export class ModerationService {
   }
 
   private changesWhere(): Prisma.JobWhereInput {
-    return { status: 'rejected', changesRequestedAt: { not: null } };
+    // Tin NTD đã xoá thì không còn chờ NTD sửa – chuyển sang tab đã xử lý
+    return { status: 'rejected', changesRequestedAt: { not: null }, deletedAt: null };
   }
 
   private doneWhere(): Prisma.JobWhereInput {
-    return { moderatedAt: { gte: new Date(Date.now() - DONE_WINDOW_DAYS * DAY) }, changesRequestedAt: null, status: { not: 'pending' } };
+    return { moderatedAt: { gte: new Date(Date.now() - DONE_WINDOW_DAYS * DAY) }, status: { not: 'pending' }, OR: [{ changesRequestedAt: null }, { deletedAt: { not: null } }] };
   }
 
   /** Trang kiểm duyệt (design-new 07): 3 tab, lọc nhanh, thống kê */
@@ -191,7 +196,8 @@ export class ModerationService {
       total = all.length;
       items = all.slice(start, start + limit);
     } else {
-      const where: Prisma.JobWhereInput = { ...(tab === 'changes' ? this.changesWhere() : this.doneWhere()), ...this.search(q) };
+      // AND: điều kiện tab và ô tìm kiếm đều có thể dùng OR – không gộp bằng spread để khỏi đè nhau
+      const where: Prisma.JobWhereInput = { AND: [tab === 'changes' ? this.changesWhere() : this.doneWhere(), this.search(q)] };
       const [count, rows] = await Promise.all([
         this.prisma.job.count({ where }),
         this.prisma.job.findMany({ where, orderBy: tab === 'changes' ? { changesRequestedAt: 'desc' } : { moderatedAt: 'desc' }, skip: start, take: limit, select: rowSelect }),
@@ -333,4 +339,9 @@ export class ModerationService {
       });
     }
   }
+}
+
+/** NTD đã xoá tin chưa: còn trong thùng rác (khôi phục được) hay đã xoá vĩnh viễn */
+export function jobRemoval(j: { deletedAt: Date | null; purgedAt: Date | null }): JobRemoval | null {
+  return j.purgedAt ? 'purged' : j.deletedAt ? 'trash' : null;
 }

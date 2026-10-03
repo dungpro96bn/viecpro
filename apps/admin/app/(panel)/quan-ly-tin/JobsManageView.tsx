@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { INDUSTRIES, PREFECTURES, type AdminJobUpdateInput } from '@viecpro/shared';
+import { INDUSTRIES, JOB_REMOVAL_LABEL, PREFECTURES, type AdminJobUpdateInput, type JobRemoval } from '@viecpro/shared';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { errorText } from '@/components/list/list-utils';
@@ -13,9 +13,10 @@ interface JobItem {
   status: string;
   employer: string;
   updatedAt: string;
+  removedByOwner: JobRemoval | null;
 }
 interface JobList { items: JobItem[]; total: number; page: number; limit: number; hasMore: boolean }
-interface JobEdit extends AdminJobUpdateInput { id: string; code: string; status: string; employer: string }
+interface JobEdit extends AdminJobUpdateInput { id: string; code: string; status: string; employer: string; removedByOwner: JobRemoval | null }
 
 const STATUS: Record<string, string> = { open: 'Đang hiển thị', pending: 'Chờ duyệt', draft: 'Nháp', paused: 'Tạm ẩn', closed: 'Đã đóng', rejected: 'Bị từ chối' };
 
@@ -107,7 +108,7 @@ export default function JobsManageView() {
             {list?.items.map((item) => (
               <button key={item.id} type="button" className={`at-list-item${selected?.id === item.id ? ' at-list-item--active' : ''}`} onClick={() => void choose(item)}>
                 <span><b>{item.title}</b></span>
-                <span className="at-list-item__meta">{item.code} · {STATUS[item.status] ?? item.status} · {item.employer}</span>
+                <span className="at-list-item__meta">{item.code} · {STATUS[item.status] ?? item.status} · {item.employer}{item.removedByOwner && ` · ${JOB_REMOVAL_LABEL[item.removedByOwner]}`}</span>
               </button>
             ))}
           </div>
@@ -118,6 +119,8 @@ export default function JobsManageView() {
           <h2>{selected ? `${selected.code} · ${selected.employer}` : 'Chọn tin để chỉnh sửa'}</h2>
           {selected && form ? (
             <form onSubmit={(e) => void submit(e)}>
+              {selected.removedByOwner && <p className="at-error" role="status">{JOB_REMOVAL_LABEL[selected.removedByOwner]} – tin không còn hiển thị nên không sửa thay được.</p>}
+              <fieldset className="at-fieldset" disabled={!!selected.removedByOwner}>
               <div className="at-form-grid">
                 <label className="at-field at-span-all">Tiêu đề<input className="at-input" minLength={10} maxLength={160} required value={form.title} onChange={(e) => change('title', e.target.value)} /></label>
                 <label className="at-field">Ngành nghề<select className="at-select" value={form.industry} onChange={(e) => change('industry', e.target.value as AdminJobUpdateInput['industry'])}>{INDUSTRIES.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
@@ -128,6 +131,7 @@ export default function JobsManageView() {
               </div>
               <p className="at-muted">Trạng thái hiện tại: {STATUS[selected.status] ?? selected.status}. Nếu cần thay đổi trạng thái, dùng màn hình kiểm duyệt.</p>
               <div className="at-actions"><button className="at-btn at-btn--primary" type="submit" disabled={saving || !can('jobs.manage')}>{saving ? 'Đang lưu…' : 'Lưu thay đổi'}</button></div>
+              </fieldset>
             </form>
           ) : <p className="at-muted">Chọn một tin trong danh sách để tải nội dung.</p>}
           {error && <p className="at-error" role="alert">{error}</p>}

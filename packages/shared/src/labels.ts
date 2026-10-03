@@ -29,6 +29,7 @@ import type {
   ReportStatus,
   ReportTarget,
 } from './enums.js';
+import type { JobRemoval } from './contracts.js';
 
 export const PROGRAM_LABEL: Record<Program, string> = {
   tts: 'Thực tập sinh',
@@ -267,4 +268,10 @@ export const REPORT_DECISION_LABEL: Record<ReportDecision, string> = {
   remove_job: 'Gỡ tin',
   suspend: 'Tạm khoá',
   ban: 'Khoá vĩnh viễn',
+};
+
+/** Tin đã bị NTD xoá (hiện cho admin) */
+export const JOB_REMOVAL_LABEL: Record<JobRemoval, string> = {
+  trash: 'NTD đã xoá (trong thùng rác)',
+  purged: 'NTD đã xoá vĩnh viễn',
 };
