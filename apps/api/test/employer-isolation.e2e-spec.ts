@@ -48,6 +48,12 @@ const ID = {
   revB: 'iso-rev-b',
   revSolo: 'iso-rev-solo',
   pSolo: 'iso-partner-solo',
+  leadA: 'iso-lead-a',
+  leadB: 'iso-lead-b',
+  leadSolo: 'iso-lead-solo',
+  leadA2: 'iso-lead-a2',
+  leadJobA: 'iso-lead-job-a',
+  leadJobSolo: 'iso-lead-job-solo',
 } as const;
 
 async function resetDatabase(prisma: PrismaService) {
@@ -124,9 +130,14 @@ async function seed(prisma: PrismaService) {
   });
   await prisma.lead.createMany({
     data: [
-      { name: 'Khách A', phone: '+84922000001', employerId: ID.eA },
-      { name: 'Khách B', phone: '+84922000002', employerId: ID.eB },
-      { name: 'Khách Solo', phone: '+84922000003', recruiterId: ID.rSolo },
+      { id: ID.leadA, name: 'Khách A', phone: '+84922000001', employerId: ID.eA },
+      { id: ID.leadB, name: 'Khách B', phone: '+84922000002', employerId: ID.eB },
+      { id: ID.leadSolo, name: 'Khách Solo', phone: '+84922000003', recruiterId: ID.rSolo },
+      // Gửi riêng cho thành viên A2 (trang cán bộ) – quản trị A cũng phải thấy
+      { id: ID.leadA2, name: 'Khách nhờ A2', phone: '+84922000004', recruiterId: ID.rA2 },
+      // Chỉ có tin: thuộc chủ tin. Tin của NTD cá nhân mang employerId của A nhưng không thuộc A
+      { id: ID.leadJobA, name: 'Khách tin A', phone: '+84922000005', jobId: ID.jA },
+      { id: ID.leadJobSolo, name: 'Khách tin Solo', phone: '+84922000006', jobId: ID.jSolo },
     ],
   });
   return { future };
@@ -188,6 +199,7 @@ describe.skipIf(!DB_URL)('Cách ly dữ liệu giữa các NTD – Postgres th�
     'POST xoá tin': { method: 'post', path: (id) => `/employer/jobs/${id}/delete` },
     'POST phản hồi đánh giá': { method: 'post', path: (id) => `/employer/reviews/${id}/respond`, body: () => ({ response: 'phản hồi lén' }) },
     'POST gia hạn liên kết đối tác': { method: 'post', path: (id) => `/employer/partners/${id}/renew` },
+    'POST đánh dấu đã liên hệ khách': { method: 'post', path: (id) => `/employer/leads/${id}/handle` },
   };
   /** id thuộc B và thuộc NTD cá nhân, theo từng route */
   const foreign: Record<string, string[]> = {
@@ -206,6 +218,7 @@ describe.skipIf(!DB_URL)('Cách ly dữ liệu giữa các NTD – Postgres th�
     'POST xoá tin': [ID.jB, ID.jSolo],
     'POST phản hồi đánh giá': [ID.revB, ID.revSolo],
     'POST gia hạn liên kết đối tác': [ID.pSolo],
+    'POST đánh dấu đã liên hệ khách': [ID.leadB, ID.leadSolo, ID.leadJobSolo],
   };
   const send = (call: Call, id: string, auth?: string) => {
     let req = http()[call.method](`/api/v1${call.path(id)}`);
@@ -243,6 +256,7 @@ describe.skipIf(!DB_URL)('Cách ly dữ liệu giữa các NTD – Postgres th�
       'GET form sửa tin': ID.jA,
       'POST đóng tin': ID.jA,
       'POST phản hồi đánh giá': ID.revA,
+      'POST đánh dấu đã liên hệ khách': ID.leadA2,
     };
     for (const [name, id] of Object.entries(own)) expect((await send(routes[name]!, id, solo)).status, name).toBe(404);
   });
@@ -266,6 +280,7 @@ describe.skipIf(!DB_URL)('Cách ly dữ liệu giữa các NTD – Postgres th�
     expect(revB.response).toBeNull();
     expect(notes).toBe(0);
     expect(partner.renewRequestedAt).toBeNull();
+    expect(await prisma.lead.count({ where: { handledAt: { not: null } } })).toBe(0);
   });
 
   it('đối chứng: chủ sở hữu vẫn mở được dữ liệu của mình (404 ở trên là do phân quyền, không do thiếu dữ liệu)', async () => {
@@ -295,7 +310,9 @@ describe.skipIf(!DB_URL)('Cách ly dữ liệu giữa các NTD – Postgres th�
     expect(ids(reviews.body)).toEqual([ID.revA]);
 
     const leads = await http().get('/api/v1/employer/leads').set('Authorization', a).expect(200);
-    expect((leads.body as { items: Array<{ name: string }> }).items.map((l) => l.name)).toEqual(['Khách A']);
+    expect(ids(leads.body).sort()).toEqual([ID.leadA, ID.leadA2, ID.leadJobA].sort());
+    const soloLeads = await http().get('/api/v1/employer/leads').set('Authorization', await bearer(ID.uSolo)).expect(200);
+    expect(ids(soloLeads.body).sort()).toEqual([ID.leadJobSolo, ID.leadSolo].sort());
 
     const from = new Date(Date.now() - 7 * 86400_000).toISOString();
     const to = new Date(Date.now() + 7 * 86400_000).toISOString();
@@ -325,5 +342,18 @@ describe.skipIf(!DB_URL)('Cách ly dữ liệu giữa các NTD – Postgres th�
     const member = await bearer(ID.uA2);
     await http().get(`/api/v1/employer/applications/${ID.aA}`).set('Authorization', member).expect(200);
     await http().get(`/api/v1/employer/applications/${ID.aSolo}`).set('Authorization', member).expect(404);
+  });
+
+  it('khách cần tư vấn: cả doanh nghiệp thấy khách nhờ thành viên; đánh dấu đã liên hệ chỉ trong phạm vi', async () => {
+    const member = await bearer(ID.uA2);
+    const admin = await bearer(ID.uA);
+    const tabs = await http().get('/api/v1/employer/leads?tab=unhandled').set('Authorization', member).expect(200);
+    expect((tabs.body as { tabs: { unhandled: number; handled: number } }).tabs).toEqual({ unhandled: 3, handled: 0 });
+    await http().post(`/api/v1/employer/leads/${ID.leadA2}/handle`).set('Authorization', admin).expect(204);
+    // Bấm lại khi đã xử lý: không lỗi
+    await http().post(`/api/v1/employer/leads/${ID.leadA2}/handle`).set('Authorization', member).expect(204);
+    const handled = await http().get('/api/v1/employer/leads?tab=handled').set('Authorization', member).expect(200);
+    expect((handled.body as { items: Array<{ id: string }> }).items.map((l) => l.id)).toEqual([ID.leadA2]);
+    expect(await prisma.lead.count({ where: { handledAt: { not: null } } })).toBe(1);
   });
 });

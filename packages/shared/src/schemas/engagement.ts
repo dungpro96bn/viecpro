@@ -71,6 +71,12 @@ export const consultSchema = z.object({
 });
 export type ConsultInput = z.infer<typeof consultSchema>;
 
+/** Khách cần tư vấn ở khu NTD – không truyền tab thì trả tất cả (giữ nghĩa cũ cho app mobile) */
+export const employerLeadListSchema = paginationSchema.extend({
+  tab: z.enum(['unhandled', 'handled']).optional(),
+});
+export type EmployerLeadListQuery = z.infer<typeof employerLeadListSchema>;
+
 /** Form "Nhận đơn hàng mới" ở footer – email hoặc số điện thoại */
 export const subscribeSchema = z.object({
   contact: z

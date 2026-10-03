@@ -233,6 +233,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
     { href: `${EMPLOYER_BASE}/don-hang`, label: company ? 'Tin tuyển dụng' : 'Tin của tôi', icon: IconBriefcaseLine, count: account.counts.jobs },
     { href: `${EMPLOYER_BASE}/ung-vien`, label: 'Ứng viên', icon: IconTeam, count: account.counts.newApplicants, hot: true },
     { href: `${EMPLOYER_BASE}/lich-phong-van`, label: 'Lịch phỏng vấn', icon: IconCalendar, count: account.counts.upcomingInterviews },
+    { href: `${EMPLOYER_BASE}/khach-tu-van`, label: 'Khách cần tư vấn', icon: IconPhone, count: account.counts.leads, hot: true },
     // Chưa có API: tin nhắn trong ứng dụng
     { href: '#', label: 'Tin nhắn', icon: IconChatSquare },
   ];

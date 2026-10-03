@@ -658,6 +658,12 @@ export interface LeadItem {
   handledAt: string | null;
   createdAt: string;
   job: { title: string; slug: string } | null;
+  /** Tư vấn viên được nhờ (khách gửi từ trang cá nhân của cán bộ) */
+  recruiter: { name: string } | null;
+}
+
+export interface EmployerLeadList extends Paginated<LeadItem> {
+  tabs: { unhandled: number; handled: number };
 }
 
 export interface PresignedUpload {
@@ -890,7 +896,7 @@ export interface EmployerAccount {
   /** Quản trị viên doanh nghiệp: quản lý thành viên, hồ sơ công ty, Thùng rác */
   companyAdmin: boolean;
   /** Số trên menu trái (trash: số mục trong Thùng rác – chỉ tính cho quản trị viên doanh nghiệp) */
-  counts: { jobs: number; newApplicants: number; upcomingInterviews: number; partners: number; reviews: number; trash: number };
+  counts: { jobs: number; newApplicants: number; upcomingInterviews: number; partners: number; reviews: number; trash: number; /** Khách cần tư vấn chưa xử lý */ leads: number };
 }
 
 /** Một chỉ số có đường xu hướng theo ngày */

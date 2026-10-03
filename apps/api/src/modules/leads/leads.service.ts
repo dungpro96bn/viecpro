@@ -12,7 +12,7 @@ export class LeadsService {
     const [employer, recruiter, job] = await Promise.all([
       input.employerSlug ? this.prisma.employer.findUnique({ where: { slug: input.employerSlug }, select: { id: true } }) : null,
       input.recruiterSlug ? this.prisma.recruiter.findUnique({ where: { slug: input.recruiterSlug }, select: { id: true, userId: true } }) : null,
-      input.jobId ? this.prisma.job.findFirst({ where: { OR: [{ id: input.jobId }, { slug: input.jobId }], deletedAt: null }, select: { id: true } }) : null,
+      input.jobId ? this.prisma.job.findFirst({ where: { OR: [{ id: input.jobId }, { slug: input.jobId }], deletedAt: null }, select: { id: true, recruiter: { select: { userId: true } } } }) : null,
     ]);
     if (input.employerSlug && !employer) throw ApiException.notFound('Không tìm thấy nhà tuyển dụng');
     if (input.recruiterSlug && !recruiter) throw ApiException.notFound('Không tìm thấy tư vấn viên');
@@ -21,8 +21,10 @@ export class LeadsService {
     await this.prisma.lead.create({
       data: { name: input.name, phone: input.phone, employerId: employer?.id, recruiterId: recruiter?.id, jobId: job?.id },
     });
-    if (recruiter?.userId) {
-      await this.notifications.notify(recruiter.userId, 'lead.new', {
+    // Báo cho tư vấn viên được nhờ, nếu không có thì cho người phụ trách tin
+    const notifyUserId = recruiter?.userId ?? job?.recruiter.userId;
+    if (notifyUserId) {
+      await this.notifications.notify(notifyUserId, 'lead.new', {
         title: `Khách cần tư vấn: ${input.name}`,
         body: input.phone,
         link: WEB_LINKS.employerLeads,

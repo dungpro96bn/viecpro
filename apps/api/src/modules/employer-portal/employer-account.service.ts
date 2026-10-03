@@ -4,6 +4,7 @@ import { AssetUrlService } from '../../core/assets/asset-url.service.js';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { type EmployerActor, EmployerContext } from './employer-context.service.js';
 import { trashedJobs } from './employer-job-trash.service.js';
+import { EmployerPortalService } from './employer-portal.service.js';
 import { trashedMembers } from './employer-trash.service.js';
 
 const WEEK = 7 * 86400_000;
@@ -15,6 +16,7 @@ export class EmployerAccountService {
     private readonly prisma: PrismaService,
     private readonly ctx: EmployerContext,
     private readonly assets: AssetUrlService,
+    private readonly portal: EmployerPortalService,
   ) {}
 
   async account(userId: string): Promise<EmployerAccount> {
@@ -50,6 +52,7 @@ export class EmployerAccountService {
       companyAdmin ? this.prisma.recruiter.count({ where: trashedMembers(actor.employerId!) }) : 0,
     ]);
     const trash = trashedJobCount + trashedMemberCount;
+    const leads = await this.portal.countUnhandled(actor);
     const e = recruiter.employer;
     return {
       user: { id: user.id, name: user.name, avatarUrl: this.assets.url(user.avatarUrl ?? recruiter.photoUrl), title: recruiter.title },
@@ -60,7 +63,7 @@ export class EmployerAccountService {
         : null,
       plan: plan && { name: plan.name, expiresAt: plan.expiresAt.toISOString(), jobQuota: plan.jobQuota, jobsVisible, boostQuota: plan.boostQuota, boostsUsed: plan.boostsUsed },
       companyAdmin,
-      counts: { jobs, newApplicants, upcomingInterviews, partners, reviews: recruiter.reviewCount, trash },
+      counts: { jobs, newApplicants, upcomingInterviews, partners, reviews: recruiter.reviewCount, trash, leads },
     };
   }
 
