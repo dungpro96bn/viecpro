@@ -21,4 +21,15 @@ describe('EmployerContext – phạm vi dữ liệu (chống xem chéo giữa NT
     expect(ctx.jobScope(company)).toMatchObject({ deletedAt: null });
     expect(ctx.applicationScope(company).job).not.toHaveProperty('deletedAt');
   });
+
+  it('tách scope tin đối tác khỏi scope sở hữu và chỉ ghép qua liên kết còn hạn', () => {
+    const scope = ctx.partnerJobScope(company);
+    expect(scope).toMatchObject({
+      employerId: 'e1',
+      deletedAt: null,
+      recruiter: { is: { employerId: null, partners: { some: { employerId: 'e1', OR: [{ expiresAt: null }, { expiresAt: { gt: expect.any(Date) } }] } } } },
+    });
+    expect(ctx.ownerScope(company)).not.toEqual(scope);
+    expect(ctx.partnerJobScope(solo)).toEqual({ id: '__no_partner_jobs__' });
+  });
 });

@@ -901,7 +901,40 @@ export interface EmployerAccount {
   /** Quản trị viên doanh nghiệp: quản lý thành viên, hồ sơ công ty, Thùng rác */
   companyAdmin: boolean;
   /** Số trên menu trái (trash: số mục trong Thùng rác – chỉ tính cho quản trị viên doanh nghiệp) */
-  counts: { jobs: number; newApplicants: number; upcomingInterviews: number; partners: number; reviews: number; trash: number; /** Khách cần tư vấn chưa xử lý */ leads: number };
+  counts: { jobs: number; newApplicants: number; upcomingInterviews: number; partners: number; partnerJobs: number; partnerRecruiters: number; reviews: number; trash: number; /** Khách cần tư vấn chưa xử lý */ leads: number };
+}
+
+export interface PartnerJobItem {
+  id: string;
+  code: string;
+  slug: string;
+  title: string;
+  status: JobStatus;
+  applications: number;
+  createdAt: string;
+  recruiter: { id: string; slug: string; name: string };
+}
+
+export interface PartnerApplicantItem {
+  id: string;
+  fullName: string;
+  gender: Gender;
+  age: number;
+  hometown: string | null;
+  phone: string;
+  email: string | null;
+  address: string | null;
+  status: ApplicationStatus;
+  createdAt: string;
+  job: { id: string; title: string; slug: string };
+  contactMasked: boolean;
+}
+
+export type PartnerApplicantList = Paginated<PartnerApplicantItem>;
+
+export interface PartnerViewItem {
+  employerName: string;
+  viewedAt: string;
 }
 
 /** Một chỉ số có đường xu hướng theo ngày */
@@ -1098,6 +1131,8 @@ export interface EmployerApplicantDetail extends EmployerApplicantItem {
   events: Array<{ status: ApplicationStatus; note: string | null; createdAt: string }>;
   notes: ApplicantNoteItem[];
   assignee: { id: string; name: string } | null;
+  /** Lượt xem của doanh nghiệp phái cử (chỉ trả cho NTD cá nhân) */
+  partnerViews?: PartnerViewItem[];
 }
 
 /* ---------- Lịch phỏng vấn (design 14, 17) ---------- */

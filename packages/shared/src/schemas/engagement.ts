@@ -59,6 +59,9 @@ export const applicationListSchema = paginationSchema.extend({
   minMatch: z.coerce.number().int().min(0).max(100).optional(),
   quick: z.enum(APPLICANT_QUICK_FILTERS).optional(),
 });
+
+export const partnerJobListSchema = paginationSchema.extend({ recruiterId: z.string().trim().min(1).optional() });
+export type PartnerJobListQuery = z.infer<typeof partnerJobListSchema>;
 export type ApplicationListQuery = z.infer<typeof applicationListSchema>;
 
 /** Form "Đăng ký tư vấn" ở trang hồ sơ / chi tiết đơn */

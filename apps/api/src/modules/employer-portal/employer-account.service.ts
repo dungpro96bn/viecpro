@@ -46,6 +46,12 @@ export class EmployerAccountService {
     ]);
 
     const companyAdmin = !!actor.employerId && recruiter.companyAdmin;
+    const [partnerJobs, partnerRecruiters] = companyAdmin
+      ? await Promise.all([
+          this.prisma.job.count({ where: this.ctx.partnerJobScope(actor) }),
+          this.prisma.recruiterPartner.count({ where: { employerId: actor.employerId!, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] } }),
+        ])
+      : [0, 0];
     // Thùng rác: quản trị viên doanh nghiệp (tin + thành viên) hoặc NTD cá nhân (tin của mình)
     const [trashedJobCount, trashedMemberCount] = await Promise.all([
       companyAdmin || !actor.employerId ? this.prisma.job.count({ where: trashedJobs(this.ctx.ownerScope(actor)) }) : 0,
@@ -63,7 +69,7 @@ export class EmployerAccountService {
         : null,
       plan: plan && { name: plan.name, expiresAt: plan.expiresAt.toISOString(), jobQuota: plan.jobQuota, jobsVisible, boostQuota: plan.boostQuota, boostsUsed: plan.boostsUsed },
       companyAdmin,
-      counts: { jobs, newApplicants, upcomingInterviews, partners, reviews: recruiter.reviewCount, trash, leads },
+      counts: { jobs, newApplicants, upcomingInterviews, partners, partnerJobs, partnerRecruiters, reviews: recruiter.reviewCount, trash, leads },
     };
   }
 

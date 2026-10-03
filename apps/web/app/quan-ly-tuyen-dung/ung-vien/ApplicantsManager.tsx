@@ -502,6 +502,18 @@ function ApplicantPanel({ id, onPatch, onChanged }: { id: string; onPatch: (id: 
           </ol>
         </div>
 
+        {d.partnerViews?.length ? (
+          <div className="appl-section appl-partner-views">
+            <b>Công ty phái cử đã xem</b>
+            {d.partnerViews.map((view) => (
+              <span key={`${view.employerName}-${view.viewedAt}`} className="appl-partner-views__item">
+                <span>{view.employerName} đã xem hồ sơ này</span>
+                <small>{timeAgo(view.viewedAt)}</small>
+              </span>
+            ))}
+          </div>
+        ) : null}
+
         <div className="appl-section">
           <b>Ghi chú nội bộ</b>
           {d.notes.map((n) => (

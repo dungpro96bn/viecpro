@@ -239,6 +239,7 @@ export const REPORT_REASON_LABEL: Record<ReportReason, string> = {
   scam: 'Lừa đảo / giả mạo',
   harassment: 'Quấy rối / xúc phạm',
   no_response: 'Phản hồi chậm / không liên hệ',
+  partner_request: 'Đề nghị xem xét tạm ẩn từ doanh nghiệp phái cử',
   other: 'Khác',
 };
 

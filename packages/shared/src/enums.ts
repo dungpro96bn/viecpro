@@ -52,6 +52,8 @@ export type JobStatus = (typeof JOB_STATUSES)[number];
 /** Trạng thái hồ sơ ứng tuyển (theo thứ tự tiến trình). viewed = cán bộ đã xem / đã liên hệ */
 export const APPLICATION_STATUSES = ['submitted', 'viewed', 'interview', 'passed', 'departed', 'rejected', 'withdrawn'] as const;
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
+/** Công ty phái cử chỉ thấy liên hệ đầy đủ sau khi ứng viên trúng tuyển / xuất cảnh */
+export const PARTNER_CONTACT_VISIBLE_FROM: readonly ApplicationStatus[] = ['passed', 'departed'];
 
 /** Mục đích mã OTP */
 export const OTP_PURPOSES = ['register', 'login', 'reset_password', 'change_phone', 'join_company'] as const;
@@ -221,7 +223,7 @@ export const REPORT_TARGETS = ['job', 'employer', 'recruiter', 'user'] as const;
 export type ReportTarget = (typeof REPORT_TARGETS)[number];
 
 /** Lý do báo cáo (spec 3.9) */
-export const REPORT_REASONS = ['fee', 'wrong_info', 'duplicate', 'fake_photo', 'scam', 'harassment', 'no_response', 'other'] as const;
+export const REPORT_REASONS = ['fee', 'wrong_info', 'duplicate', 'fake_photo', 'scam', 'harassment', 'no_response', 'partner_request', 'other'] as const;
 export type ReportReason = (typeof REPORT_REASONS)[number];
 
 export const REPORT_SEVERITIES = ['critical', 'high', 'medium', 'low'] as const;

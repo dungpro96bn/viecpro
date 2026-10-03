@@ -58,6 +58,26 @@ export class EmployerContext {
     return { ...this.ownerScope(actor), deletedAt: null };
   }
 
+  /** Tin của tư vấn viên cá nhân đang liên kết với công ty này – CHỈ dùng cho route đọc dành cho quản trị viên */
+  partnerJobScope(actor: EmployerActor): Prisma.JobWhereInput {
+    if (!actor.employerId) return { id: '__no_partner_jobs__' };
+    return {
+      employerId: actor.employerId,
+      deletedAt: null,
+      recruiter: {
+        is: {
+          employerId: null,
+          partners: {
+            some: {
+              employerId: actor.employerId,
+              OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+            },
+          },
+        },
+      },
+    };
+  }
+
   /** Hồ sơ ứng tuyển vẫn theo dõi được khi tin đã xoá (ứng viên có thể đang phỏng vấn / đã xuất cảnh) */
   applicationScope(actor: EmployerActor): Prisma.ApplicationWhereInput {
     return { job: this.ownerScope(actor) };

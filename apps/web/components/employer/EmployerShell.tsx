@@ -233,6 +233,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
     { href: `${EMPLOYER_BASE}/ung-vien`, label: 'Ứng viên', icon: IconTeam, count: account.counts.newApplicants, hot: true },
     { href: `${EMPLOYER_BASE}/lich-phong-van`, label: 'Lịch phỏng vấn', icon: IconCalendar, count: account.counts.upcomingInterviews },
     { href: `${EMPLOYER_BASE}/khach-tu-van`, label: 'Khách cần tư vấn', icon: IconPhone, count: account.counts.leads, hot: true },
+    ...(company && account.companyAdmin && account.counts.partnerRecruiters > 0 ? [{ href: `${EMPLOYER_BASE}/tin-doi-tac`, label: 'Tin đối tác', icon: IconBriefcaseLine, count: account.counts.partnerJobs }] : []),
   ];
   const second: NavItem[] = company
     ? [

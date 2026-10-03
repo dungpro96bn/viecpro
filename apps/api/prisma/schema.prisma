@@ -430,6 +430,7 @@ model Employer {
   leads         Lead[]
   verifications VerificationRequest[]
   reports       Report[]
+  partnerViews  PartnerView[]
   plan          BusinessPlan?
   partners      RecruiterPartner[]
   interviews    Interview[]
@@ -487,6 +488,7 @@ model Recruiter {
   interviewing  Interview[]           @relation("InterviewInterviewers")
   invitesSent   MemberInvite[]        @relation("InviteSender")
   removed       Recruiter[]           @relation("RemovedBy")
+  partnerViews  PartnerView[]         @relation("PartnerViewViewer")
   reviews       EmployerReview[]
   reviewResponses EmployerReview[]     @relation("ReviewResponseAuthor")
   deletedJobs   Job[]                 @relation("JobDeletedBy")
@@ -719,6 +721,7 @@ model Application {
   notes     ApplicationNote[]
   attendees InterviewAttendee[]
   employerReview EmployerReview?
+  partnerViews  PartnerView[]
 
   @@index([jobId, status])
   @@index([userId])
@@ -736,6 +739,21 @@ model ApplicationNote {
   createdAt     DateTime    @default(now())
 
   @@index([applicationId, createdAt])
+}
+
+/// Nhật ký minh bạch khi công ty phái cử xem hồ sơ của NTD cá nhân liên kết
+model PartnerView {
+  id                String      @id @default(cuid())
+  employerId        String
+  employer          Employer    @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  viewerRecruiterId String
+  viewerRecruiter   Recruiter   @relation("PartnerViewViewer", fields: [viewerRecruiterId], references: [id], onDelete: Cascade)
+  applicationId     String
+  application       Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  createdAt         DateTime    @default(now())
+
+  @@index([applicationId, createdAt])
+  @@index([viewerRecruiterId, applicationId, createdAt])
 }
 
 /// Lịch phỏng vấn / thi tay nghề – một lịch có thể gồm nhiều ứng viên

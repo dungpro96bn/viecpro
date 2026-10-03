@@ -12,6 +12,7 @@ import { PrismaModule } from '../src/core/prisma/prisma.module.js';
 import { PrismaService } from '../src/core/prisma/prisma.service.js';
 import { EmployerPortalModule } from '../src/modules/employer-portal/employer-portal.module.js';
 import { NotificationsModule } from '../src/modules/notifications/notifications.module.js';
+import { ReportsModule } from '../src/modules/reports/reports.module.js';
 
 /**
  * Cách ly dữ liệu giữa các NTD (RULE-BE.md mục 6 lớp 2, mục 14) – chạy service + Postgres thật, không mock truy vấn.
@@ -54,6 +55,7 @@ const ID = {
   leadA2: 'iso-lead-a2',
   leadJobA: 'iso-lead-job-a',
   leadJobSolo: 'iso-lead-job-solo',
+  partnerApply: 'iso-partner-apply',
 } as const;
 
 async function resetDatabase(prisma: PrismaService) {
@@ -160,7 +162,7 @@ describe.skipIf(!DB_URL)('Cách ly dữ liệu giữa các NTD – Postgres th�
       REDIS_URL: '',
     });
     const module = await Test.createTestingModule({
-      imports: [ConfigModule, PrismaModule, AssetsModule, MailModule, AuditModule, NotificationsModule, JwtModule.register({ global: true, secret: JWT_SECRET }), EmployerPortalModule],
+      imports: [ConfigModule, PrismaModule, AssetsModule, MailModule, AuditModule, NotificationsModule, ReportsModule, JwtModule.register({ global: true, secret: JWT_SECRET }), EmployerPortalModule],
       providers: [AuthGuard],
     }).compile();
     app = module.createNestApplication();
@@ -342,6 +344,30 @@ describe.skipIf(!DB_URL)('Cách ly dữ liệu giữa các NTD – Postgres th�
     const member = await bearer(ID.uA2);
     await http().get(`/api/v1/employer/applications/${ID.aA}`).set('Authorization', member).expect(200);
     await http().get(`/api/v1/employer/applications/${ID.aSolo}`).set('Authorization', member).expect(404);
+  });
+
+  it('quản trị A chỉ đọc được hồ sơ đối tác, che liên hệ và ghi lượt xem; thành viên/B bị chặn', async () => {
+    const admin = await bearer(ID.uA);
+    const member = await bearer(ID.uA2);
+    const companyB = await bearer(ID.uB);
+    await http().get(`/api/v1/employer/partner-jobs/${ID.jSolo}/applications`).expect(401);
+    await http().get('/api/v1/employer/partner-jobs').set('Authorization', await bearer(ID.uSeeker, 'seeker')).expect(403);
+    await http().get(`/api/v1/employer/partner-jobs/${ID.jSolo}/applications`).set('Authorization', member).expect(403);
+    await http().get(`/api/v1/employer/partner-jobs/${ID.jSolo}/applications`).set('Authorization', companyB).expect(404);
+    await http().get(`/api/v1/employer/partner-jobs/${ID.jSolo}/applications`).set('Authorization', admin).expect(200);
+
+    const hidden = await http().get(`/api/v1/employer/partner-applications/${ID.aSolo}`).set('Authorization', admin).expect(200);
+    expect(hidden.body).toMatchObject({ contactMasked: true, phone: '0911 xxx 003', email: null, address: null });
+    expect(await prisma.partnerView.count({ where: { applicationId: ID.aSolo } })).toBe(1);
+    const ownerDetail = await http().get(`/api/v1/employer/applications/${ID.aSolo}`).set('Authorization', await bearer(ID.uSolo)).expect(200);
+    expect(ownerDetail.body.partnerViews).toHaveLength(1);
+
+    await prisma.application.update({ where: { id: ID.aSolo }, data: { status: 'passed', email: 'candidate@example.com', address: 'Tokyo' } });
+    const visible = await http().get(`/api/v1/employer/partner-applications/${ID.aSolo}`).set('Authorization', admin).expect(200);
+    expect(visible.body).toMatchObject({ contactMasked: false, phone: '+84911000003', email: 'candidate@example.com', address: 'Tokyo' });
+    await http().post(`/api/v1/employer/partner-jobs/${ID.jSolo}/report`).set('Authorization', admin).expect(201);
+    expect(await prisma.report.count({ where: { jobId: ID.jSolo, reason: 'partner_request' } })).toBe(1);
+    await http().patch(`/api/v1/employer/applications/${ID.aSolo}/status`).set('Authorization', admin).send({ status: 'rejected' }).expect(404);
   });
 
   it('khách cần tư vấn: cả doanh nghiệp thấy khách nhờ thành viên; đánh dấu đã liên hệ chỉ trong phạm vi', async () => {

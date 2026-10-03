@@ -28,10 +28,13 @@ import { EmployerJobTrashService } from './employer-job-trash.service.js';
 import { EmployerReviewsController, SeekerReviewsController } from './employer-reviews.controller.js';
 import { EmployerReviewsService } from './employer-reviews.service.js';
 import { MemberInvitesService } from './member-invites.service.js';
+import { EmployerPartnerViewController } from './employer-partner-view.controller.js';
+import { EmployerPartnerViewService } from './employer-partner-view.service.js';
+import { ReportsModule } from '../reports/reports.module.js';
 
 @Module({
-  imports: [JobsModule, AuthModule],
-  controllers: [EmployerAccountController, EmployerJobsController, EmployerApplicantsController, EmployerInterviewsController, EmployerPortalController, EmployerProfileController, EmployerMembersController, MemberInvitesController, EmployerTrashController, EmployerReviewsController, SeekerReviewsController],
-  providers: [EmployerContext, EmployerAccountService, EmployerDashboardService, EmployerJobsService, EmployerJobFormService, EmployerApplicantsService, EmployerIntakeService, EmployerInterviewCreateService, EmployerInterviewsService, EmployerPartnersService, EmployerPortalService, EmployerProfileService, EmployerMembersService, MemberInvitesService, EmployerTrashService, EmployerJobTrashService, TrashPurgeWorker, EmployerReviewsService],
+  imports: [JobsModule, AuthModule, ReportsModule],
+  controllers: [EmployerAccountController, EmployerJobsController, EmployerApplicantsController, EmployerInterviewsController, EmployerPortalController, EmployerProfileController, EmployerMembersController, MemberInvitesController, EmployerTrashController, EmployerReviewsController, SeekerReviewsController, EmployerPartnerViewController],
+  providers: [EmployerContext, EmployerAccountService, EmployerDashboardService, EmployerJobsService, EmployerJobFormService, EmployerApplicantsService, EmployerIntakeService, EmployerInterviewCreateService, EmployerInterviewsService, EmployerPartnersService, EmployerPortalService, EmployerProfileService, EmployerMembersService, MemberInvitesService, EmployerTrashService, EmployerJobTrashService, TrashPurgeWorker, EmployerReviewsService, EmployerPartnerViewService],
 })
 export class EmployerPortalModule {}
