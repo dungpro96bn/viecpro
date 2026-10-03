@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { normalizeVnPhone, WEB_LINKS, type ConsultInput, type SubscribeInput } from '@viecpro/shared';
 import { ApiException } from '../../core/http/api-exception.js';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
@@ -6,6 +6,8 @@ import { NotificationsService } from '../notifications/notifications.service.js'
 
 @Injectable()
 export class LeadsService {
+  private readonly logger = new Logger(LeadsService.name);
+
   constructor(private readonly prisma: PrismaService, private readonly notifications: NotificationsService) {}
 
   async consult(input: ConsultInput): Promise<void> {
@@ -21,15 +23,28 @@ export class LeadsService {
     await this.prisma.lead.create({
       data: { name: input.name, phone: input.phone, employerId: employer?.id, recruiterId: recruiter?.id, jobId: job?.id },
     });
-    // Báo cho tư vấn viên được nhờ, nếu không có thì cho người phụ trách tin
-    const notifyUserId = recruiter?.userId ?? job?.recruiter.userId;
-    if (notifyUserId) {
-      await this.notifications.notify(notifyUserId, 'lead.new', {
-        title: `Khách cần tư vấn: ${input.name}`,
-        body: input.phone,
-        link: WEB_LINKS.employerLeads,
+    let recipients: string[];
+    if (recruiter?.userId) recipients = [recruiter.userId];
+    else if (job?.recruiter.userId) recipients = [job.recruiter.userId];
+    else if (employer && !input.recruiterSlug && !input.jobId) {
+      const admins = await this.prisma.recruiter.findMany({
+        where: { employerId: employer.id, companyAdmin: true, leftAt: null, userId: { not: null } },
+        select: { userId: true },
       });
-    }
+      recipients = [...new Set(admins.flatMap((admin) => admin.userId ? [admin.userId] : []))];
+    } else recipients = [];
+
+    await Promise.all(recipients.map(async (userId) => {
+      try {
+        await this.notifications.notify(userId, 'lead.new', {
+          title: `Khách cần tư vấn: ${input.name}`,
+          body: input.phone,
+          link: WEB_LINKS.employerLeads,
+        });
+      } catch (error) {
+        this.logger.warn(`Không gửi được thông báo lead cho ${userId}: ${String(error)}`);
+      }
+    }));
   }
 
   async subscribe(input: SubscribeInput): Promise<void> {

@@ -47,7 +47,7 @@ Môi trường dev in mã OTP SMS ra log API và trả thêm `devCode` trong res
 | --- | --- |
 | `/` | Trang chủ (hero tìm kiếm, danh bạ tỉnh thành, 20 việc làm mới, sidebar quảng cáo) |
 | `/tim-kiem` | Tìm kiếm việc làm (form mở rộng, bộ lọc trái, danh sách + phân trang 20 đơn/trang) |
-| `/viec-lam/[slug]` | Chi tiết đơn hàng (2 slider đơn liên quan) |
+| `/viec-lam/[slug]` | Chi tiết đơn hàng (2 slider đơn liên quan, form nhờ tư vấn gắn với tin) |
 | `/nha-tuyen-dung/viet-nam-camcom` | Hồ sơ nhà tuyển dụng doanh nghiệp |
 | `/tu-van-vien/nguyen-thu-ha` | Hồ sơ nhà tuyển dụng cá nhân |
 | `/dang-nhap` | Đăng nhập bằng email hoặc số điện thoại và mật khẩu |
@@ -102,8 +102,8 @@ Danh sách đầy đủ, thử trực tiếp: http://localhost:4000/docs (OpenAP
 | Việc đã lưu | `GET /me/saved-jobs` (sắp xếp, lọc ngành, % phù hợp, điều kiện), `PUT/DELETE /me/saved-jobs/:jobId` | Nút lưu việc, trang việc đã lưu |
 | Hồ sơ NTD | `GET /employers/:slug`, `/recruiters/:slug`, `/recruiters/:slug/phone`, `PUT/DELETE …/follow` | Trang nhà tuyển dụng, tư vấn viên |
 | Cổng NTD | `/employer/me`, `/employer/dashboard`, `/employer/team`, `/employer/partners`, `/employer/jobs` (+ summary, market, form, stats, boost, pause, resume, close), `/employer/applications` (+ notes, status, duplicates, job-match, import), `/employer/interviews` (+ candidates, availability, dời lịch, kết quả, huỷ), `/employer/leads` | Khu quản lý tuyển dụng (design 10 – 17) |
-| Tư vấn & tin | `POST /leads/consultations`, `/leads/subscriptions` | Form đăng ký tư vấn, nhận đơn mới ở footer |
-| Thông báo | `GET /me/notifications`, `POST …/:id/read`, `…/read-all` – push tôn trọng Cài đặt + giờ yên lặng | Chuông thông báo |
+| Tư vấn & tin | `POST /leads/consultations` (báo cán bộ phụ trách; form trang công ty báo các quản trị viên công ty), `/leads/subscriptions` | Form đăng ký tư vấn, nhận đơn mới ở footer |
+| Thông báo | `GET /me/notifications`, `POST …/:id/read`, `…/read-all` – push tôn trọng Cài đặt + giờ yên lặng, có thể tắt riêng nhóm khách cần tư vấn | Chuông thông báo |
 | Thông báo việc làm | `GET/POST /me/alerts` (tối đa 10), `PATCH/DELETE /me/alerts/:id`, `GET /me/alerts/:id/jobs`, `POST …/:id/seen`, `/me/alerts/feed`, `/me/alerts/suggestions`; worker 5 phút / lần (`JOB_ALERT_WORKER`) gửi app + email theo tần suất | C-05 (design-new 04) |
 | Cài đặt | `GET/PATCH /me/settings`, `POST /me/email/otp` → `/me/email`, `POST /me/phone/otp` → `/me/phone`, `DELETE /me/sessions` (đăng xuất thiết bị khác), `GET /me/export` (tải dữ liệu JSON) | C-06 (design-new 05) |
 | Báo cáo vi phạm | `POST /reports` (khách gửi được), `GET /me/reports`; ≥ 3 người báo "thu phí" / 24 giờ → tin tự tạm ẩn | M18 |

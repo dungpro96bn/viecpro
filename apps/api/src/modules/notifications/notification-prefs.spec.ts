@@ -12,6 +12,7 @@ describe('notification prefs', () => {
     expect(groupOf('interview.scheduled')).toBe('interview');
     expect(groupOf('alert.digest')).toBe('job_match');
     expect(groupOf('application.status')).toBe('application');
+    expect(groupOf('lead.new')).toBe('lead');
     expect(groupOf('job.approved')).toBe('system');
   });
 
