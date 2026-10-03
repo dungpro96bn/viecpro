@@ -37,6 +37,7 @@ Môi trường dev in mã OTP SMS ra log API và trả thêm `devCode` trong res
 | `npm run typecheck` | Kiểm tra kiểu mọi workspace |
 | `npm run test` | Unit test API (Vitest) |
 | `npm run test:e2e -w @viecpro/api` | E2E phân quyền 401 / 403 / 404 |
+| `npm run test:e2e:db -w @viecpro/api` | E2E như trên + cách ly dữ liệu giữa các NTD trên Postgres thật (tự tạo / migrate database `viecpro_e2e`, cần `npm run db:up`) |
 | `npm run build` | Build shared → API → web |
 | `npm run db:studio` | Xem / sửa dữ liệu bằng Prisma Studio |
 
