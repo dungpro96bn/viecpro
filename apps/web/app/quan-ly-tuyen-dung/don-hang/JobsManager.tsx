@@ -4,9 +4,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   APPLICATION_SOURCE_LABEL,
+  DELETABLE_JOB_STATUSES,
   EMPLOYER_JOB_TABS,
   INDUSTRIES,
   JOB_STATUS_LABEL,
+  TRASH_RETENTION_DAYS,
   type EmployerJobItem,
   type EmployerJobList,
   type EmployerJobSort,
@@ -32,6 +34,7 @@ import {
   IconEyeOff,
   IconPlus,
   IconSearch,
+  IconTrash,
   IconTrendUp,
   IconUser,
 } from '@/components/ui/Icons';
@@ -129,10 +132,21 @@ export default function JobsManager() {
       return next;
     });
 
-  const bulk = async (action: 'pause' | 'close') => {
+  const bulk = async (action: 'pause' | 'close' | 'delete') => {
     setError('');
+    if (action === 'delete') {
+      const closing = tab !== 'draft' && tab !== 'expired';
+      const where = account.kind === 'company' && !account.companyAdmin ? 'Quản trị viên doanh nghiệp' : 'Bạn';
+      if (!window.confirm(`${closing ? `Đóng và xoá ${checked.size} tin` : `Xoá ${checked.size} tin`}? Tin chuyển vào Thùng rác. ${where} có thể khôi phục trong ${TRASH_RETENTION_DAYS} ngày. Hồ sơ ứng tuyển vẫn được giữ.`)) return;
+    }
     try {
-      for (const id of checked) await apiRequest(`/employer/jobs/${encodeURIComponent(id)}/${action}`, { method: 'POST' });
+      for (const id of checked) {
+        if (action === 'delete') {
+          const status = items.find((j) => j.id === id)?.status;
+          if (status && !isDeletable(status)) await apiRequest(`/employer/jobs/${encodeURIComponent(id)}/close`, { method: 'POST' });
+        }
+        await apiRequest(`/employer/jobs/${encodeURIComponent(id)}/${action}`, { method: 'POST' });
+      }
       setChecked(new Set());
       await reload();
     } catch (e) {
@@ -214,6 +228,10 @@ export default function JobsManager() {
                     Đóng tin
                   </button>
                 )}
+                <button type="button" className="emp-btn emp-btn--md emp-btn--danger" onClick={() => void bulk('delete')}>
+                  <IconTrash size={15} />
+                  Xoá
+                </button>
                 <button type="button" className="emp-link-btn" onClick={() => setChecked(new Set())}>
                   Bỏ chọn
                 </button>
@@ -254,6 +272,9 @@ export default function JobsManager() {
   );
 }
 
+
+/** Tin xoá thẳng được (nháp / bị từ chối / đã đóng); trạng thái khác phải đóng trước */
+const isDeletable = (status: string) => (DELETABLE_JOB_STATUSES as readonly string[]).includes(status);
 /* ---------- Thẻ chỉ số ---------- */
 function SummaryCards({ s }: { s: EmployerJobSummary }) {
   const views = percentDelta(s.views7, s.viewsPrev7);
@@ -350,7 +371,7 @@ function Checkbox({ checked, onChange, label }: { checked: boolean; onChange: ()
 function JobPanel({ jobId, onChanged }: { jobId: string; onChanged: () => Promise<void> }) {
   const { account } = useEmployerAccount();
   const [stats, setStats] = useState<EmployerJobStats | null>(null);
-  const [busy, setBusy] = useState<'' | 'boost' | 'pause' | 'resume'>('');
+  const [busy, setBusy] = useState<'' | 'boost' | 'pause' | 'resume' | 'delete'>('');
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
@@ -375,6 +396,28 @@ function JobPanel({ jobId, onChanged }: { jobId: string; onChanged: () => Promis
       setMessage({ ok: false, text: apiMessage(e, 'Thao tác chưa thành công.') });
     } finally {
       setBusy('');
+    }
+  };
+
+  /** Xoá mềm vào Thùng rác – khôi phục được trong 30 ngày. Tin còn hiển thị / chờ duyệt thì đóng trước rồi mới xoá */
+  const remove = async () => {
+    if (!stats) return;
+    const { job } = stats;
+    const mustClose = !isDeletable(job.status);
+    const where = account.kind === 'company' && !account.companyAdmin ? 'Quản trị viên doanh nghiệp' : 'Bạn';
+    const intro = mustClose ? `Tin ${job.code} đang ở trạng thái “${JOB_STATUS_LABEL[job.status]}”. Tin sẽ được đóng (ngừng nhận hồ sơ) rồi chuyển vào Thùng rác.` : `Xoá tin ${job.code}? Tin chuyển vào Thùng rác.`;
+    if (!window.confirm(`${intro} ${where} có thể khôi phục trong ${TRASH_RETENTION_DAYS} ngày. Hồ sơ ứng tuyển vẫn được giữ.`)) return;
+    setBusy('delete');
+    setMessage(null);
+    try {
+      if (mustClose) await apiRequest(`/employer/jobs/${encodeURIComponent(jobId)}/close`, { method: 'POST' });
+      await apiRequest<void>(`/employer/jobs/${encodeURIComponent(jobId)}/delete`, { method: 'POST' });
+      await onChanged();
+    } catch (e) {
+      setMessage({ ok: false, text: apiMessage(e, 'Không xoá được tin.') });
+      setBusy('');
+      // Có thể đã đóng tin xong nhưng xoá lỗi – tải lại để danh sách đúng trạng thái
+      if (mustClose) void onChanged();
     }
   };
 
@@ -478,6 +521,10 @@ function JobPanel({ jobId, onChanged }: { jobId: string; onChanged: () => Promis
               </button>
             )}
           </span>
+          <button type="button" className="emp-btn jobs-panel__delete" disabled={busy !== ''} onClick={() => void remove()}>
+            <IconTrash size={15} />
+            {busy === 'delete' ? 'Đang xoá…' : isDeletable(job.status) ? 'Xoá tin' : 'Đóng & xoá tin'}
+          </button>
           {message && (
             <p className={cx('jobs-panel__msg', !message.ok && 'jobs-panel__msg--error')} role={message.ok ? 'status' : 'alert'}>
               {message.text}

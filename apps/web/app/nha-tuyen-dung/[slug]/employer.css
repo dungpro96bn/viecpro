@@ -219,3 +219,14 @@
     text-align: left;
   }
 }
+/* ---------- Đánh giá từ người lao động ---------- */
+.company-reviews__list { display: flex; flex-direction: column; gap: 14px; }
+.company-review { padding: 16px; border: 1px solid var(--border-soft); border-radius: var(--radius); }
+.company-review__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.company-review__stars { color: #e7a51d; letter-spacing: 2px; }
+.company-review__head time, .company-review > small { color: var(--text-3); font-size: 11px; }
+.company-review > p, .company-review__response p { margin: 10px 0; color: var(--text-body); font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+.company-review__response { margin: 0 0 10px 12px; padding: 10px 12px; border-left: 3px solid var(--primary); background: var(--bg-alt); }
+.company-review__response b { color: var(--text); font-size: 12px; }
+.company-review__response p { margin-bottom: 0; }
+.company-reviews__empty { margin: 0; color: var(--text-3); font-size: 13px; }

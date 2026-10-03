@@ -15,7 +15,7 @@ import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { authUserInclude, toAuthUser } from '../auth/auth-user.js';
 import { hashPassword, verifyPassword } from '../auth/password.js';
 import { SessionService } from '../auth/session.service.js';
-import { JobMapper, PUBLIC_JOB_STATUSES, recruiterSummarySelect } from '../jobs/job.mapper.js';
+import { JobMapper, PUBLIC_JOB_WHERE, recruiterSummarySelect } from '../jobs/job.mapper.js';
 import { JobsService } from '../jobs/jobs.service.js';
 import { UploadService } from '../../core/assets/upload.service.js';
 
@@ -51,7 +51,7 @@ export class MeService {
         orderBy: { interviewAt: 'asc' },
         include: { job: { select: { title: true } } },
       }),
-      this.prisma.savedJob.count({ where: { userId, job: { status: { in: PUBLIC_JOB_STATUSES } } } }),
+      this.prisma.savedJob.count({ where: { userId, job: PUBLIC_JOB_WHERE } }),
       this.prisma.savedJob.count({ where: { userId, job: { status: 'open', deadline: { gte: now, lte: soon } } } }),
       this.prisma.profileView.count({ where: { seekerId: userId, createdAt: { gte: weekAgo } } }),
       this.prisma.profileView.count({ where: { seekerId: userId, createdAt: { gte: twoWeeksAgo, lt: weekAgo } } }),

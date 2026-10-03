@@ -21,6 +21,9 @@ interface SelectProps {
   /** Class của nút bấm – giữ nguyên kiểu ô cũ (field-input, search-bar__input…) */
   className?: string;
   'aria-label'?: string;
+  'aria-labelledby'?: string;
+  'aria-describedby'?: string;
+  'aria-invalid'?: boolean;
 }
 
 const norm = (o: SelectOption) => (typeof o === 'object' ? o : { value: String(o), label: String(o) });
@@ -29,7 +32,7 @@ const norm = (o: SelectOption) => (typeof o === 'object' ? o : { value: String(o
  * Dropdown thay cho <select>: menu tự vẽ (portal ra body, không bị overflow cắt),
  * theo mẫu ARIA "select-only combobox".
  */
-export default function Select({ options, name, value, defaultValue, onChange, placeholder, required, className, 'aria-label': ariaLabel }: SelectProps) {
+export default function Select({ options, name, value, defaultValue, onChange, placeholder, required, className, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledBy, 'aria-describedby': ariaDescribedBy, 'aria-invalid': ariaInvalid }: SelectProps) {
   const items = options.map(norm);
   const [inner, setInner] = useState(defaultValue ?? (placeholder ? '' : items[0]?.value ?? ''));
   const current = value ?? inner;
@@ -176,6 +179,9 @@ export default function Select({ options, name, value, defaultValue, onChange, p
         type="button"
         role="combobox"
         aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy}
+        aria-describedby={ariaDescribedBy}
+        aria-invalid={ariaInvalid || undefined}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}

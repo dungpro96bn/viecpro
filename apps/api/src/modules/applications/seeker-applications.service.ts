@@ -26,7 +26,7 @@ const LINK_LEAD_MS = 15 * 60_000;
 const WITHDRAWABLE = ['submitted', 'viewed', 'interview'];
 
 const include = {
-  job: { select: { id: true, slug: true, code: true, title: true, imageUrl: true, salary: true, pref: true, program: true, industry: true, employer: { select: { name: true } } } },
+  job: { select: { id: true, slug: true, code: true, title: true, imageUrl: true, salary: true, pref: true, program: true, industry: true, deletedAt: true, employer: { select: { name: true } } } },
   events: { orderBy: { createdAt: 'asc' } },
   assignee: { select: { id: true, slug: true, name: true, title: true, photoUrl: true, phone: true, online: true } },
   attendees: {
@@ -52,6 +52,7 @@ const include = {
       },
     },
   },
+  employerReview: { select: { id: true, rating: true } },
 } satisfies Prisma.ApplicationInclude;
 
 type Row = Prisma.ApplicationGetPayload<{ include: typeof include }>;
@@ -67,7 +68,7 @@ export class SeekerApplicationsService {
   ) {}
 
   private toItem(a: Row, now = new Date()): ApplicationItem {
-    const { employer, ...job } = a.job;
+    const { employer, deletedAt, ...job } = a.job;
     const att = a.attendees[0];
     const iv = att && att.interview.endAt > now ? att.interview : null;
     const noted = [...a.events].reverse().find((e) => e.note);
@@ -76,7 +77,7 @@ export class SeekerApplicationsService {
       status: a.status,
       interviewAt: a.interviewAt?.toISOString() ?? null,
       createdAt: a.createdAt.toISOString(),
-      job: { ...job, industry: job.industry as Industry, imageUrl: this.assets.url(job.imageUrl), employerName: employer?.name ?? null },
+      job: { ...job, industry: job.industry as Industry, imageUrl: this.assets.url(job.imageUrl), employerName: employer?.name ?? null, removed: !!deletedAt },
       timeline: a.events.map((e) => ({ status: e.status, note: e.note, createdAt: e.createdAt.toISOString() })),
       code: `VP-${a.number}`,
       steps: buildSteps(a.status, a.events, a.interviewAt),
@@ -97,6 +98,7 @@ export class SeekerApplicationsService {
       consultant: a.assignee && { ...a.assignee, photoUrl: this.assets.url(a.assignee.photoUrl) },
       latestNote: noted?.note ? { text: noted.note, at: noted.createdAt.toISOString() } : null,
       withdrawable: WITHDRAWABLE.includes(a.status),
+      review: a.employerReview,
     };
   }
 

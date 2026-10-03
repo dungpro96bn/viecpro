@@ -417,6 +417,56 @@
   color: #fff;
 }
 
+/* Menu có mục con: nút bấm mở / đóng */
+.emp-nav__toggle {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.emp-nav__chevron {
+  flex-shrink: 0;
+  color: var(--text-3);
+  transition: transform 0.2s;
+}
+.emp-nav__chevron--open {
+  transform: rotate(180deg);
+}
+
+/* Menu con (vd. Thùng rác → Thành viên đã xoá) */
+.emp-nav__sub {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 4px 21px;
+  padding: 0 0 0 12px;
+  border-left: 1px solid var(--border);
+  list-style: none;
+}
+.emp-nav__subitem {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 600;
+}
+.emp-nav__subitem:hover {
+  background: var(--bg-alt);
+  color: var(--text);
+}
+.emp-nav__subitem--active,
+.emp-nav__subitem--active:hover {
+  color: var(--primary);
+  background: var(--accent-soft);
+}
+
 /* Gói dịch vụ */
 .emp-plan {
   display: flex;

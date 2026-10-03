@@ -43,6 +43,7 @@ const TABS = [
   { id: 'gioi-thieu', label: 'Giới thiệu' },
   { id: 'don-hang', label: 'Đơn hàng đang tuyển' },
   { id: 'doi-ngu', label: 'Đội ngũ tư vấn' },
+  { id: 'danh-gia', label: 'Đánh giá' },
   { id: 'lien-he', label: 'Liên hệ' },
 ];
 
@@ -114,6 +115,7 @@ export default async function EmployerPage({ params }: { params: Promise<Params>
                 </div>
                 <h1 className="profile-card__name">{c.name}</h1>
                 <div className="profile-card__meta">
+                  {!!profile.reviewCount && <span><IconStar size={15} /><b>{profile.rating?.toFixed(1) ?? '0.0'}</b>/5 · {formatNumber(profile.reviewCount)} đánh giá</span>}
                   {profile.address && <span><IconPin size={15} />{profile.address}</span>}
                   {profile.website && <span><IconBuildingSimple size={15} />{profile.website}</span>}
                 </div>
@@ -247,6 +249,24 @@ export default async function EmployerPage({ params }: { params: Promise<Params>
                   </div>
                 ))}
               </div>
+            </section>
+
+            <section id="danh-gia" className="content-card content-card--gap20 company-reviews">
+              <div className="content-card__head">
+                <span className="content-card__icon"><IconStar size={19} /></span>
+                <div className="content-card__titles">
+                  <h2 className="content-card__title">Đánh giá từ người lao động</h2>
+                  <span className="content-card__subtitle">Chỉ hồ sơ có ghi nhận xuất cảnh qua viecpro mới được đánh giá</span>
+                </div>
+              </div>
+              {profile.reviews?.length ? <div className="company-reviews__list">{profile.reviews.map((review) => (
+                <article key={review.id} className="company-review">
+                  <div className="company-review__head"><span className="company-review__stars" aria-label={`${review.rating} trên 5 sao`}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span><time dateTime={review.createdAt}>{new Date(review.createdAt).toLocaleDateString('vi-VN')}</time></div>
+                  <p>{review.comment}</p>
+                  {review.response && <div className="company-review__response"><b>Phản hồi từ nhà tuyển dụng</b><p>{review.response}</p></div>}
+                  <small>Người lao động đã xuất cảnh · Ẩn danh</small>
+                </article>
+              ))}</div> : <p className="company-reviews__empty">Chưa có đánh giá nào.</p>}
             </section>
           </div>
 

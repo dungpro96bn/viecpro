@@ -162,7 +162,6 @@ export const THU_HA = {
     { label: 'Giờ tư vấn', value: 'Thứ 2 – Chủ nhật, 8:00 – 21:00', icon: 'clock' },
   ] as Array<{ label: string; value: string; icon: ContactIcon }>,
   checks: [
-    { title: 'Đã xác minh CCCD', note: '03/2021', ok: true },
     { title: 'Đã xác minh số điện thoại', note: '03/2021', ok: true },
     { title: 'Liên kết doanh nghiệp có giấy phép', note: '2 đơn vị', ok: true },
     { title: 'Không có báo cáo vi phạm', note: '12 tháng', ok: true },

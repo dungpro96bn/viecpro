@@ -7,7 +7,7 @@ describe('profile-sections', () => {
       stats: [['8 năm', 'Kinh nghiệm']],
       fields: 'không phải mảng',
       timeline: [{ when: '2021', title: 'TTS', desc: '' }],
-      checks: [{ title: 'Đã xác minh CCCD', ok: true }],
+      checks: [{ title: 'Đã xác minh số điện thoại', ok: true }],
     };
     const read = readSections(recruiterProfileSectionsSchema, stored);
     expect(read.stats).toEqual([['8 năm', 'Kinh nghiệm']]);

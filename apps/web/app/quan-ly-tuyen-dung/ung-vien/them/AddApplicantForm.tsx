@@ -37,7 +37,7 @@ import { uploadAsset } from '@/lib/upload';
 
 const YEAR = new Date().getFullYear();
 /** Giấy tờ NTD đã xem bản gốc – lưu dạng nhãn trên hồ sơ, không lưu ảnh */
-const CHECKED_PAPERS = ['Có CV', 'Đã xem CCCD gốc', 'Có bằng tốt nghiệp'] as const;
+const CHECKED_PAPERS = ['Có CV', 'Có bằng tốt nghiệp'] as const;
 type Mode = 'manual' | 'scan' | 'excel';
 type Stage = 'new' | 'contacted' | 'interview';
 
@@ -93,7 +93,7 @@ const EMPTY: Draft = {
 
 const MODES: Array<{ key: Mode; title: string; desc: string; tone: string; icon: typeof IconEdit; badge?: string }> = [
   { key: 'manual', title: 'Nhập thủ công', desc: 'Từ cuộc gọi, hồ sơ giấy, người đến trực tiếp', tone: 'blue', icon: IconEdit },
-  { key: 'scan', title: 'Quét CCCD / CV', desc: 'Chụp ảnh giấy tờ, AI tự điền thông tin', tone: 'violet', icon: IconSparkle, badge: 'MỚI' },
+  { key: 'scan', title: 'Quét CV', desc: 'Tải CV để AI tự điền thông tin', tone: 'violet', icon: IconSparkle, badge: 'SẮP RA MẮT' },
   { key: 'excel', title: 'Nhập từ Excel', desc: 'Thêm hàng loạt, tối đa 500 hồ sơ / lần', tone: 'green', icon: IconFileSheet },
 ];
 
@@ -303,9 +303,9 @@ export default function AddApplicantForm() {
           <span className="aa-mode__icon aa-mode__icon--violet">
             <IconSparkle size={22} />
           </span>
-          <b>Quét CCCD / CV sắp ra mắt</b>
+          <b>Quét CV sắp ra mắt</b>
           {/* Chưa có API: nhận dạng giấy tờ (OCR) và tự điền form */}
-          <p>Tính năng đọc ảnh CCCD, CV và tự điền thông tin đang được phát triển. Trong lúc chờ, hãy nhập thủ công hoặc nhập hàng loạt từ Excel.</p>
+          <p>Tính năng đọc CV và tự điền thông tin đang được phát triển. ViecPro không thu thập CCCD. Trong lúc chờ, hãy nhập thủ công hoặc nhập hàng loạt từ Excel.</p>
           <button type="button" className="emp-btn" onClick={() => setMode('manual')}>
             Nhập thủ công
           </button>
@@ -390,9 +390,8 @@ export default function AddApplicantForm() {
                   ))}
                 </div>
               </Field>
-              {/* Không nhận ảnh CCCD / CV lên kho ảnh công khai (RULE-BE.md mục 8).
-                  Chưa có API: kho giấy tờ riêng tư mã hoá + link xem có hạn – tạm chỉ ghi nhận đã kiểm tra bản gốc */}
-              <Field label="Giấy tờ đã kiểm tra" hint="Không chụp hay tải CCCD, hộ chiếu lên hệ thống – chỉ đánh dấu đã xem bản gốc">
+              {/* ViecPro không nhận CCCD; phần này chỉ ghi nhận hồ sơ và bằng cấp đã kiểm tra ngoài hệ thống. */}
+              <Field label="Giấy tờ đã kiểm tra" hint="Không tải giấy tờ định danh lên ViecPro.">
                 <div className="emp-chips">
                   {CHECKED_PAPERS.map((t) => (
                     <CheckCard key={t} checked={d.tags.includes(t)} onChange={() => set('tags', toggleIn(d.tags, t))}>

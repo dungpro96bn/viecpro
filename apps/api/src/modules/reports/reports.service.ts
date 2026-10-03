@@ -32,7 +32,7 @@ export class ReportsService {
     const key = input.target;
     if (input.targetType === 'job') {
       const job = await this.prisma.job.findFirst({
-        where: { OR: [{ id: key }, { slug: key }], status: { in: ['open', 'closed', 'paused'] } },
+        where: { OR: [{ id: key }, { slug: key }], status: { in: ['open', 'closed', 'paused'] }, deletedAt: null },
         select: { id: true, employerId: true, recruiterId: true },
       });
       if (!job) throw ApiException.notFound('Không tìm thấy tin tuyển dụng');

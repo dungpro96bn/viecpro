@@ -287,7 +287,7 @@ export default function JobPostForm({ jobId }: { jobId?: string }) {
   const steps = stepsOf(d);
   const completion = completionOf(d);
   const quality = qualityOf(d);
-  const verified = account.kind === 'company' ? !!account.company?.verified : account.cccdVerified;
+  const verified = account.kind === 'company' ? !!account.company?.verified : account.recruiter.verified;
   const boostsLeft = account.plan ? account.plan.boostQuota - account.plan.boostsUsed : 0;
   const primaryLabel = jobId ? 'Lưu & gửi duyệt' : verified ? 'Đăng tin' : 'Gửi duyệt tin';
 

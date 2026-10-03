@@ -30,7 +30,6 @@ export class EmployerContext {
         id: true,
         employerId: true,
         leftAt: true,
-        cccdVerifiedAt: true,
         employer: { select: { verified: true } },
         verifications: { where: { status: 'approved' }, select: { id: true }, take: 1 },
       },
@@ -45,12 +44,23 @@ export class EmployerContext {
     };
   }
 
-  jobScope(actor: EmployerActor): Prisma.JobWhereInput {
-    return actor.employerId ? { employerId: actor.employerId } : { recruiterId: actor.recruiterId };
+  /**
+   * Mọi tin thuộc NTD, kể cả tin đã xoá vào Thùng rác (hồ sơ ứng tuyển, thống kê lịch sử, thùng rác).
+   * Doanh nghiệp: chỉ tin do thành viên của chính doanh nghiệp đăng. Tin của NTD cá nhân đăng qua doanh nghiệp phái cử
+   * cũng mang employerId của doanh nghiệp đó nhưng thuộc về NTD cá nhân – doanh nghiệp không được xem / sửa / thấy ứng viên.
+   */
+  ownerScope(actor: EmployerActor): Prisma.JobWhereInput {
+    return actor.employerId ? { employerId: actor.employerId, recruiter: { employerId: actor.employerId } } : { recruiterId: actor.recruiterId };
   }
 
+  /** Tin đang quản lý (chưa xoá) – danh sách tin, sửa, đẩy / ẩn / đóng tin */
+  jobScope(actor: EmployerActor): Prisma.JobWhereInput {
+    return { ...this.ownerScope(actor), deletedAt: null };
+  }
+
+  /** Hồ sơ ứng tuyển vẫn theo dõi được khi tin đã xoá (ứng viên có thể đang phỏng vấn / đã xuất cảnh) */
   applicationScope(actor: EmployerActor): Prisma.ApplicationWhereInput {
-    return { job: this.jobScope(actor) };
+    return { job: this.ownerScope(actor) };
   }
 
   interviewScope(actor: EmployerActor): Prisma.InterviewWhereInput {

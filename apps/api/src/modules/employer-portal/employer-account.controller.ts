@@ -1,6 +1,6 @@
 import { Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { employerRangeSchema, type EmployerAccount, type EmployerDashboard, type EmployerPartnerItem, type EmployerRangeQuery, type TeamMember } from '@viecpro/shared';
+import { employerRangeSchema, employerReportQuerySchema, type EmployerAccount, type EmployerDashboard, type EmployerPartnerItem, type EmployerRangeQuery, type EmployerReport, type EmployerReportQuery, type TeamMember } from '@viecpro/shared';
 import { type AuthPayload, CurrentUser, Roles } from '../../core/auth/auth.decorators.js';
 import { ZodQuery } from '../../core/http/zod.js';
 import { EmployerAccountService } from './employer-account.service.js';
@@ -30,6 +30,12 @@ export class EmployerAccountController {
   @ApiOperation({ summary: 'Tổng quan: chỉ số, biểu đồ hồ sơ theo ngày, phễu, hồ sơ mới, lịch hôm nay' })
   dashboard(@CurrentUser() user: AuthPayload, @ZodQuery(employerRangeSchema) query: EmployerRangeQuery): Promise<EmployerDashboard> {
     return this.dashboardService.dashboard(user.sub, query.range);
+  }
+
+  @Get('reports')
+  @ApiOperation({ summary: 'Báo cáo lượt xem, hồ sơ, nguồn ứng tuyển và hiệu quả từng tin' })
+  reports(@CurrentUser() user: AuthPayload, @ZodQuery(employerReportQuerySchema) query: EmployerReportQuery): Promise<EmployerReport> {
+    return this.dashboardService.report(user.sub, query.range);
   }
 
   @Get('team')

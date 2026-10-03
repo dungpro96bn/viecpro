@@ -3,6 +3,8 @@
  * Ngày giờ trả về dạng chuỗi ISO 8601; URL ảnh luôn là URL tuyệt đối.
  */
 import type {
+  AlertChannel,
+  AlertFrequency,
   ApplicantStage,
   ApplicationSource,
   ApplicationStatus,
@@ -11,35 +13,34 @@ import type {
   DashboardRange,
   EmployerJobTab,
   EmployerRange,
-  InterviewKind,
-  InterviewStatus,
-  JobVisibility,
-  JlptLevel,
-  MaritalStatus,
-  SeekerDocumentKey,
-  SeekerDocumentStatus,
-  SeekerApplicationStep,
-  SeekerApplicationTab,
   Gender,
   Industry,
+  InterviewKind,
+  InterviewStatus,
+  JlptLevel,
   JobGender,
   JobStatus,
   JobTag,
+  JobVisibility,
+  Locale,
+  MaritalStatus,
+  NotificationGroup,
+  PhoneVisibility,
   Platform,
   Program,
   RegionKey,
-  Role,
-  AlertChannel,
-  AlertFrequency,
-  Locale,
-  NotificationGroup,
-  PhoneVisibility,
   ReportDecision,
   ReportSeverity,
   ReportStatus,
   ReportTarget,
   ResetChannel,
+  Role,
+  SeekerApplicationStep,
+  SeekerApplicationTab,
+  SeekerDocumentKey,
+  SeekerDocumentStatus,
   Theme,
+  TrashCategory,
   VerificationStatus,
 } from './enums.js';
 import type { AdminPermission } from './admin.js';
@@ -100,6 +101,8 @@ export const ERROR_CODES = [
   'PASSWORD_CHANGE_REQUIRED',
   /** Cán bộ đã bị quản trị viên doanh nghiệp gỡ khỏi doanh nghiệp */
   'MEMBER_REMOVED',
+  /** Hệ thống đang bảo trì (admin bật trong Cài đặt hệ thống) */
+  'MAINTENANCE',
   'INTERNAL_ERROR',
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
@@ -244,6 +247,9 @@ export interface EmployerProfile extends EmployerSummary {
   followerCount: number;
   following?: boolean;
   jobCounts: Partial<Record<Program | 'all', number>>;
+  rating?: number;
+  reviewCount?: number;
+  reviews?: EmployerReviewPublicItem[];
 }
 
 export interface RecruiterProfile extends RecruiterSummary {
@@ -255,6 +261,47 @@ export interface RecruiterProfile extends RecruiterSummary {
   followerCount: number;
   following?: boolean;
   jobCounts: Partial<Record<Program | 'all', number>>;
+  reviews: EmployerReviewPublicItem[];
+}
+
+export interface EmployerReviewPublicItem {
+  id: string;
+  rating: number;
+  comment: string;
+  response: string | null;
+  createdAt: string;
+}
+
+export interface EmployerReviewReceipt {
+  id: string;
+  rating: number;
+}
+
+export interface EmployerReviewMine extends EmployerReviewReceipt {}
+
+export interface EmployerReviewItem extends EmployerReviewPublicItem {
+  applicationId: string;
+  recruiterName: string;
+  recruiterResponseAt: string | null;
+}
+
+export interface EmployerReviewList extends Paginated<EmployerReviewItem> {
+  average: number;
+  distribution: Array<{ rating: number; count: number }>;
+  awaitingResponse: number;
+}
+
+export interface EmployerReport {
+  range: '7' | '30' | '90';
+  totalApplications: number;
+  totalViews: number;
+  conversion: number;
+  previousApplications: number;
+  previousViews: number;
+  daily: Array<{ date: string; applications: number; views: number }>;
+  sources: Array<{ source: ApplicationSource; count: number }>;
+  jobs: Array<{ id: string; title: string; code: string; views: number; applications: number; conversion: number }>;
+  funnel: { applied: number; contacted: number; interview: number; passed: number; departed: number };
 }
 
 /* ---------------- Khu NTD: cài đặt hồ sơ công khai ---------------- */
@@ -349,6 +396,45 @@ export interface MemberInvitePreview {
   expiresAt: string;
 }
 
+/* ---------------- Khu NTD: Thùng rác ---------------- */
+export interface TrashSummary {
+  categories: Array<{ key: TrashCategory; label: string; count: number }>;
+}
+
+export interface TrashedMember {
+  id: string;
+  name: string;
+  title: string;
+  photoUrl: string | null;
+  phone: string | null;
+  email: string | null;
+  hasAccount: boolean;
+  removedAt: string;
+  removedBy: string | null;
+  /** Thời điểm hệ thống tự xoá vĩnh viễn (removedAt + TRASH_RETENTION_DAYS) */
+  purgeAt: string;
+  /** Lịch sử được giữ lại: tin đã đăng (đã đóng / không bàn giao), ghi chú hồ sơ */
+  keptJobs: number;
+  keptNotes: number;
+  /** Chuỗi phải gõ đúng để xoá vĩnh viễn (tên thành viên) */
+  confirmText: string;
+}
+
+export interface TrashedJob {
+  id: string;
+  code: string;
+  title: string;
+  /** Trạng thái lúc xoá – khôi phục giữ nguyên trạng thái này */
+  status: JobStatus;
+  removedAt: string;
+  removedBy: string | null;
+  purgeAt: string;
+  /** Hồ sơ ứng tuyển vẫn được giữ và theo dõi ở mục Ứng viên */
+  applications: number;
+  /** Chuỗi phải gõ đúng để xoá vĩnh viễn (mã tin) */
+  confirmText: string;
+}
+
 /* ---------------- Ứng tuyển ---------------- */
 export interface ApplicationEventItem {
   status: ApplicationStatus;
@@ -361,7 +447,8 @@ export interface ApplicationItem {
   status: ApplicationStatus;
   interviewAt: string | null;
   createdAt: string;
-  job: Pick<JobListItem, 'id' | 'slug' | 'title' | 'imageUrl' | 'salary' | 'pref' | 'program'> & { employerName: string | null; code?: string; industry?: Industry };
+  /** `removed`: NTD đã gỡ tin – vẫn theo dõi được hồ sơ nhưng không mở trang tin */
+  job: Pick<JobListItem, 'id' | 'slug' | 'title' | 'imageUrl' | 'salary' | 'pref' | 'program'> & { employerName: string | null; code?: string; industry?: Industry; removed?: boolean };
   timeline: ApplicationEventItem[];
   /* Các trường dưới thêm cho design 19 (có ở GET /me/applications) */
   /** Mã hồ sơ "VP-58259" */
@@ -373,6 +460,8 @@ export interface ApplicationItem {
   /** Ghi chú mới nhất của cán bộ trên hồ sơ */
   latestNote?: { text: string; at: string } | null;
   withdrawable?: boolean;
+  /** Đánh giá do chính ứng viên gửi cho cán bộ của đơn này */
+  review?: { id: string; rating: number } | null;
 }
 
 export interface SeekerApplicationStepItem {
@@ -492,7 +581,7 @@ export interface SeekerProfile {
   jlptLearning: JlptLevel | null;
   skills: SeekerSkill[];
   experiences: SeekerExperience[];
-  /** Luôn đủ 5 mục giấy tờ theo SEEKER_DOCUMENT_KEYS */
+  /** Luôn đủ 4 mục giấy tờ theo SEEKER_DOCUMENT_KEYS */
   documents: SeekerDocument[];
   /** 0–100 */
   completion: number;
@@ -793,15 +882,15 @@ export interface AdminDashboard {
 /** Tài khoản NTD đang đăng nhập – khung trang (thanh trên, menu trái, gói dịch vụ) */
 export interface EmployerAccount {
   user: { id: string; name: string; avatarUrl: string | null; title: string };
-  recruiter: { id: string; slug: string };
+  recruiter: { id: string; slug: string; verified: boolean };
   /** company: thành viên doanh nghiệp · individual: NTD cá nhân / tư vấn viên */
   kind: 'company' | 'individual';
   company: { id: string; slug: string; name: string; shortName: string | null; logoUrl: string | null; verified: boolean; memberCount: number } | null;
-  /** NTD cá nhân: đã xác minh CCCD */
-  cccdVerified: boolean;
   plan: { name: string; expiresAt: string; jobQuota: number; jobsVisible: number; boostQuota: number; boostsUsed: number } | null;
-  /** Số trên menu trái */
-  counts: { jobs: number; newApplicants: number; upcomingInterviews: number; partners: number; reviews: number };
+  /** Quản trị viên doanh nghiệp: quản lý thành viên, hồ sơ công ty, Thùng rác */
+  companyAdmin: boolean;
+  /** Số trên menu trái (trash: số mục trong Thùng rác – chỉ tính cho quản trị viên doanh nghiệp) */
+  counts: { jobs: number; newApplicants: number; upcomingInterviews: number; partners: number; reviews: number; trash: number };
 }
 
 /** Một chỉ số có đường xu hướng theo ngày */
@@ -1309,6 +1398,23 @@ export interface AdminReportDetail extends AdminReportItem {
   reports: Array<{ code: string; reason: string; detail: string | null; reporter: string; contact: string | null; createdAt: string }>;
   target: { type: ReportTarget; id: string | null; name: string; link: string | null; status: string | null; previousViolations: number };
   decisionNote: string | null;
+}
+
+/** Khách đăng ký tư vấn trong trang quản trị */
+export interface AdminLeadItem {
+  id: string;
+  name: string;
+  /** Bị che nếu admin không có users.pii */
+  phone: string;
+  handledAt: string | null;
+  createdAt: string;
+  job: { title: string; slug: string } | null;
+  employer: { name: string } | null;
+  recruiter: { name: string } | null;
+}
+
+export interface AdminLeadList extends Paginated<AdminLeadItem> {
+  tabs: { unhandled: number; handled: number };
 }
 
 /* ================================================================== */

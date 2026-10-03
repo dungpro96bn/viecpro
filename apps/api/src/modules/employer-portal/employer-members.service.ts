@@ -138,7 +138,7 @@ export class EmployerMembersService {
     return this.list(userId);
   }
 
-  /** Gỡ thành viên: chặn vào khu quản lý, đăng xuất mọi thiết bị, bàn giao tin đang mở / hồ sơ / lịch hẹn sắp tới */
+  /** Xoá mềm thành viên (vào Thùng rác): chặn vào khu quản lý, đăng xuất mọi thiết bị, bàn giao tin đang mở / hồ sơ / lịch hẹn sắp tới */
   async remove(userId: string, memberId: string, input: RemoveMemberInput): Promise<CompanyMembers> {
     const { actor } = await this.company(userId, true);
     if (memberId === actor.recruiterId) throw ApiException.forbidden('Không thể tự gỡ chính mình khỏi doanh nghiệp');
@@ -154,7 +154,7 @@ export class EmployerMembersService {
       this.prisma.job.updateMany({ where: { employerId, recruiterId: memberId, status: { in: [...OPEN_JOB_STATUSES] } }, data: { recruiterId: target.id } }),
       this.prisma.application.updateMany({ where: { assigneeId: memberId, job: { employerId }, status: { in: [...ACTIVE_APPLICATION_STATUSES] } }, data: { assigneeId: target.id } }),
       this.prisma.interview.updateMany({ where: { employerId, ownerId: memberId, status: 'scheduled', startAt: { gte: now } }, data: { ownerId: target.id } }),
-      this.prisma.recruiter.update({ where: { id: memberId }, data: { leftAt: now, companyAdmin: false } }),
+      this.prisma.recruiter.update({ where: { id: memberId }, data: { leftAt: now, removedById: actor.recruiterId, companyAdmin: false } }),
       ...(member.userId ? [this.prisma.session.updateMany({ where: { userId: member.userId, revokedAt: null }, data: { revokedAt: now } })] : []),
     ]);
     return this.list(userId);

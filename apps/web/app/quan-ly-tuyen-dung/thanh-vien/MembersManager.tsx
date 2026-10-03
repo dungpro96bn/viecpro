@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import Link from 'next/link';
-import type { CompanyMember, CompanyMemberInvite, CompanyMembers, MemberInviteSent } from '@viecpro/shared';
+import { TRASH_RETENTION_DAYS, type CompanyMember, type CompanyMemberInvite, type CompanyMembers, type MemberInviteSent } from '@viecpro/shared';
 import ApplicantAvatar from '@/components/employer/ApplicantAvatar';
 import { useEmployerAccount } from '@/components/employer/EmployerAccountProvider';
 import { EMPLOYER_BASE } from '@/components/employer/EmployerShell';
@@ -55,7 +55,7 @@ export default function MembersManager() {
       const res = await apiRequest<CompanyMembers>(`/employer/members/${removing.id}/remove`, { method: 'POST', body: JSON.stringify({ transferToId }) });
       setRemoving(null);
       return res;
-    }, `Đã gỡ ${removing.name} khỏi doanh nghiệp và bàn giao công việc.`);
+    }, `Đã chuyển ${removing.name} vào Thùng rác và bàn giao công việc. Có thể khôi phục trong Thùng rác trong vòng ${TRASH_RETENTION_DAYS} ngày.`);
   };
 
   if (account.kind !== 'company') {
@@ -250,7 +250,7 @@ function MemberRow({ m, canManage, onToggleAdmin, onRemove }: { m: CompanyMember
           )}
           <button type="button" className="emp-btn emp-btn--sm mb-danger" onClick={onRemove}>
             <IconTrash size={14} />
-            Gỡ
+            Xoá
           </button>
         </span>
       )}
@@ -374,10 +374,11 @@ function RemovePanel({ member, members, onConfirm, onCancel }: { member: Company
   return (
     <section ref={ref} tabIndex={-1} className="emp-card mb-remove" role="alertdialog" aria-labelledby="mb-remove-title">
       <h2 className="emp-card__title" id="mb-remove-title">
-        Gỡ {member.name} khỏi doanh nghiệp?
+        Xoá {member.name} khỏi doanh nghiệp?
       </h2>
       <ul className="mb-remove__effects">
-        <li>Bị đăng xuất khỏi mọi thiết bị và không vào khu quản lý được nữa.</li>
+        <li>Được chuyển vào Thùng rác – quản trị viên doanh nghiệp có thể khôi phục trong {TRASH_RETENTION_DAYS} ngày, sau đó hệ thống tự xoá vĩnh viễn.</li>
+        <li>Bị đăng xuất khỏi mọi thiết bị, không đăng nhập được cho tới khi được khôi phục.</li>
         <li>Không còn hiện trong đội ngũ tư vấn trên trang công ty. Lịch sử ghi chú, tin đã đóng vẫn được giữ.</li>
         <li>
           {busyWork ? (
@@ -406,7 +407,7 @@ function RemovePanel({ member, members, onConfirm, onCancel }: { member: Company
         </button>
         <button type="button" className="emp-btn emp-btn--danger" disabled={!target} onClick={() => onConfirm(target || undefined)}>
           <IconTrash size={15} />
-          Gỡ thành viên
+          Chuyển vào Thùng rác
         </button>
       </div>
     </section>

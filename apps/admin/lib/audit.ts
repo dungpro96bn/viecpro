@@ -32,6 +32,8 @@ export const AUDIT_ACTION_LABEL: Record<string, string> = {
   'verification.request_info': 'Yêu cầu bổ sung giấy tờ',
   'report.claim': 'Nhận xử lý báo cáo',
   'report.decide': 'Kết luận báo cáo',
+  'lead.handle': 'Đánh dấu đã liên hệ khách tư vấn',
+  'lead.pii_view': 'Xem số điện thoại khách tư vấn',
   'data.export': 'Xuất dữ liệu',
 };
 
@@ -45,6 +47,7 @@ export const AUDIT_GROUPS = [
   { value: 'job.', label: 'Tin tuyển dụng' },
   { value: 'verification.', label: 'Xác minh doanh nghiệp' },
   { value: 'report.', label: 'Báo cáo vi phạm' },
+  { value: 'lead.', label: 'Khách cần tư vấn' },
   { value: 'data.', label: 'Xuất dữ liệu' },
 ] as const;
 
@@ -55,6 +58,8 @@ export const AUDIT_TARGET_LABEL: Record<string, string> = {
   job: 'Tin tuyển dụng',
   verification: 'Hồ sơ xác minh',
   report: 'Báo cáo',
+  lead: 'Khách cần tư vấn',
+  lead_list: 'Danh sách khách tư vấn',
   session: 'Phiên đăng nhập',
   dashboard: 'Bảng điều khiển',
   admin_role: 'Vai trò quản trị',

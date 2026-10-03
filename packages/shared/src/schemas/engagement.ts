@@ -155,11 +155,21 @@ export const pushTokenSchema = z.object({
 });
 export type PushTokenInput = z.infer<typeof pushTokenSchema>;
 
-/** Dashboard NTD: khoảng 7 / 14 / 30 ngày */
+/** Dashboard NTD: khoảng 7 / 14 / 30 / 90 ngày */
 export const employerRangeSchema = z.object({
   range: z.enum(EMPLOYER_RANGES).default('14'),
 });
 export type EmployerRangeQuery = z.infer<typeof employerRangeSchema>;
+
+export const employerReportQuerySchema = z.object({ range: z.enum(['7', '30', '90']).default('30') });
+export type EmployerReportQuery = z.infer<typeof employerReportQuerySchema>;
+export const employerReviewCreateSchema = z.object({
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().trim().min(10, 'Đánh giá cần ít nhất 10 ký tự').max(1500),
+});
+export type EmployerReviewCreateInput = z.infer<typeof employerReviewCreateSchema>;
+export const employerReviewResponseSchema = z.object({ response: z.string().trim().min(3).max(1500) });
+export type EmployerReviewResponseInput = z.infer<typeof employerReviewResponseSchema>;
 
 /** Ghi chú nội bộ trên hồ sơ */
 export const applicantNoteSchema = z.object({

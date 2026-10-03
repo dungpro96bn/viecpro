@@ -9,6 +9,7 @@ import { MailModule } from './core/mail/mail.module.js';
 import { AuditModule } from './core/audit/audit.service.js';
 import { AuthGuard } from './core/auth/auth.guard.js';
 import { AllExceptionsFilter } from './core/http/all-exceptions.filter.js';
+import { MaintenanceGuard } from './core/http/maintenance.guard.js';
 import { PrismaModule } from './core/prisma/prisma.module.js';
 import { RedisThrottlerStorage } from './core/http/redis-throttler.storage.js';
 import { AdminModule } from './modules/admin/admin.module.js';
@@ -69,6 +70,7 @@ import { UploadsModule } from './modules/uploads/uploads.module.js';
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
+    { provide: APP_GUARD, useClass: MaintenanceGuard },
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
   ],
 })

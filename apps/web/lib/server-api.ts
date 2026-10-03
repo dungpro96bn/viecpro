@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import type { EmployerProfile, JobDetail, JobListItem, Paginated, RecruiterProfile, RegionDirectoryItem } from '@viecpro/shared';
+import type { EmployerProfile, HomepageContent, JobDetail, JobListItem, Paginated, RecruiterProfile, RegionDirectoryItem, SystemSettings } from '@viecpro/shared';
 
 // Server (SSR) gọi API qua mạng nội bộ khi chạy Docker (API_INTERNAL_URL=http://api:4000/api/v1); trình duyệt dùng NEXT_PUBLIC_API_BASE_URL
 const API_BASE_URL = (process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000/api/v1').replace(/\/$/, '');
@@ -32,3 +32,6 @@ export const getRegionDirectory = () => get<RegionDirectoryItem[]>('/regions');
 
 /** Đơn mới nhất – trang chủ dùng để chọn nhà tuyển dụng nổi bật */
 export const getLatestJobs = (limit = 50) => get<Paginated<JobListItem>>(`/jobs?page=1&limit=${limit}&sort=newest`);
+
+export const getHomepageContent = cache(() => get<HomepageContent>('/site/homepage'));
+export const getSiteSystem = cache(() => get<Pick<SystemSettings, 'supportPhone' | 'supportEmail' | 'maintenanceMode' | 'maintenanceMessage'>>('/site/system'));

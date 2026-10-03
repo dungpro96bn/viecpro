@@ -154,7 +154,6 @@ export const MARITAL_LABEL: Record<MaritalStatus, string> = {
 };
 
 export const SEEKER_DOCUMENT_LABEL: Record<SeekerDocumentKey, string> = {
-  cccd: 'CCCD',
   photo: 'Ảnh 4×6',
   passport: 'Hộ chiếu',
   criminal: 'Lý lịch tư pháp',

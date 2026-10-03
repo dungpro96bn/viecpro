@@ -227,7 +227,7 @@ function RecruiterForm({ recruiter, onSaved }: { recruiter: Recruiter; onSaved: 
         <ItemsEditor items={d.sections.certificates} max={10} addLabel="Thêm chứng chỉ" empty={{ title: '', desc: '' }} fields={[{ key: 'title', label: 'Tên chứng chỉ', max: 80 }, { key: 'desc', label: 'Ghi chú', max: 200 }]} onChange={(v) => setSection('certificates', v)} />
       </FormSection>
 
-      <SaveBar busy={save.busy} error={save.error} savedAt={save.savedAt} publicHref={`/tu-van-vien/${recruiter.slug}`} note="Mục xác minh (CCCD, số điện thoại…) do viecpro cập nhật" />
+      <SaveBar busy={save.busy} error={save.error} savedAt={save.savedAt} publicHref={`/tu-van-vien/${recruiter.slug}`} note="Trạng thái xác minh số điện thoại do ViecPro cập nhật" />
     </form>
   );
 }

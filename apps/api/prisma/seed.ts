@@ -123,7 +123,6 @@ const THU_HA_SECTIONS = {
   ],
   certificates: [{ title: 'JLPT N2', desc: 'Năng lực tiếng Nhật' }, { title: 'Tư vấn XKLĐ', desc: 'Chứng chỉ nghiệp vụ' }, { title: 'Hoàn thành TTS', desc: 'Chứng nhận 3 năm' }],
   checks: [
-    { title: 'Đã xác minh CCCD', note: '03/2021', ok: true },
     { title: 'Đã xác minh số điện thoại', note: '03/2021', ok: true },
     { title: 'Không có báo cáo vi phạm', note: '12 tháng', ok: true },
   ],
@@ -212,7 +211,6 @@ async function main() {
         ...(r.key === 'minhanh' && { userId: minhAnhUser.id, companyAdmin: true }),
         ...(isHa && {
           userId: haUser.id,
-          cccdVerifiedAt: new Date(now - 200 * 86400_000),
           reviewCount: 326,
           phone: '+84912000368',
           headline: 'Chuyên viên tư vấn XKLĐ Nhật Bản · Đơn thực tập sinh & kỹ năng đặc định',
@@ -311,7 +309,6 @@ async function main() {
             { kind: 'education', title: 'Tốt nghiệp THPT', org: 'Trường THPT Diễn Châu 3, Nghệ An', from: '2014', to: '2017', desc: 'Học lực khá, hạnh kiểm tốt.', tags: [] },
           ],
           documents: [
-            { key: 'cccd', status: 'verified', note: null },
             { key: 'photo', status: 'uploaded', note: null },
             { key: 'passport', status: 'processing', note: 'hẹn 10/10' },
             { key: 'criminal', status: 'missing', note: null },

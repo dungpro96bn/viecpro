@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { TRASH_CATEGORIES } from '@viecpro/shared';
 import NotificationMenu from '@/components/account/NotificationMenu';
 import { useAuth } from '@/components/auth/AuthProvider';
 import {
@@ -13,6 +14,7 @@ import {
   IconChatSquare,
   IconCheck,
   IconCheckMark,
+  IconChevronDown,
   IconClose,
   IconExternal,
   IconHelp,
@@ -26,6 +28,7 @@ import {
   IconSettings,
   IconStarLine,
   IconTeam,
+  IconTrash,
   IconUserRound,
 } from '@/components/ui/Icons';
 import { dayMonth, initialOf } from '@/lib/employer';
@@ -35,7 +38,7 @@ import './employer.css';
 
 export const EMPLOYER_BASE = '/quan-ly-tuyen-dung';
 
-type NavItem = { href: string; label: string; icon: (p: { size?: number }) => ReactNode; count?: number; hot?: boolean; exact?: boolean };
+type NavItem = { href: string; label: string; icon: (p: { size?: number }) => ReactNode; count?: number; hot?: boolean; exact?: boolean; children?: Array<{ href: string; label: string }> };
 
 /** Khung trang khu quản lý nhà tuyển dụng: thanh trên tối, menu trái, footer */
 export default function EmployerShell({ children }: { children: ReactNode }) {
@@ -121,11 +124,11 @@ function Topbar({ onMenu }: { onMenu: () => void }) {
         </div>
       ) : (
         <span className="emp-personal">
-          <span className={cx('emp-personal__check', !account.cccdVerified && 'emp-personal__check--pending')}>
+          <span className={cx('emp-personal__check', !account.recruiter.verified && 'emp-personal__check--pending')}>
             <IconCheck size={12} className="icon--w3" />
           </span>
           <b>Tài khoản cá nhân</b>
-          <span className="emp-personal__meta">· {account.cccdVerified ? 'Đã xác minh CCCD' : 'Chưa xác minh CCCD'}</span>
+          <span className="emp-personal__meta">· {account.recruiter.verified ? 'Đã xác minh ViecPro' : 'Chưa xác minh ViecPro'}</span>
         </span>
       )}
 
@@ -235,27 +238,74 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   ];
   const second: NavItem[] = company
     ? [
-        { href: '#', label: 'Báo cáo', icon: IconBarChart },
+        { href: `${EMPLOYER_BASE}/bao-cao`, label: 'Báo cáo thống kê', icon: IconBarChart },
+        { href: `${EMPLOYER_BASE}/danh-gia`, label: 'Đánh giá', icon: IconStarLine },
         { href: publicHref(account), label: 'Trang công ty', icon: IconBuilding },
         { href: `${EMPLOYER_BASE}/thanh-vien`, label: 'Thành viên', icon: IconMembers },
         { href: `${EMPLOYER_BASE}/cai-dat`, label: 'Cài đặt', icon: IconSettings },
+        // Thùng rác: dữ liệu xoá mềm – doanh nghiệp chỉ quản trị viên mở được (API kiểm tra lại)
+        ...(account.companyAdmin
+          ? [
+              {
+                href: `${EMPLOYER_BASE}/thung-rac`,
+                label: 'Thùng rác',
+                icon: IconTrash,
+                count: account.counts.trash,
+                children: TRASH_CATEGORIES.map((c) => ({ href: `${EMPLOYER_BASE}/thung-rac/${c.path}`, label: c.label })),
+              },
+            ]
+          : []),
       ]
     : [
+        { href: `${EMPLOYER_BASE}/bao-cao`, label: 'Báo cáo thống kê', icon: IconBarChart },
         { href: `${EMPLOYER_BASE}#doanh-nghiep-phai-cu`, label: 'Đơn vị hợp tác', icon: IconBuilding, count: account.counts.partners },
         { href: publicHref(account), label: 'Hồ sơ cá nhân', icon: IconUserRound },
-        { href: '#', label: 'Đánh giá', icon: IconStarLine, count: account.counts.reviews },
+        { href: `${EMPLOYER_BASE}/danh-gia`, label: 'Đánh giá', icon: IconStarLine, count: account.counts.reviews },
         { href: `${EMPLOYER_BASE}/cai-dat`, label: 'Cài đặt', icon: IconSettings },
+        // NTD cá nhân: thùng rác chỉ có tin của mình
+        { href: `${EMPLOYER_BASE}/thung-rac/tin-tuyen-dung`, label: 'Thùng rác', icon: IconTrash, count: account.counts.trash },
       ];
 
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const isActive = (item: NavItem) => item.href !== '#' && (item.exact ? pathname === item.href : pathname.startsWith(item.href));
+  /** Menu có mục con (Thùng rác): bấm để mở / đóng; đang ở trang con thì mở sẵn */
+  const isOpen = (item: NavItem) => openGroups[item.label] ?? isActive(item);
   const renderItem = (item: NavItem) => {
     const active = isActive(item);
     return (
-      <Link key={item.label} href={item.href} className={cx('emp-nav__item', active && 'emp-nav__item--active')} aria-current={active ? 'page' : undefined}>
-        <item.icon size={19} />
-        <span className="emp-nav__label">{item.label}</span>
-        {!!item.count && <span className={cx('emp-nav__count', item.hot && 'emp-nav__count--hot')}>{item.count}</span>}
-      </Link>
+      <div key={item.label} className="emp-nav__entry">
+        {item.children ? (
+          <button
+            type="button"
+            className={cx('emp-nav__item emp-nav__toggle', active && 'emp-nav__item--active')}
+            aria-expanded={isOpen(item)}
+            aria-controls={`emp-sub-${item.label}`}
+            onClick={() => setOpenGroups((g) => ({ ...g, [item.label]: !isOpen(item) }))}
+          >
+            <item.icon size={19} />
+            <span className="emp-nav__label">{item.label}</span>
+            {!!item.count && <span className={cx('emp-nav__count', item.hot && 'emp-nav__count--hot')}>{item.count}</span>}
+            <IconChevronDown size={16} className={cx('emp-nav__chevron', isOpen(item) && 'emp-nav__chevron--open')} />
+          </button>
+        ) : (
+          <Link href={item.href} className={cx('emp-nav__item', active && 'emp-nav__item--active')} aria-current={active ? 'page' : undefined}>
+            <item.icon size={19} />
+            <span className="emp-nav__label">{item.label}</span>
+            {!!item.count && <span className={cx('emp-nav__count', item.hot && 'emp-nav__count--hot')}>{item.count}</span>}
+          </Link>
+        )}
+        {item.children && isOpen(item) && (
+          <ul className="emp-nav__sub" id={`emp-sub-${item.label}`} aria-label={item.label}>
+            {item.children.map((c) => (
+              <li key={c.href}>
+                <Link href={c.href} className={cx('emp-nav__subitem', pathname.startsWith(c.href) && 'emp-nav__subitem--active')} aria-current={pathname.startsWith(c.href) ? 'page' : undefined}>
+                  {c.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     );
   };
 

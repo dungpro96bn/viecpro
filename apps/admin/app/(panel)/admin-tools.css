@@ -1,0 +1,30 @@
+.at-layout { display: grid; gap: 16px; }
+.at-panel { min-width: 0; padding: 20px; border: 1px solid var(--line, #e5e9f0); border-radius: 14px; background: var(--surface, #fff); }
+.at-panel h2 { margin: 0 0 8px; font-size: 16px; }
+.at-muted { color: var(--muted, #718096); font-size: 13px; line-height: 1.6; }
+.at-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; }
+.at-input, .at-select, .at-textarea { width: 100%; min-height: 40px; padding: 9px 11px; border: 1px solid #d9dee8; border-radius: 8px; color: #203047; background: #fff; font: inherit; font-size: 14px; }
+.at-textarea { min-height: 100px; resize: vertical; }
+.at-field { display: grid; gap: 6px; min-width: 0; color: #3e4c60; font-size: 13px; font-weight: 650; }
+.at-field--check { display: flex; align-items: center; gap: 9px; min-height: 40px; }
+.at-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.at-span-all { grid-column: 1 / -1; }
+.at-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; }
+.at-btn { display: inline-flex; min-height: 38px; align-items: center; justify-content: center; gap: 8px; padding: 0 13px; border: 1px solid #d9dee8; border-radius: 8px; background: #fff; color: #24334a; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.at-btn--primary { border-color: #235fd4; background: #235fd4; color: #fff; }
+.at-btn--danger { color: #b42318; }
+.at-btn:disabled { opacity: .55; cursor: wait; }
+.at-error { margin: 12px 0 0; color: #b42318; font-size: 13px; }
+.at-success { margin: 12px 0 0; color: #177245; font-size: 13px; }
+.at-jobs { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1.5fr); gap: 16px; }
+.at-list { display: grid; gap: 6px; max-height: 68vh; overflow: auto; }
+.at-list-item { display: grid; gap: 5px; padding: 11px; border: 1px solid transparent; border-radius: 9px; background: #f7f9fc; color: inherit; text-align: left; cursor: pointer; }
+.at-list-item--active { border-color: #90b4ff; background: #eff5ff; }
+.at-list-item__meta { color: #718096; font-size: 11px; }
+.at-inline { display: flex; gap: 8px; align-items: center; }
+.at-inline > * { flex: 1; }
+.at-ad-list { display: grid; gap: 12px; margin-top: 16px; }
+.at-ad { display: grid; gap: 12px; padding: 14px; border: 1px solid #e5e9f0; border-radius: 12px; }
+.at-notice { padding: 12px 14px; border-radius: 9px; background: #fff7d6; color: #704d00; font-size: 13px; }
+@media (max-width: 900px) { .at-jobs { grid-template-columns: 1fr; } .at-list { max-height: 300px; } }
+@media (max-width: 640px) { .at-form-grid { grid-template-columns: 1fr; } .at-span-all { grid-column: auto; } .at-panel { padding: 15px; } }

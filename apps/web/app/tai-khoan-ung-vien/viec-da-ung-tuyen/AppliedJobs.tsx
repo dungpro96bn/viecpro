@@ -199,13 +199,25 @@ function ApplicationCard({ a, expanded, onToggle, onWithdraw, avgHours }: { a: A
   return (
     <li className={cx('ap-card', expanded && 'ap-card--open')}>
       <div className="ap-card__top">
-        <Link href={`/viec-lam/${a.job.slug}`} className="ap-card__img">
-          <img src={a.job.imageUrl} alt="" />
-        </Link>
-        <span className="ap-card__info">
-          <Link href={`/viec-lam/${a.job.slug}`} className="ap-card__title">
-            {a.job.title}
+        {a.job.removed ? (
+          <span className="ap-card__img">
+            <img src={a.job.imageUrl} alt="" />
+          </span>
+        ) : (
+          <Link href={`/viec-lam/${a.job.slug}`} className="ap-card__img">
+            <img src={a.job.imageUrl} alt="" />
           </Link>
+        )}
+        <span className="ap-card__info">
+          {a.job.removed ? (
+            <span className="ap-card__title">
+              {a.job.title} <small className="ap-card__removed">Tin đã bị gỡ</small>
+            </span>
+          ) : (
+            <Link href={`/viec-lam/${a.job.slug}`} className="ap-card__title">
+              {a.job.title}
+            </Link>
+          )}
           <span className="ap-card__meta">
             {a.job.employerName && <span>{a.job.employerName}</span>}
             <span>{a.job.pref}, Nhật Bản</span>
@@ -278,6 +290,7 @@ function ApplicationCard({ a, expanded, onToggle, onWithdraw, avgHours }: { a: A
               )}
             </div>
           )}
+          {a.status === 'departed' && <DepartureReview applicationId={a.id} review={a.review ?? null} />}
         </div>
       )}
 
@@ -310,5 +323,48 @@ function ApplicationCard({ a, expanded, onToggle, onWithdraw, avgHours }: { a: A
         </button>
       </div>
     </li>
+  );
+}
+
+function DepartureReview({ applicationId, review }: { applicationId: string; review: ApplicationItem['review'] }) {
+  const [rating, setRating] = useState(review?.rating ?? 0);
+  const [comment, setComment] = useState('');
+  const [saved, setSaved] = useState(!!review);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  if (saved) return <p className="ap-review__saved" role="status">Cảm ơn bạn đã đánh giá cán bộ phụ trách · {rating}/5 sao</p>;
+  return (
+    <form
+      className="ap-review"
+      noValidate
+      onSubmit={async (event) => {
+        event.preventDefault();
+        if (!rating) return setError('Chọn số sao trước khi gửi.');
+        if (comment.trim().length < 10) return setError('Đánh giá cần ít nhất 10 ký tự.');
+        setBusy(true);
+        setError('');
+        try {
+          await apiRequest(`/me/applications/${encodeURIComponent(applicationId)}/review`, { method: 'POST', body: JSON.stringify({ rating, comment }) });
+          setSaved(true);
+        } catch (e) {
+          setError(apiMessage(e, 'Chưa gửi được đánh giá. Vui lòng thử lại.'));
+        } finally {
+          setBusy(false);
+        }
+      }}
+    >
+      <b>Chia sẻ trải nghiệm sau khi xuất cảnh</b>
+      <span className="ap-review__hint">Đánh giá chỉ dành cho hồ sơ đã xuất cảnh qua viecpro. Nội dung sẽ hiển thị công khai, không kèm tên và thông tin liên hệ của bạn.</span>
+      <span className="ap-review__stars" role="radiogroup" aria-label="Số sao đánh giá">
+        {[1, 2, 3, 4, 5].map((value) => (
+          <button key={value} type="button" role="radio" aria-checked={rating === value} aria-label={`${value} sao`} className={cx('ap-review__star', rating >= value && 'ap-review__star--on')} onClick={() => (setRating(value), setError(''))}>★</button>
+        ))}
+      </span>
+      <label className="ap-review__label" htmlFor={`review-${applicationId}`}>Nội dung đánh giá</label>
+      <textarea id={`review-${applicationId}`} value={comment} maxLength={1500} rows={3} onChange={(event) => (setComment(event.target.value), setError(''))} placeholder="Chia sẻ về cách tư vấn, hỗ trợ và quy trình xuất cảnh…" />
+      {error && <span className="ap-review__error" role="alert">{error}</span>}
+      <button type="submit" className="btn btn--primary btn--sm" disabled={busy}>{busy ? 'Đang gửi…' : 'Gửi đánh giá'}</button>
+    </form>
   );
 }

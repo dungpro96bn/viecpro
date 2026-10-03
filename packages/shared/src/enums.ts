@@ -132,12 +132,11 @@ export type PassportStatus = (typeof PASSPORT_STATUSES)[number];
 export const MARITAL_STATUSES = ['single', 'married', 'other'] as const;
 export type MaritalStatus = (typeof MARITAL_STATUSES)[number];
 
-/** Giấy tờ xuất cảnh của ứng viên */
-export const SEEKER_DOCUMENT_KEYS = ['cccd', 'photo', 'passport', 'criminal', 'health'] as const;
+/** Giấy tờ xuất cảnh được theo dõi trên hồ sơ (ViecPro không thu thập CCCD) */
+export const SEEKER_DOCUMENT_KEYS = ['photo', 'passport', 'criminal', 'health'] as const;
 export type SeekerDocumentKey = (typeof SEEKER_DOCUMENT_KEYS)[number];
 /**
- * Giấy tờ ứng viên tự tải lên được. CCCD, hộ chiếu, lý lịch tư pháp, khám sức khoẻ là dữ liệu nhạy cảm:
- * chỉ nhận khi có kho riêng mã hoá + link ký có hạn (RULE-BE.md mục 8) – hiện gửi bản gốc cho cán bộ tư vấn.
+ * Ứng viên chỉ tự tải ảnh 4×6 lên. ViecPro không nhận hoặc lưu CCCD, hộ chiếu, lý lịch tư pháp hay giấy khám sức khoẻ.
  */
 export const SEEKER_SELF_UPLOAD_DOCUMENTS = ['photo'] as const satisfies readonly SeekerDocumentKey[];
 
@@ -153,7 +152,7 @@ export const EMPLOYER_JOB_TABS = ['visible', 'pending', 'draft', 'expired'] as c
 export type EmployerJobTab = (typeof EMPLOYER_JOB_TABS)[number];
 
 /** Khoảng thời gian trên dashboard NTD (ngày) */
-export const EMPLOYER_RANGES = ['7', '14', '30'] as const;
+export const EMPLOYER_RANGES = ['7', '14', '30', '90'] as const;
 export type EmployerRange = (typeof EMPLOYER_RANGES)[number];
 
 /** Phúc lợi chọn nhanh khi đăng tin */
@@ -267,3 +266,19 @@ export const JOB_REJECT_REASONS = [
   'Doanh nghiệp chưa xác minh',
   'Thu phí ngoài bảng chi phí',
 ] as const;
+
+/**
+ * Thùng rác khu NTD: dữ liệu xoá mềm nằm ở đây, khôi phục được hoặc xoá vĩnh viễn (gõ xác nhận).
+ * Thêm loại dữ liệu mới: thêm vào danh sách này + API /employer/trash/<key>.
+ */
+/** Số ngày giữ trong Thùng rác trước khi hệ thống tự xoá vĩnh viễn */
+export const TRASH_RETENTION_DAYS = 30;
+
+export const TRASH_CATEGORIES = [
+  { key: 'jobs', label: 'Tin tuyển dụng đã xoá', path: 'tin-tuyen-dung' },
+  { key: 'members', label: 'Thành viên đã xoá', path: 'thanh-vien' },
+] as const;
+
+/** NTD chỉ xoá được tin không còn hiển thị: nháp, bị từ chối, đã đóng (tin đang hiển thị phải đóng / tạm ẩn trước) */
+export const DELETABLE_JOB_STATUSES = ['draft', 'rejected', 'closed'] as const;
+export type TrashCategory = (typeof TRASH_CATEGORIES)[number]['key'];

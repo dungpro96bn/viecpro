@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { contactPhoneSchema, emailSchema, nameSchema, passwordSchema, phoneSchema } from './common.js';
+import { contactPhoneSchema, emailSchema, nameSchema, paginationSchema, passwordSchema, phoneSchema } from './common.js';
 
 /**
  * Hồ sơ công khai của NTD (trang /nha-tuyen-dung/[slug], /tu-van-vien/[slug]).
@@ -89,6 +89,13 @@ export type MemberRoleInput = z.infer<typeof memberRoleSchema>;
 /** Gỡ thành viên: tin đang mở và hồ sơ đang phụ trách chuyển cho người khác (mặc định người thao tác) */
 export const removeMemberSchema = z.object({ transferToId: z.string().trim().max(40).optional() });
 export type RemoveMemberInput = z.infer<typeof removeMemberSchema>;
+
+/** Xoá vĩnh viễn từ Thùng rác: gõ lại tên đối tượng, khớp đúng 100% (confirmTextMatches) */
+export const purgeSchema = z.object({ confirm: z.string().max(200) });
+export type PurgeInput = z.infer<typeof purgeSchema>;
+
+export const trashListSchema = paginationSchema;
+export type TrashListQuery = z.infer<typeof trashListSchema>;
 
 /** Người được mời xác thực OTP gửi tới số được mời và đặt mật khẩu */
 export const acceptInviteSchema = z.object({

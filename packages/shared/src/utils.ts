@@ -112,3 +112,11 @@ export function maskPhoneTail(e164: string): string {
   const d = e164.replace(/^\+84/, '0');
   return `•••• ${d.slice(4, 7)} ${d.slice(7)}`;
 }
+
+/**
+ * Chuỗi gõ lại để xác nhận xoá vĩnh viễn phải khớp đúng 100% (hoa / thường, dấu, dấu cách).
+ * Chỉ chuẩn hoá Unicode NFC: cùng một chữ có dấu, bộ gõ Telex / VNI có thể sinh mã khác nhau dù nhìn giống hệt.
+ */
+export function confirmTextMatches(typed: string, expected: string): boolean {
+  return typed.normalize('NFC') === expected.normalize('NFC');
+}

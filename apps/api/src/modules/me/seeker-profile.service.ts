@@ -114,7 +114,7 @@ export class SeekerProfileService {
   async uploadDocument(userId: string, key: string, input: SeekerDocumentUploadInput): Promise<SeekerDocument[]> {
     if (!(SEEKER_DOCUMENT_KEYS as readonly string[]).includes(key)) throw ApiException.notFound('Không có mục giấy tờ này');
     if (!(SEEKER_SELF_UPLOAD_DOCUMENTS as readonly string[]).includes(key)) {
-      throw new ApiException('NOT_IMPLEMENTED', 'Giấy tờ này gửi bản gốc cho cán bộ tư vấn để xác minh', HttpStatus.NOT_IMPLEMENTED);
+      throw new ApiException('NOT_IMPLEMENTED', 'ViecPro không nhận hoặc lưu giấy tờ này; vui lòng xác minh trực tiếp với đơn vị phái cử', HttpStatus.NOT_IMPLEMENTED);
     }
     if (!input.path.startsWith(`uploads/${userId}/`)) throw new ApiException('VALIDATION_ERROR', 'Chỉ được dùng tệp đã tải lên', HttpStatus.BAD_REQUEST, { path: 'Tải tệp lên trước khi gắn' });
     const p = await this.prisma.seekerProfile.findUnique({ where: { userId }, select: { documents: true } });

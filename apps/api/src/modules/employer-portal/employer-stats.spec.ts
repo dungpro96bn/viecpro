@@ -31,14 +31,14 @@ describe('employer-stats', () => {
   });
 
   it('trustScore: thiếu video → 92 điểm, chip "Chưa có video"', () => {
-    const t = trustScore({ cccdVerified: true, phoneVerified: true, licensedPartners: 2, violations12m: 0, rating: 4.9, hasVideo: false });
+    const t = trustScore({ phoneVerified: true, licensedPartners: 2, violations12m: 0, rating: 4.9, hasVideo: false });
     expect(t.score).toBe(92);
     expect(t.checks.find((c) => c.key === 'video')).toEqual({ key: 'video', label: 'Chưa có video giới thiệu', ok: false });
     expect(t.checks.some((c) => c.key === 'rating')).toBe(false);
   });
 
   it('trustScore: chưa xác minh gì → điểm thấp', () => {
-    const t = trustScore({ cccdVerified: false, phoneVerified: true, licensedPartners: 0, violations12m: 1, rating: 3.5, hasVideo: false });
-    expect(t.score).toBe(15);
+    const t = trustScore({ phoneVerified: true, licensedPartners: 0, violations12m: 1, rating: 3.5, hasVideo: false });
+    expect(t.score).toBe(20);
   });
 });

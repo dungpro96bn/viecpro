@@ -12,7 +12,7 @@ export class LeadsService {
     const [employer, recruiter, job] = await Promise.all([
       input.employerSlug ? this.prisma.employer.findUnique({ where: { slug: input.employerSlug }, select: { id: true } }) : null,
       input.recruiterSlug ? this.prisma.recruiter.findUnique({ where: { slug: input.recruiterSlug }, select: { id: true, userId: true } }) : null,
-      input.jobId ? this.prisma.job.findFirst({ where: { OR: [{ id: input.jobId }, { slug: input.jobId }] }, select: { id: true } }) : null,
+      input.jobId ? this.prisma.job.findFirst({ where: { OR: [{ id: input.jobId }, { slug: input.jobId }], deletedAt: null }, select: { id: true } }) : null,
     ]);
     if (input.employerSlug && !employer) throw ApiException.notFound('Không tìm thấy nhà tuyển dụng');
     if (input.recruiterSlug && !recruiter) throw ApiException.notFound('Không tìm thấy tư vấn viên');

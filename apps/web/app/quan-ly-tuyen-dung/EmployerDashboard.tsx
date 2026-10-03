@@ -26,7 +26,7 @@ import {
 import { cx, formatNumber } from '@/lib/format';
 import { DailyChart, Funnel, KpiCard, type Kpi } from './DashboardCharts';
 
-const RANGE_LABEL: Record<EmployerRange, string> = { '7': '7 ngày', '14': '14 ngày', '30': '30 ngày' };
+const RANGE_LABEL: Record<EmployerRange, string> = { '7': '7 ngày', '14': '14 ngày', '30': '30 ngày', '90': '90 ngày' };
 const GENDER_SHORT = { nam: 'Nam', nu: 'Nữ' } as const;
 
 /** Trang tổng quan khu NTD – doanh nghiệp (design 10) và cá nhân (design 11) */

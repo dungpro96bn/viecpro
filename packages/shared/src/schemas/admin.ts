@@ -15,6 +15,7 @@ import {
   VERIFICATION_TABS,
 } from '../enums.js';
 import { ADMIN_PERMISSIONS } from '../admin.js';
+import { PREFECTURES } from '../prefectures.js';
 import { emailSchema, nameSchema, paginationSchema, passwordSchema } from './common.js';
 
 /** Danh sách admin cho phép tối đa 100 dòng / trang (RULE-BE.md mục 2) */
@@ -151,6 +152,69 @@ export const adminReportListSchema = adminPagination.extend({
   q: search,
 });
 export type AdminReportListQuery = z.infer<typeof adminReportListSchema>;
+
+/** Khách đăng ký tư vấn trong admin */
+export const adminLeadListSchema = adminPagination.extend({
+  tab: z.enum(['unhandled', 'handled']).default('unhandled'),
+  q: search,
+});
+export type AdminLeadListQuery = z.infer<typeof adminLeadListSchema>;
+
+/** Tìm tin cho màn hình sửa nội dung thay nhà tuyển dụng */
+export const adminManageJobsQuerySchema = adminPagination.extend({ q: search });
+export type AdminManageJobsQuery = z.infer<typeof adminManageJobsQuerySchema>;
+
+/** Trường nội dung được phép sửa thay NTD; giữ nguyên trạng thái và thông tin sở hữu tin */
+export const adminJobUpdateSchema = z.object({
+  title: z.string().trim().min(10).max(160),
+  industry: z.enum(INDUSTRIES),
+  pref: z.enum(PREFECTURES as [string, ...string[]]),
+  salary: z.coerce.number().int().min(50_000).max(1_000_000),
+  quantity: z.coerce.number().int().min(1).max(500),
+  description: z.string().trim().max(3000),
+});
+export type AdminJobUpdateInput = z.infer<typeof adminJobUpdateSchema>;
+
+export const ADMIN_EXPORT_DATASETS = ['jobs', 'employers', 'applications', 'users'] as const;
+export const adminExportSchema = z.object({ dataset: z.enum(ADMIN_EXPORT_DATASETS) });
+export type AdminExportInput = z.infer<typeof adminExportSchema>;
+
+const phoneOrEmpty = z.string().trim().max(24);
+const emailOrEmpty = z.union([emailSchema, z.literal('')]);
+export const systemSettingsSchema = z.object({
+  supportPhone: phoneOrEmpty,
+  supportEmail: emailOrEmpty,
+  maintenanceMode: z.boolean(),
+  maintenanceMessage: z.string().trim().min(1).max(240),
+});
+export type SystemSettings = z.infer<typeof systemSettingsSchema>;
+
+const safeContentUrl = z.string().trim().max(500).refine((v) => (/^\/(?!\/)/.test(v) || /^https:\/\//i.test(v)), 'Chỉ dùng đường dẫn nội bộ hoặc HTTPS');
+const homeAdSchema = z.object({
+  id: z.string().trim().regex(/^[a-z0-9-]{1,32}$/),
+  enabled: z.boolean(),
+  image: safeContentUrl,
+  tag: z.string().trim().max(50),
+  title: z.string().trim().min(1).max(120),
+  cta: z.string().trim().max(60),
+  href: safeContentUrl,
+});
+const homeBannerSchema = z.object({
+  enabled: z.boolean(),
+  image: safeContentUrl,
+  tag: z.string().trim().max(60),
+  title: z.string().trim().min(1).max(120),
+  description: z.string().trim().max(240),
+  cta: z.string().trim().max(60),
+  href: safeContentUrl,
+});
+export const homepageContentSchema = z.object({
+  employerBanner: homeBannerSchema,
+  courseBanner: homeBannerSchema,
+  miniAdsTitle: z.string().trim().min(1).max(80),
+  miniAds: z.array(homeAdSchema).max(8),
+});
+export type HomepageContent = z.infer<typeof homepageContentSchema>;
 
 export const reportDecisionSchema = z
   .object({

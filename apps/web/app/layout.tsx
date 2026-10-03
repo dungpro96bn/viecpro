@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import ApplyProvider from '@/components/apply/ApplyProvider';
 import AuthProvider from '@/components/auth/AuthProvider';
+import MaintenanceNotice from '@/components/layout/MaintenanceNotice';
 import './globals.css';
 
 const inter = localFont({
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="vi" className={inter.variable} data-scroll-behavior="smooth">
       <body>
         <AuthProvider>
+          <MaintenanceNotice />
           <ApplyProvider>{children}</ApplyProvider>
         </AuthProvider>
       </body>

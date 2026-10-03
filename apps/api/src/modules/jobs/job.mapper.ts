@@ -28,6 +28,8 @@ export const employerSummarySelect = { id: true, slug: true, name: true, logoUrl
 
 /** Trạng thái đơn được xem công khai: nháp / chờ duyệt / bị từ chối không lộ ra ngoài (RULE-BE.md mục 7) */
 export const PUBLIC_JOB_STATUSES: JobStatus[] = ['open', 'closed'];
+/** Tin xem được công khai (kể cả đã đóng), trừ tin NTD đã xoá */
+export const PUBLIC_JOB_WHERE = { status: { in: PUBLIC_JOB_STATUSES }, deletedAt: null } satisfies Prisma.JobWhereInput;
 
 /** include dùng cho mọi truy vấn trả về JobListItem / JobDetail */
 export const jobInclude = {
