@@ -66,6 +66,8 @@ Môi trường dev in mã OTP SMS ra log API và trả thêm `devCode` trong res
 | `/quan-ly-tuyen-dung/ung-vien` | Quản lý ứng viên (design 13); `/them`: thêm ứng viên thủ công / Excel (design 16) |
 | `/quan-ly-tuyen-dung/lich-phong-van` | Lịch phỏng vấn tuần (design 14); `/tao`: tạo lịch hẹn (design 17) |
 
+Khi admin bật bảo trì trong Cài đặt hệ thống, toàn bộ trang web người dùng hiển thị màn hình bảo trì cùng thông điệp và thông tin hỗ trợ; trạng thái được kiểm tra lại mỗi 30 giây. API admin và tài nguyên tĩnh không bị ảnh hưởng.
+
 **Ứng tuyển có xác nhận email:** popup ứng tuyển gồm 2 bước – điền thông tin (email bắt buộc) → nhập mã 6 số gửi tới email. Mã sống 5 phút, sai tối đa 5 lần, gửi lại sau 60 giây, tối đa 5 mã/giờ/email; API chỉ lưu HMAC của mã. Tài khoản ứng viên đã xác thực đúng email đó thì bỏ qua bước nhập mã. Gửi hồ sơ thành công → email "Đã nhận hồ sơ".
 
 ## Admin – trang quản trị (`apps/admin`)

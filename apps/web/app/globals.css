@@ -3,8 +3,6 @@
    Design tokens, reset và các thành phần dùng chung (button, chip, badge…)
    ========================================================================== */
 
-.site-maintenance { position: relative; z-index: 100; padding: 10px 16px; background: #fff7d6; color: #704d00; text-align: center; font-size: 14px; font-weight: 700; }
-
 :root {
   /* Brand */
   --primary: #336fe8;

@@ -78,6 +78,9 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
 
   const payload = (await response.json().catch(() => null)) as ApiError | null;
   if (!response.ok) {
+    if (payload?.code === 'MAINTENANCE' && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('viecpro:maintenance', { detail: { message: payload.message } }));
+    }
     throw new ApiClientError(
       payload ?? { statusCode: response.status, code: 'INTERNAL_ERROR', message: 'Không thể kết nối hệ thống' },
       response.status,
@@ -87,5 +90,6 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
 }
 
 export function apiMessage(error: unknown, fallback = 'Đã có lỗi xảy ra. Vui lòng thử lại.'): string {
+  if (error instanceof ApiClientError && error.code === 'MAINTENANCE') return 'ViecPro đang bảo trì. Vui lòng quay lại sau.';
   return error instanceof ApiClientError ? error.message : fallback;
 }
